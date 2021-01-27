@@ -5,6 +5,7 @@ CC		=	clang++
 SRC		= 	main.cpp
 
 #CFLAGS	=	-Wall -Wextra -Werror -Isrcs/
+#CFLAGS	=	-Wall -Wextra -Isrcs/
 CFLAGS	=	-Wall -Wextra -g3 -fsanitize=address -Isrcs/
 
 all: 	$(NAME)
@@ -15,6 +16,7 @@ $(NAME):Makefile $(SRC) srcs/*
 
 clean:
 		@rm -rf main.o
+		@rm -rf main.dSYM
 		@echo "make clean done..."
 
 fclean: clean

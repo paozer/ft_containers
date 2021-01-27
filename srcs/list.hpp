@@ -1,16 +1,15 @@
 #pragma once
 
-# include <iostream>
+#include <iostream>
+#include "list_node.hpp"
+#include "list_iterator.hpp"
 
 namespace ft {
-
-template < class T > struct Node;
-template < class T > class list_iterator;
-
 
 template < class T, class Alloc = std::allocator<T> >
 class list
 {
+
     public:
         typedef T value_type;
         typedef Alloc allocator_type;
@@ -28,23 +27,31 @@ class list
 
         /* Constructors */
         explicit list (const allocator_type& alloc = allocator_type())
-            : _head(NULL), _size(0) {}
-
-        explicit list (size_t n, const value_type& val = value_type(),
-                const allocator_type& alloc = allocator_type())
-            : _head(NULL), _size(n)
+            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
         {
-            for (size_type i = 0; i < _size; ++i)
+            _head->next = _tail;
+            _tail->prev = _head;
+        }
+
+        explicit list (size_t n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
+            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
+        {
+            _head->next = _tail;
+            _tail->prev = _head;
+            for (size_type i = 0; i < n; ++i)
                 push_front(val);
         }
 
-        //substitution failure with second constructor
         // use std::is_integral ?
-        // check sfinae cpp reference page
-        // https://stackoverflow.com/questions/45889587/c-sfinae-to-differentiate-fill-and-range-constructors
-        //template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
-        //list (InputIterator first, InputIterator last,
-        //        const allocator_type& alloc = allocator_type()) {}
+        template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
+        list (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
+            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
+        {
+            _head->next = _tail;
+            _tail->prev = _head;
+            for (; first != last; ++first)
+                push_back(*first);
+        }
 
         //list (const list& x);
 
@@ -55,9 +62,9 @@ class list
         ~list() {}
 
         /* Iterators */
-        iterator begin() { return (iterator(_head)); }
+        iterator begin() { return (iterator(_head->next)); }
         //const_iterator begin() const;
-        iterator end() { return (iterator(NULL)); }
+        iterator end() { return (iterator(_tail)); }
         //const_iterator end() const;
         //reverse_iterator rbegin();
         //const_reverse_iterator rbegin() const;
@@ -65,7 +72,7 @@ class list
         //const_reverse_iterator rend() const;
 
         /* Capacity */
-        bool empty() const { return (_head == NULL); }
+        bool empty() const { return (_size == 0); }
         size_type size() const { return (_size); }
         size_type max_size() const { return (std::numeric_limits<size_type>::max()); }
 
@@ -82,28 +89,23 @@ class list
 
         void push_front (const value_type& val)
         {
-            Node<value_type> * node = new Node<value_type>(val);
-
-            if (!_head)
-                _head = node;
-            else {
-                node->next = _head;
-                _head->prev = node;
-                _head = node;
-            }
+            list_node<value_type> * node = new list_node<value_type>(val);
+            node->next = _head->next;
+            node->prev = _head;
+            _head->next->prev = node;
+            _head->next = node;
+            ++_size;
         }
-
-        void pop_front (void)
+        //void pop_front (void);
+        void push_back (const value_type& val)
         {
-            if (!_head)
-                return ;
-            Node<value_type> * tmp = _head;
-            _head = _head->next;
-            --_size;
-            delete tmp;
+            list_node<value_type> * node = new list_node<value_type>(val);
+            node->next = _tail;
+            node->prev = _tail->prev;
+            node->prev->next = node;
+            _tail->prev = node;
+            ++_size;
         }
-
-        //void push_back (const value_type& val);
         //void pop_back ();
         //iterator insert (iterator position, const value_type& val);
         //void insert (iterator position, size_type n, const value_type& val);
@@ -135,7 +137,8 @@ class list
 
 
     private:
-        Node<value_type> * _head;
+        list_node<value_type> * _head;
+        list_node<value_type> * _tail;
         size_type _size;
 
 }; // class list
@@ -155,41 +158,5 @@ class list
 //
 //template <class T, class Alloc>
 //void swap (list<T,Alloc>& x, list<T,Alloc>& y);
-
-template <class value_type>
-class list_iterator
-{
-    public:
-        typedef std::bidirectional_iterator_tag iterator_category;
-
-        list_iterator ( ft::Node<value_type> * pointee ) : _node(pointee) {};
-
-        bool operator==(const list_iterator<value_type> & other) { return (_node == other._node); }
-        bool operator!=(const list_iterator<value_type> & other) { return (_node != other._node); }
-
-        const value_type & operator*(void) { return (_node->content); }
-
-        // post fix
-        const list_iterator<value_type> & operator++(void)
-        {
-            assert(_node != NULL);
-            _node = _node->next;
-            return (*this);
-        }
-
-    private:
-        ft::Node<value_type> * _node;
-};
-
-template <class T>
-struct Node
-{
-    T content;
-    Node * next;
-    Node * prev;
-
-    Node(T contentt) : content(contentt), next(NULL), prev(NULL) {};
-    ~Node() {}
-};
 
 } // namespace ft
