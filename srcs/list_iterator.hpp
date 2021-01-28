@@ -15,16 +15,24 @@ class list_iterator
         typedef T & reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
+        list_iterator () : _node(NULL) {} // private ?
         list_iterator (list_node<value_type> * node) : _node(node) {};
+        //~list_iterator () { delete _node; }
+        list_iterator &operator=(const list_iterator & other)
+        {
+            if (*this != other)
+                _node = other._node;
+            return (*this);
+        }
 
         bool operator==(const list_iterator<value_type> & other) { return (_node == other._node); }
         bool operator!=(const list_iterator<value_type> & other) { return (_node != other._node); }
 
-        const value_type & operator*(void) { return (_node->_content); }
+        const value_type & operator*(void) { return (_node->content); }
 
         const list_iterator<value_type> & operator++(void)
         {
-            assert(_node != NULL);
+            //assert(_node != NULL); //?
             _node = _node->next;
             return (*this);
         }
@@ -49,9 +57,11 @@ class list_iterator
             return (tmp);
         }
 
+        list_node<value_type> * get_prev(void) { return (_node->prev); }
+        list_node<value_type> * get_next(void) { return (_node->next); }
+        list_node<value_type> * get_node(void) { return (_node); }
+
     private:
         list_node<value_type> * _node;
-
-        list_iterator ();
 };
 }
