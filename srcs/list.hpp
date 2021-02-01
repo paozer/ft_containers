@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 #include "list_node.hpp"
 #include "list_iterator.hpp"
 
@@ -27,14 +28,14 @@ class list
 
         /* Constructors */
         explicit list (const allocator_type& alloc = allocator_type())
-            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
+            : _size(0), _head(new_node()), _tail(new_node())
         {
             _head->next = _tail;
             _tail->prev = _head;
         }
 
         explicit list (size_t n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
-            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
+            : _size(0), _head(new_node()), _tail(new_node())
         {
             _head->next = _tail;
             _tail->prev = _head;
@@ -45,7 +46,7 @@ class list
         // use std::is_integral ?
         template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
         list (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
-            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
+            : _size(0), _head(new_node()), _tail(new_node())
         {
             _head->next = _tail;
             _tail->prev = _head;
@@ -54,7 +55,7 @@ class list
         }
 
         list (const list& x)
-            : _head(new list_node<value_type>()), _tail(new list_node<value_type>()), _size(0)
+            : _size(0), _head(new_node()), _tail(new_node())
         {
             *this = x;
         }
@@ -112,7 +113,7 @@ class list
         {
             for (list_node<value_type> * tmp; _head; _head = tmp) {
                 tmp = _head->next;
-                delete _head;
+                delete_node(_head);
             }
         }
 
@@ -155,7 +156,7 @@ class list
 
         void push_front (const value_type& val)
         {
-            list_node<value_type> * node = new list_node<value_type>(val);
+            list_node<value_type> * node = new_node(val);
             node->next = _head->next;
             node->prev = _head;
             _head->next->prev = node;
@@ -171,12 +172,12 @@ class list
             _head->next->next->prev = _head;
             _head->next = _head->next->next;
             --_size;
-            delete tmp;
+            delete_node(tmp);
         }
 
         void push_back (const value_type& val)
         {
-            list_node<value_type> * node = new list_node<value_type>(val);
+            list_node<value_type> * node = new_node(val);
             node->next = _tail;
             node->prev = _tail->prev;
             node->prev->next = node;
@@ -192,12 +193,14 @@ class list
             _tail->prev->prev->next = _tail;
             _tail->prev = _tail->prev->prev;
             --_size;
-            delete tmp;
+            delete_node(tmp);
         }
 
         iterator insert (iterator position, const value_type& val)
         {
-            list_node<value_type> * to_insert = new list_node<value_type> (val, position.get_prev(), position.get_node());
+            list_node<value_type> * to_insert = new_node();
+            to_insert->prev = position.get_prev();
+            to_insert->next = position.get_node();
             position.get_prev()->next = to_insert;
             position.get_node()->prev = to_insert;
             ++_size;
@@ -222,7 +225,7 @@ class list
             position.get_next()->prev = position.get_prev();
             position.get_prev()->next = position.get_next();
             iterator ret = iterator (position.get_prev()->next);
-            delete position.get_node();
+            delete_node(position.get_node());
             --_size;
             return (ret);
         }
@@ -266,7 +269,7 @@ class list
         {
             list_node<value_type> * node = _head->next;
             for (; node != _tail; node = node->next)
-                delete node;
+                delete_node(node);
             _size = 0;
         }
 
@@ -415,9 +418,25 @@ class list
         }
 
     private:
+        typedef typename Alloc::template rebind<list_node<value_type> >::other node_allocator;
+
+        size_type _size;
         list_node<value_type> * _head;
         list_node<value_type> * _tail;
-        size_type _size;
+        node_allocator _alloc;
+
+        list_node<value_type> * new_node(const value_type & val = value_type())
+        {
+            list_node<value_type> * p = _alloc.allocate(1);
+            _alloc.construct(p, val);
+            return (p);
+        }
+
+        void delete_node(list_node<value_type> * p)
+        {
+            _alloc.destroy(p);
+            _alloc.deallocate(p, 1);
+        }
 
 }; // class list
 
