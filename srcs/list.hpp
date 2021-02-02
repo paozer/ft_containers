@@ -224,7 +224,7 @@ class list
         {
             position.get_next()->prev = position.get_prev();
             position.get_prev()->next = position.get_next();
-            iterator ret = iterator (position.get_prev()->next);
+            iterator ret = iterator (position.get_next());
             delete_node(position.get_node());
             --_size;
             return (ret);
@@ -236,7 +236,7 @@ class list
                 erase(first);
         }
 
-        void swap (list& x)
+        void swap (list& x) // add swap of allocator ?
         {
             {
                 size_type tmp = _size;
@@ -338,11 +338,13 @@ class list
         {
             if (_size < 2)
                 return ;
-            iterator it = begin();
-            iterator prev = it++;
+            iterator prev = begin();
+            iterator it = ++begin();
             for (; it != end(); ++it) {
-                if (binary_pred(*it, *prev))
-                    it = erase(it);
+                if (binary_pred(*it, *prev)) {
+                    erase(it);
+                    it = prev;
+                }
                 else
                     prev = it;
             }
