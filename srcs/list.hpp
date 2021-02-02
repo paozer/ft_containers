@@ -26,6 +26,12 @@ class list
         //typedef difference_type
         typedef size_t size_type;
 
+    private:
+        typedef list_node<value_type> node;
+        typedef node * node_pointer;
+        typedef typename Alloc::template rebind<list_node<value_type> >::other node_allocator;
+
+    public:
         /* Constructors */
         explicit list (const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node())
@@ -73,8 +79,8 @@ class list
         {
             if (_size != rhs._size)
                 return (false);
-            list_node<T> * lhs_node = _head;
-            list_node<T> * rhs_node = rhs._head;
+            node_pointer lhs_node = _head;
+            node_pointer rhs_node = rhs._head;
             while (lhs_node && rhs_node) {
                 if (lhs_node->content != rhs_node->content)
                     return (false);
@@ -89,8 +95,8 @@ class list
 
         bool operator< (const list<value_type, allocator_type>& rhs)
         {
-            list_node<T> * lhs_node = _head;
-            list_node<T> * rhs_node = rhs._head;
+            node_pointer lhs_node = _head;
+            node_pointer rhs_node = rhs._head;
             while (lhs_node && rhs_node) {
                 if (lhs_node->content < rhs_node->content)
                     return (true);
@@ -111,7 +117,7 @@ class list
         /* Destructor */
         ~list()
         {
-            for (list_node<value_type> * tmp; _head; _head = tmp) {
+            for (node_pointer tmp; _head; _head = tmp) {
                 tmp = _head->next;
                 delete_node(_head);
             }
@@ -156,7 +162,7 @@ class list
 
         void push_front (const value_type& val)
         {
-            list_node<value_type> * node = new_node(val);
+            node_pointer node = new_node(val);
             node->next = _head->next;
             node->prev = _head;
             _head->next->prev = node;
@@ -168,7 +174,7 @@ class list
         {
             if (_size == 0)
                 return ;
-            list_node<value_type> * tmp = _head->next;
+            node_pointer tmp = _head->next;
             _head->next->next->prev = _head;
             _head->next = _head->next->next;
             --_size;
@@ -177,7 +183,7 @@ class list
 
         void push_back (const value_type& val)
         {
-            list_node<value_type> * node = new_node(val);
+            node_pointer node = new_node(val);
             node->next = _tail;
             node->prev = _tail->prev;
             node->prev->next = node;
@@ -189,7 +195,7 @@ class list
         {
             if (_size == 0)
                 return ;
-            list_node<value_type> * tmp = _tail->prev;
+            node_pointer tmp = _tail->prev;
             _tail->prev->prev->next = _tail;
             _tail->prev = _tail->prev->prev;
             --_size;
@@ -198,7 +204,7 @@ class list
 
         iterator insert (iterator position, const value_type& val)
         {
-            list_node<value_type> * to_insert = new_node();
+            node_pointer to_insert = new_node();
             to_insert->prev = position.get_prev();
             to_insert->next = position.get_node();
             position.get_prev()->next = to_insert;
@@ -244,7 +250,7 @@ class list
                 x._size = tmp;
             }
             {
-                list_node<value_type> * tmp = _head;
+                node_pointer tmp = _head;
                 _head = x._head;
                 x._head = tmp;
                 tmp = _tail;
@@ -267,7 +273,7 @@ class list
 
         void clear (void)
         {
-            list_node<value_type> * node = _head->next;
+            node_pointer node = _head->next;
             for (; node != _tail; node = node->next)
                 delete_node(node);
             _size = 0;
@@ -414,27 +420,25 @@ class list
         {
             if (_size < 2)
                 return ;
-            ft::list<int>::iterator pos = begin();
+            iterator pos = begin();
             for (size_type i = 0; i < _size - 1; ++i)
                 splice(pos, *this, --end());
         }
 
     private:
-        typedef typename Alloc::template rebind<list_node<value_type> >::other node_allocator;
-
         size_type _size;
-        list_node<value_type> * _head;
-        list_node<value_type> * _tail;
+        node_pointer _head;
+        node_pointer _tail;
         node_allocator _alloc;
 
-        list_node<value_type> * new_node(const value_type & val = value_type())
+        node_pointer new_node(const value_type & val = value_type())
         {
-            list_node<value_type> * p = _alloc.allocate(1);
+            node_pointer p = _alloc.allocate(1);
             _alloc.construct(p, val);
             return (p);
         }
 
-        void delete_node(list_node<value_type> * p)
+        void delete_node(node_pointer p)
         {
             _alloc.destroy(p);
             _alloc.deallocate(p, 1);
