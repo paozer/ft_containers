@@ -139,10 +139,10 @@ class list
         size_type max_size() const { return (std::numeric_limits<size_type>::max()); }
 
         /* Element Access */
-        reference front () { return (*(_head->next)); }
-        const_reference front () const { return (*(_head->next)); }
-        reference back () { return (*(_tail->prev)); }
-        const_reference back () const { return (*(_tail->prev)); }
+        reference front () { return _head->next->content; }
+        const_reference front () const { return _head->next->content; }
+        reference back () { return _tail->prev->content; }
+        const_reference back () const { return _tail->prev->content; }
 
         /* Modifiers */
         template <class InputIterator>
