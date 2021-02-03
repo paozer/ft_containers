@@ -29,7 +29,7 @@ class list
     private:
         typedef list_node<value_type> node;
         typedef node * node_pointer;
-        typedef typename Alloc::template rebind<list_node<value_type> >::other node_allocator;
+        typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
         /* Constructors */
@@ -40,7 +40,7 @@ class list
             _tail->prev = _head;
         }
 
-        explicit list (size_t n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
+        explicit list (size_t n, const value_type & val = value_type(), const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node())
         {
             _head->next = _tail;
@@ -60,38 +60,38 @@ class list
                 push_back(*first);
         }
 
-        list (const list& x)
+        list (const list & x)
             : _size(0), _head(new_node()), _tail(new_node())
         {
             *this = x;
         }
 
         /* Operators */
-        list &operator=(const list& x)
+        list &operator=(const list & x)
         {
             if (*this != x)
                 assign(x.begin(), x.end());
-            return (*this);
+            return *this;
         }
 
         // use iterators vs pointers ?
         bool operator== (const list<value_type, allocator_type>& rhs)
         {
             if (_size != rhs._size)
-                return (false);
+                return false;
             node_pointer lhs_node = _head;
             node_pointer rhs_node = rhs._head;
             while (lhs_node && rhs_node) {
                 if (lhs_node->content != rhs_node->content)
-                    return (false);
+                    return false;
                 lhs_node = lhs_node->next;
                 rhs_node = rhs_node->next;
             }
-            return (true);
+            return true;
 
         }
 
-        bool operator!= (const list<value_type, allocator_type>& rhs) { return (!(*this == rhs)); }
+        bool operator!= (const list<value_type, allocator_type>& rhs) { return !(*this == rhs); }
 
         bool operator< (const list<value_type, allocator_type>& rhs)
         {
@@ -99,9 +99,9 @@ class list
             node_pointer rhs_node = rhs._head;
             while (lhs_node && rhs_node) {
                 if (lhs_node->content < rhs_node->content)
-                    return (true);
+                    return true;
                 else if (lhs_node->content > rhs_node->content)
-                    return (false);
+                    return false;
                 lhs_node = lhs_node->next;
                 rhs_node = rhs_node->next;
             }
@@ -124,9 +124,9 @@ class list
         }
 
         /* Iterators */
-        iterator begin() { return (iterator(_head->next)); }
+        iterator begin() { return iterator(_head->next); }
         //const_iterator begin() const;
-        iterator end() { return (iterator(_tail)); }
+        iterator end() { return iterator(_tail); }
         //const_iterator end() const;
         //reverse_iterator rbegin();
         //const_reverse_iterator rbegin() const;
@@ -134,9 +134,9 @@ class list
         //const_reverse_iterator rend() const;
 
         /* Capacity */
-        bool empty() const { return (_size == 0); }
-        size_type size() const { return (_size); }
-        size_type max_size() const { return (std::numeric_limits<size_type>::max()); }
+        bool empty() const { return _size == 0; }
+        size_type size() const { return _size; }
+        size_type max_size() const { return std::numeric_limits<size_type>::max(); }
 
         /* Element Access */
         reference front () { return _head->next->content; }
@@ -210,7 +210,7 @@ class list
             position.get_prev()->next = to_insert;
             position.get_node()->prev = to_insert;
             ++_size;
-            return (--position);
+            return --position;
         }
 
         void insert (iterator position, size_type n, const value_type& val)
@@ -233,7 +233,7 @@ class list
             iterator ret = iterator (position.get_next());
             delete_node(position.get_node());
             --_size;
-            return (ret);
+            return ret;
         }
 
         iterator erase (iterator first, iterator last)
@@ -435,7 +435,7 @@ class list
         {
             node_pointer p = _alloc.allocate(1);
             _alloc.construct(p, val);
-            return (p);
+            return p;
         }
 
         void delete_node(node_pointer p)
