@@ -1,69 +1,76 @@
 #pragma once
 
 #include "list_node.hpp"
+#include "utils.hpp" // choose<is_const, const, non_const>
 #include <iterator>
 
 namespace ft {
 
-template <class T>
+template <class T, bool is_const>
 class list_iterator
 {
     public:
         typedef T value_type;
         typedef std::ptrdiff_t difference_type;
-        typedef T * pointer;
-        typedef T & reference;
+        typedef typename choose<is_const, const T *, T *>::type pointer;
+        typedef typename choose<is_const, const T &, T &>::type reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
-        list_iterator () : _node(NULL) {}
-        list_iterator (list_node<value_type> * node) : _node(node) {};
+    private:
+        typedef list_iterator<value_type, is_const> self_type;
+        typedef typename choose<is_const, const list_node<T> *, list_node<T> *>::type node_pointer;
 
-        ~list_iterator () {}
+    public:
 
-        list_iterator &operator=(const list_iterator & other)
+        list_iterator (list_node<value_type> * node = NULL) : _node(node) {}
+
+        list_iterator (const list_iterator<value_type, false>& other) : _node(other.get_node()) {}
+
+        list_iterator &operator=(const self_type & other)
         {
             if (*this != other)
                 _node = other._node;
             return *this;
         }
 
-        bool operator==(const list_iterator<value_type> & other) { return _node == other._node; }
-        bool operator!=(const list_iterator<value_type> & other) { return _node != other._node; }
+        bool operator==(const self_type & other) { return _node == other._node; }
+        bool operator!=(const self_type & other) { return _node != other._node; }
 
-        const value_type & operator*(void) { return _node->content; }
+        pointer operator->(void) { return &(_node->content); }
+        reference operator*(void) { return _node->content; }
 
-        const list_iterator<value_type> & operator++(void)
+        self_type & operator++(void)
         {
-            //assert(_node != NULL); //?
             _node = _node->next;
             return *this;
         }
 
-        const list_iterator<value_type> operator++(int)
+        self_type operator++(int)
         {
-            list_iterator<value_type> tmp = *this;
+            self_type tmp = *this;
             _node = _node->next;
             return tmp;
         }
 
-        const list_iterator<value_type> & operator--(void)
+        self_type & operator--(void)
         {
             _node = _node->prev;
             return *this;
         }
 
-        const list_iterator<value_type> operator--(int)
+        self_type operator--(int)
         {
-            list_iterator<value_type> tmp = *this;
+            self_type tmp = *this;
             _node = _node->prev;
             return tmp;
         }
 
-        list_node<value_type> * get_prev(void) { return _node->prev; }
-        list_node<value_type> * get_next(void) { return _node->next; }
-        list_node<value_type> * get_node(void) { return _node; }
+        node_pointer get_prev(void) const { return _node->prev; }
+        node_pointer get_next(void) const { return _node->next; }
+        node_pointer get_node(void) const { return _node; }
 
     private:
-        list_node<value_type> * _node;
+        node_pointer _node;
+
 }; // class list_iterator
 } // namespace ft

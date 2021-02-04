@@ -19,8 +19,8 @@ class list
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
 
-        typedef list_iterator<value_type> iterator;
-        //typedef list_iterator<const value_type> const_iterator;
+        typedef list_iterator<value_type, false> iterator;
+        typedef list_iterator<value_type, true> const_iterator;
         //typedef reverse_iterator
         //typedef const_reverse_iterator
         //typedef difference_type
@@ -125,9 +125,10 @@ class list
 
         /* Iterators */
         iterator begin() { return iterator(_head->next); }
-        //const_iterator begin() const;
+        const_iterator begin() const { return const_iterator(_head->next); }
         iterator end() { return iterator(_tail); }
-        //const_iterator end() const;
+        const_iterator end() const { return const_iterator(_tail); }
+
         //reverse_iterator rbegin();
         //const_reverse_iterator rbegin() const;
         //reverse_iterator rend();
@@ -285,6 +286,7 @@ class list
             splice(position, x, x.begin(), x.end());
         }
 
+        // just call splice(position, x, i, ++i);
         void splice (iterator position, list& x, iterator i)
         {
             if (x._size == 0)
@@ -303,7 +305,7 @@ class list
         void splice (iterator position, list& x, iterator first, iterator last)
         {
             first.get_prev()->next = last.get_node();
-            last.get_node()->prev = first.get_prev(); // diff than splice w/ iter i and no last ?
+            last.get_node()->prev = first.get_prev();
 
             while (first != last) {
                 iterator tmp (first.get_next());
