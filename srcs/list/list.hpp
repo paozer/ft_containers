@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <limits>
 #include "list_node.hpp"
 #include "list_iterator.hpp"
 
@@ -23,7 +24,7 @@ class list
         typedef list_iterator<value_type, true> const_iterator;
         typedef reverse_list_iterator<value_type, false> reverse_iterator;
         typedef reverse_list_iterator<value_type, true> const_reverse_iterator;
-        //typedef difference_type
+        typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
     private:
