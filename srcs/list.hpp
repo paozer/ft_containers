@@ -21,8 +21,8 @@ class list
 
         typedef list_iterator<value_type, false> iterator;
         typedef list_iterator<value_type, true> const_iterator;
-        //typedef reverse_iterator
-        //typedef const_reverse_iterator
+        typedef reverse_list_iterator<value_type, false> reverse_iterator;
+        typedef reverse_list_iterator<value_type, true> const_reverse_iterator;
         //typedef difference_type
         typedef size_t size_type;
 
@@ -129,10 +129,10 @@ class list
         iterator end() { return iterator(_tail); }
         const_iterator end() const { return const_iterator(_tail); }
 
-        //reverse_iterator rbegin();
-        //const_reverse_iterator rbegin() const;
-        //reverse_iterator rend();
-        //const_reverse_iterator rend() const;
+        reverse_iterator rbegin() { return reverse_iterator(_tail->prev); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(_tail->prev); }
+        reverse_iterator rend() { return reverse_iterator(_head); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(_head); }
 
         /* Capacity */
         bool empty() const { return _size == 0; }
