@@ -1,14 +1,13 @@
 #ifdef NO_UNIT_TESTS
 
 #include "../srcs/list/list.hpp"
+#include <list>
 
-int main(int ac, char **av, char **ev)
+int main(void)
 {
-    ft::list<int> mylist;
 
-    for (int i = 0; i < 10; ++i)
-        mylist.push_front(i);
-    std::cout << mylist.size() << '\n';
+    std::list<int> mylist (-1, 10);
+    std::cout << "size = " << mylist.size() << '\n';
     return 0;
 }
 
