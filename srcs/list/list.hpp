@@ -206,7 +206,7 @@ class list
 
         iterator insert (iterator position, const value_type& val)
         {
-            node_pointer to_insert = new_node();
+            node_pointer to_insert = new_node(val);
             to_insert->prev = position.get_prev();
             to_insert->next = position.get_node();
             position.get_prev()->next = to_insert;

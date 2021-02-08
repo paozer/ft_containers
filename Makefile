@@ -1,22 +1,28 @@
-NAME	=	main
+NAME	=	test
 
 CC		=	clang++
 
-SRC		= 	main.cpp
+MAIN_SRC = 	tests/main.cpp
 
-#CFLAGS	=	-Wall -Wextra -Werror -Isrcs/
-#CFLAGS	=	-Wall -Wextra -Isrcs/
-CFLAGS	=	-std=c++98 -Wall -Wextra -g3 -fsanitize=address -Isrcs/
+UNIT_TEST_SRC = tests/list.cpp
+
+CFLAGS	=	-Wall -Wextra -std=c++11
+
+CFLAGS_NO_UNIT_TESTS =	-Wall -Wextra -std=c++98
 
 all: 	$(NAME)
 
-$(NAME):Makefile $(SRC) srcs/**
-		@$(CC) $(CFLAGS) $(SRC) -o $(NAME)
-		@echo "all your base are belong to us"
+$(NAME):Makefile $(SRC) $(UNIT_TEST_SRC) srcs/**
+		@$(CC) $(CFLAGS) $(MAIN_SRC) $(UNIT_TEST_SRC) -o $(NAME)
+		@echo "execute ./$(NAME) to run all unit tests"
+
+no_unit_tests: Makefile $(SRC) srcs/**
+		$(CC) $(CFLAGS_NO_UNIT_TESTS) -DNO_UNIT_TESTS $(MAIN_SRC) -o $(NAME)
+		@echo "execute ./$(NAME) to run main specified in tests/main.cpp"
 
 clean:
-		@rm -rf main.o
-		@rm -rf main.dSYM
+		@rm -rf $(NAME).o
+		@rm -rf $(NAME).dSYM
 		@echo "make clean done..."
 
 fclean: clean
