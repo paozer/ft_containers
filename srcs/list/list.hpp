@@ -37,6 +37,7 @@ class list
         explicit list (const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node())
         {
+            (void)alloc;
             _head->next = _tail;
             _tail->prev = _head;
         }
@@ -44,6 +45,7 @@ class list
         explicit list (size_t n, const value_type & val = value_type(), const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node())
         {
+            (void)alloc;
             _head->next = _tail;
             _tail->prev = _head;
             for (size_type i = 0; i < n; ++i)
@@ -55,15 +57,18 @@ class list
         list (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node())
         {
+            (void)alloc;
             _head->next = _tail;
             _tail->prev = _head;
-            for (; first != last; ++first)
-                push_back(*first);
+            assign(first, last);
         }
 
+        // add copy of allocator
         list (const list & x)
             : _size(0), _head(new_node()), _tail(new_node())
         {
+            _head->next = _tail;
+            _tail->prev = _head;
             *this = x;
         }
 
@@ -138,7 +143,7 @@ class list
         /* Capacity */
         bool empty() const { return _size == 0; }
         size_type size() const { return _size; }
-        size_type max_size() const { return std::numeric_limits<size_type>::max(); }
+        size_type max_size() const { return std::numeric_limits<size_type>::max() / sizeof(node); }
 
         /* Element Access */
         reference front () { return _head->next->content; }
@@ -188,7 +193,7 @@ class list
             node_pointer node = new_node(val);
             node->next = _tail;
             node->prev = _tail->prev;
-            node->prev->next = node;
+            _tail->prev->next = node;
             _tail->prev = node;
             ++_size;
         }
@@ -275,9 +280,13 @@ class list
 
         void clear (void)
         {
+            if (_size == 0)
+                return ;
             node_pointer node = _head->next;
             for (; node != _tail; node = node->next)
                 delete_node(node);
+            _head->next = _tail;
+            _tail->prev = _head;
             _size = 0;
         }
 
