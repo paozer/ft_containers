@@ -36,17 +36,15 @@ class list
     public:
         /* Constructors */
         explicit list (const allocator_type& alloc = allocator_type())
-            : _size(0), _head(new_node()), _tail(new_node())
+            : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
-            (void)alloc;
             _head->next = _tail;
             _tail->prev = _head;
         }
 
         explicit list (size_t n, const value_type & val = value_type(), const allocator_type& alloc = allocator_type())
-            : _size(0), _head(new_node()), _tail(new_node())
+            : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
-            (void)alloc;
             _head->next = _tail;
             _tail->prev = _head;
             for (size_type i = 0; i < n; ++i)
@@ -59,7 +57,6 @@ class list
               typename std::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
             : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
-            (void)alloc;
             _head->next = _tail;
             _tail->prev = _head;
             assign(first, last);
@@ -67,7 +64,7 @@ class list
 
         // add copy of allocator
         list (const list & x)
-            : _size(0), _head(new_node()), _tail(new_node())
+            : _size(0), _head(new_node()), _tail(new_node()), _alloc(x._alloc)
         {
             _head->next = _tail;
             _tail->prev = _head;
@@ -251,14 +248,22 @@ class list
                 erase(first);
         }
 
-        void swap (list& x) // add swap of allocator ?
+        void swap (list& x) // usage of std::swap in <algorithm> forbidden ?
         {
             {
+                // allocator swap
+                Alloc tmp = _alloc;
+                _alloc = x._alloc;
+                x._alloc = tmp;
+            }
+            {
+                // size swap
                 size_type tmp = _size;
                 _size = x._size;
                 x._size = tmp;
             }
             {
+                // content swap
                 node_pointer tmp = _head;
                 _head = x._head;
                 x._head = tmp;
@@ -333,7 +338,7 @@ class list
 
         void remove (const value_type& val)
         {
-            for (iterator it ; it != end(); ++it) {
+            for (iterator it = begin(); it != end(); ++it) {
                 if (*it == val)
                     it = erase(it);
             }
