@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <limits>
+#include <type_traits>
 #include "list_node.hpp"
 #include "list_iterator.hpp"
 
@@ -52,10 +53,11 @@ class list
                 push_front(val);
         }
 
-        // use std::is_integral ?
-        template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
-        list (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type())
-            : _size(0), _head(new_node()), _tail(new_node())
+        //template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
+        template <class InputIterator>
+        list (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
+              typename std::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+            : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
             (void)alloc;
             _head->next = _tail;
