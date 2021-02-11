@@ -79,45 +79,44 @@ class list
             return *this;
         }
 
-        // use iterators vs pointers ?
-        bool operator== (const list<value_type, allocator_type>& rhs)
+        friend bool operator== (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
         {
-            if (_size != rhs._size)
+            if (lhs._size != rhs._size)
                 return false;
-            node_pointer lhs_node = _head;
-            node_pointer rhs_node = rhs._head;
-            while (lhs_node && rhs_node) {
-                if (lhs_node->content != rhs_node->content)
+            typedef list<T, Alloc>::const_iterator iterator;
+            iterator lit = lhs.begin();
+            iterator rit = rhs.begin();
+            while (lit != lhs.end() && rit != rhs.end()) {
+                if (*lit != *rit)
                     return false;
-                lhs_node = lhs_node->next;
-                rhs_node = rhs_node->next;
+                ++lit;
+                ++rit;
             }
             return true;
-
         }
 
-        bool operator!= (const list<value_type, allocator_type>& rhs) { return !(*this == rhs); }
-
-        bool operator< (const list<value_type, allocator_type>& rhs)
+        friend bool operator< (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
         {
-            node_pointer lhs_node = _head;
-            node_pointer rhs_node = rhs._head;
-            while (lhs_node && rhs_node) {
-                if (lhs_node->content < rhs_node->content)
+            typedef list<T, Alloc>::const_iterator iterator;
+            iterator lit = lhs.begin();
+            iterator rit = rhs.begin();
+            while (lit != lhs.end() && rit != rhs.end()) {
+                if (*lit < *rit)
                     return true;
-                else if (lhs_node->content > rhs_node->content)
+                else if (*lit > *rit)
                     return false;
-                lhs_node = lhs_node->next;
-                rhs_node = rhs_node->next;
+                ++lit;
+                ++rit;
             }
-            if (_size >= rhs._size)
+            if (lhs._size >= rhs._size)
                 return false;
             return true;
         }
 
-        bool operator<= (const list<value_type, allocator_type>& rhs) { return (*this == rhs || *this < rhs); }
-        bool operator> (const list<value_type, allocator_type>& rhs) { return (!(*this < rhs) && *this != rhs); }
-        bool operator>= (const list<value_type, allocator_type>& rhs) { return (*this == rhs || *this > rhs); }
+        friend bool operator!= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) { return !(lhs == rhs); }
+        friend bool operator<= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) { return !(rhs < lhs); }
+        friend bool operator> (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) { return rhs < lhs; }
+        friend bool operator>= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) { return !(lhs < rhs); }
 
         /* Destructor */
         ~list()
