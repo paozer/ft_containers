@@ -62,7 +62,6 @@ class list
             assign(first, last);
         }
 
-        // add copy of allocator
         list (const list & x)
             : _size(0), _head(new_node()), _tail(new_node()), _alloc(x._alloc)
         {
@@ -74,7 +73,7 @@ class list
         /* Operators */
         list &operator=(const list & x)
         {
-            if (*this != x)
+            if (this != &x)
                 assign(x.begin(), x.end());
             return *this;
         }
@@ -305,20 +304,11 @@ class list
             splice(position, x, x.begin(), x.end());
         }
 
-        // just call splice(position, x, i, ++i);
         void splice (iterator position, list& x, iterator i)
         {
-            if (x._size == 0)
-                return ;
-            i.get_prev()->next = i.get_next();
-            i.get_next()->prev = i.get_prev();
-
-            i.get_node()->next = position.get_node();
-            i.get_node()->prev = position.get_prev();
-            position.get_prev()->next = i.get_node();
-            position.get_node()->prev = i.get_node();
-            ++_size;
-            --x._size;
+            iterator next = i;
+            ++next;
+            splice(position, x, i, next);
         }
 
         void splice (iterator position, list& x, iterator first, iterator last)

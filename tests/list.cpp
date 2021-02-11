@@ -32,7 +32,7 @@ TEST_CASE( "fill constructor works correctly", "[list][basics]" )
     SECTION( "list(1000, 5) returns list w/ size 1000 and filled w/ 5" ) {
         ft::list<int> mylist (1000, 5);
         REQUIRE( mylist.size() == 1000 );
-        for (ft::list<int>::iterator it = mylist.begin(); it != mylist.end(); ++it)
+        for (auto it = mylist.begin(); it != mylist.end(); ++it)
             REQUIRE( *it == 5 );
     }
 }

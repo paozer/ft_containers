@@ -22,6 +22,7 @@ class list_iterator
 
     public:
 
+        // use typedef node_pointer
         list_iterator (list_node<value_type> * node = NULL) : _node(node) {}
 
         list_iterator (const list_iterator<value_type, false>& other) : _node(other.get_node()) {}
@@ -90,6 +91,7 @@ class reverse_list_iterator
 
     public:
 
+        // use typedef node_pointer
         reverse_list_iterator (list_node<value_type> * node = NULL) : _node(node) {}
 
         reverse_list_iterator (const reverse_list_iterator<value_type, false>& other) : _node(other.get_node()) {}
