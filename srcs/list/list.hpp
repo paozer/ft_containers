@@ -248,6 +248,7 @@ class list
         {
             for (; first != last; ++first)
                 erase(first);
+            return last;
         }
 
         void swap (list& x) // usage of std::swap in <algorithm> forbidden ?
@@ -341,8 +342,10 @@ class list
         void remove (const value_type& val)
         {
             for (iterator it = begin(); it != end(); ++it) {
-                if (*it == val)
+                if (*it == val) {
                     it = erase(it);
+                    --it;
+                }
             }
         }
 
@@ -350,8 +353,10 @@ class list
         void remove_if (Predicate pred)
         {
             for (iterator it = begin(); it != end(); ++it) {
-                if (pred(*it))
-                    erase(it);
+                if (pred(*it)) {
+                    it = erase(it);
+                    --it;
+                }
             }
         }
 
@@ -433,8 +438,8 @@ class list
             }
             left.sort(comp);
             right.sort(comp);
-            left.merge(right);
-            merge(left);
+            left.merge(right, comp);
+            merge(left, comp);
         }
 
         void reverse()
