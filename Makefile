@@ -4,7 +4,8 @@ CC		=	clang++
 
 MAIN_SRC = 	tests/main.cpp
 
-UNIT_TEST_SRC = tests/list.cpp
+UNIT_TEST_SRC = tests/all_containers.cpp\
+				tests/sequence_containers.cpp
 
 CFLAGS	=	-Wall -Wextra -std=c++11
 

@@ -6,15 +6,6 @@
 
 int main(void)
 {
-
-    int v[] = {1, 34, 5, 5, 66, 122};
-    ft::list<int> mylist;
-    std::list<int> mylist2 (v + 1, v + 3);
-    std::cout << "size = " << mylist.size() << '\n';
-    for (auto it = mylist.begin(); it != mylist.end(); ++it)
-        std::cout << *it << " ";
-    for (auto it = mylist2.begin(); it != mylist2.end(); ++it)
-        std::cout << *it << " ";
     return 0;
 }
 
