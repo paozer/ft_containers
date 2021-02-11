@@ -508,9 +508,9 @@ TEMPLATE_TEST_CASE( "max_size works correctly", "[list][vector][capacity]",
         std::list<TestType> stl_cnt;
         REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
     }
-    //SECTION ( "ft::vector returns same value as std::vector" ) {
-    //    ft::vector<TestType> ft_cnt;
-    //    std::vector<TestType> stl_cnt;
-    //    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
-    //}
+    SECTION ( "ft::vector returns same value as std::vector" ) {
+        ft::vector<TestType> ft_cnt;
+        std::vector<TestType> stl_cnt;
+        REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
+    }
 }
