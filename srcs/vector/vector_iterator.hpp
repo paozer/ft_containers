@@ -43,7 +43,6 @@ class vector_iterator
         friend bool operator==(const self_type & lhs, const self_type & rhs)
         {
             if (lhs._ptr != rhs._ptr
-                || lhs._capacity != rhs._capacity
                 || lhs._size != rhs._size
                 || lhs._index != rhs._index)
                 return false;
@@ -54,7 +53,6 @@ class vector_iterator
         {
             if (lhs._ptr < rhs._ptr
                 || lhs._size < rhs._size
-                || lhs._capacity < rhs._capacity
                 || lhs._index < rhs._index)
                 return true;
             return false;
@@ -114,6 +112,8 @@ class vector_iterator
         }
 
         self_type & operator-=(difference_type n) { return *this += -n; }
+
+        size_type get_index() const { return _index; }
 
     private:
         size_t _index;
