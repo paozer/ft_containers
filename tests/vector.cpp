@@ -5,7 +5,7 @@
 
 #include "../srcs/vector/vector.hpp"
 
-#define TYPE_LIST ( int, char, std::string, std::vector<int>, std::vector<std::string> )
+#define TYPE_LIST ( int, char, std::string )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
@@ -39,12 +39,11 @@ TEMPLATE_TEST_CASE( "fill constructor works correctly", "[vector][basics]", ft::
 TEMPLATE_TEST_CASE( "range constructor works correctly", "[vector][basics]", ft::vector<int> )
 {
     int v[] = {2, 4, 12, 5, 60, 99, -12};
-    size_t v_size = sizeof(v) / sizeof(int);
-    TestType cnt (v, v + v_size);
+    TestType cnt (v, v + 7);
 
-    REQUIRE( cnt.size() == v_size );
+    REQUIRE( cnt.size() == 7 );
     auto it = cnt.begin();
-    for (size_t i = 0; i < v_size; ++i) {
+    for (size_t i = 0; i < 7; ++i) {
         REQUIRE( *it == v[i] );
         ++it;
     }
@@ -80,7 +79,7 @@ TEMPLATE_TEST_CASE( "copy constructor works correctly", "[vector][basics]", ft::
 
 /* RELATIONAL OPERATORS */
 
-TEMPLATE_TEST_CASE( "operator= works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator= works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
     TestType cnt2 = cnt1;
@@ -90,7 +89,7 @@ TEMPLATE_TEST_CASE( "operator= works correctly", "[vector][basics]", ft::vector<
         REQUIRE( *it == 10 );
 }
 
-TEMPLATE_TEST_CASE( "operator== works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator== works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
     TestType cnt2;
@@ -103,7 +102,7 @@ TEMPLATE_TEST_CASE( "operator== works correctly", "[vector][basics]", ft::vector
     REQUIRE( (cnt3 == cnt4) );
 }
 
-TEMPLATE_TEST_CASE( "operator!= works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator!= works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
     TestType cnt2;
@@ -116,7 +115,7 @@ TEMPLATE_TEST_CASE( "operator!= works correctly", "[vector][basics]", ft::vector
     REQUIRE_FALSE( (cnt3 != cnt4) );
 }
 
-TEMPLATE_TEST_CASE( "operator< works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator< works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
     TestType cnt2 (11, 10);
@@ -132,7 +131,7 @@ TEMPLATE_TEST_CASE( "operator< works correctly", "[vector][basics]", ft::vector<
     REQUIRE_FALSE( (cnt4 < cnt4) );
 }
 
-TEMPLATE_TEST_CASE( "operator<= works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator<= works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
     TestType cnt2 (11, 10);
@@ -149,7 +148,7 @@ TEMPLATE_TEST_CASE( "operator<= works correctly", "[vector][basics]", ft::vector
     REQUIRE_FALSE( (cnt2 <= cnt1) );
 }
 
-TEMPLATE_TEST_CASE( "operator> works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator> works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
     TestType cnt2 (11, 10);
@@ -167,7 +166,7 @@ TEMPLATE_TEST_CASE( "operator> works correctly", "[vector][basics]", ft::vector<
     REQUIRE( (cnt2 > cnt1) );
 }
 
-TEMPLATE_TEST_CASE( "operator>= works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "operator>= works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     int a[] = { 1, 4, -1, 2, 33 };
     int b[] = { 1, 4, -6, 4, 2 };
@@ -190,12 +189,34 @@ TEMPLATE_TEST_CASE( "operator>= works correctly", "[vector][basics]", ft::vector
 // add const_iterator tests & non const to const construction
 // add tests using std::distance
 
-TEMPLATE_TEST_CASE( "begin works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "begin works correctly", "[vector][iterators]", ft::vector<int> )
 {
+    TestType cnt (1, 10);               // { 10 }
+    REQUIRE( *cnt.begin() == 10 );
+    cnt.push_back(5);                   // { 10, 5 }
+    REQUIRE( *cnt.begin() == 10 );
+    cnt.push_back(20);
+    cnt[0] = 2;                         // { 2, 14, 20 }
+    REQUIRE( *cnt.begin() == 2 );
+    cnt.pop_back();                     // { 2, 14 }
+    REQUIRE( *cnt.begin() == 2 );
+    *cnt.begin() = 5;                   // { 5, 14 }
+    REQUIRE( *cnt.begin() == 5 );
 }
 
-TEMPLATE_TEST_CASE( "end works correctly", "[vector][basics]", ft::vector<int> )
+TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int> )
 {
+    TestType cnt (1, 10);               // { 10 }
+    REQUIRE( *--cnt.end() == 10 );
+    cnt.push_back(5);                   // { 10, 5 }
+    REQUIRE( *--cnt.end() == 5 );
+    cnt.push_back(20);
+    cnt[0] = 2;                         // { 2, 5, 20 }
+    REQUIRE( *--cnt.end() == 20 );
+    cnt.pop_back();                     // { 2, 5 }
+    REQUIRE( *--cnt.end() == 5 );
+    *--cnt.end() = 1;                     // { 2, 1 }
+    REQUIRE( *--cnt.end() == 1 );
 }
 
 /* MODIFIERS */
@@ -203,15 +224,6 @@ TEMPLATE_TEST_CASE( "end works correctly", "[vector][basics]", ft::vector<int> )
 TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[vector][modifiers]", ft::vector, TYPE_LIST )
 {
     SECTION( "range assign works correctly" ) {
-        // generate starting index between 0 and vector_size
-        // generate advance step between 0 and vector_size - index
-        // call assign with iterators from starting to starting + step
-
-        //auto size = GENERATE(range(0, 100));
-        //auto i = GENERATE_COPY(range(0, size));
-        //auto j = GENERATE_COPY(range(i, size - i));
-
-        // automate
         size_t size = 10;
         size_t i = 2;
         size_t j = 7;
@@ -221,17 +233,18 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[vector][modifiers]", ft::
         auto last = v.begin();
         std::advance(first, i);
         std::advance(last, j);
-        TestType l;
-        l.assign(first, last);
-        REQUIRE( (l.size() == j - i) );
+
+        TestType my_vector;
+        my_vector.assign(first, last);
+        REQUIRE( (my_vector.size() == j - i) );
     }
 
     SECTION( "fill assign works correctly" ) {
-        size_t n = GENERATE(0, 5, 1000);
+        size_t n = GENERATE(0, 100);
         TestType cnt;
         cnt.assign(n, VALUE_TYPE());
 
-        REQUIRE( cnt.size() == n);
+        REQUIRE( cnt.size() == n );
         for (auto it = cnt.begin(); it != cnt.end(); ++it)
             REQUIRE( *it == VALUE_TYPE());
     }
@@ -289,9 +302,9 @@ TEMPLATE_TEST_CASE( "insert work correctly", "[vector][modifiers]", ft::vector<i
     }
     SECTION( "range insert works correctly" ) {
         int arr[] = {12, 1, 4, 5, 6, 7};
-        //cnt.push_front(0);
-        //cnt.push_front(-32);
-        cnt.insert(--cnt.end(), arr + 1, arr + 5);
+        cnt.push_back(0);
+        cnt.insert(cnt.end(), arr + 1, arr + 5);
+        cnt.push_back(-32);
         REQUIRE( cnt.size() == 6 );
         auto it = cnt.begin();
         REQUIRE( *it == 0 );
@@ -376,10 +389,10 @@ TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[vector][modifiers]", ft:
     SECTION( "container size is reduced when n is smaller than current size" ) {
         cnt.resize(0);
         REQUIRE( cnt.size() == 0 );
-        cnt.push_front(VALUE_TYPE());
-        cnt.push_front(VALUE_TYPE());
-        cnt.push_front(VALUE_TYPE());
-        cnt.push_front(VALUE_TYPE());
+        cnt.push_back(VALUE_TYPE());
+        cnt.push_back(VALUE_TYPE());
+        cnt.push_back(VALUE_TYPE());
+        cnt.push_back(VALUE_TYPE());
         cnt.resize(2);
         REQUIRE( cnt.size() == 2 );
         cnt.resize(1);
@@ -393,10 +406,10 @@ TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[vector][modifiers]", ft:
             REQUIRE( cnt.size() == 5 );
         }
         SECTION( "non-empty list" ) {
-            cnt.push_front(VALUE_TYPE());
+            cnt.push_back(VALUE_TYPE());
             cnt.resize(5);
             REQUIRE( cnt.size() == 5 );
-            cnt.push_front(VALUE_TYPE());
+            cnt.push_back(VALUE_TYPE());
             cnt.resize(20);
             REQUIRE( cnt.size() == 20 );
         }
@@ -435,17 +448,22 @@ TEMPLATE_TEST_CASE( "back works correctly", "[vector][element access]", ft::vect
 }
 
 // vector test at()
+TEMPLATE_PRODUCT_TEST_CASE( "at works correctly", "[vector][element access]", ft::vector, TYPE_LIST )
+{
+    TestType cnt;
+    REQUIRE_THROWS_AS( cnt.at(100), std::out_of_range);
+}
 // vector test operator[]
 
 /* CAPACITY */
 
-TEMPLATE_PRODUCT_TEST_CASE( "empty reflects list state", "[vector][basics]", ft::vector, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE( "empty reflects list state", "[vector][capacity]", ft::vector, TYPE_LIST )
 {
     TestType cnt;
     REQUIRE( cnt.empty() );
     cnt.push_back(VALUE_TYPE());
     REQUIRE_FALSE( cnt.empty() );
-    cnt.pop_front();
+    cnt.pop_back();
     REQUIRE( cnt.empty() );
 }
 
@@ -458,7 +476,7 @@ TEMPLATE_PRODUCT_TEST_CASE( "size works correctly", "[vector][capacity]", ft::ve
     }
     SECTION( "size() returns updated size when elements are added" ) {
         for (int i = 0; i < 5; ++i)
-            cnt.push_front(VALUE_TYPE());
+            cnt.push_back(VALUE_TYPE());
         REQUIRE( cnt.size() == 5 );
         SECTION( "size() returns updated size after clearing the list" ) {
             cnt.clear();
@@ -467,12 +485,9 @@ TEMPLATE_PRODUCT_TEST_CASE( "size works correctly", "[vector][capacity]", ft::ve
     }
 }
 
-TEMPLATE_TEST_CASE( "max_size works correctly", "[vector][capacity]",
-        int, char, std::string, std::vector<int>, std::vector<std::string> )
+TEMPLATE_PRODUCT_TEST_CASE( "ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector, TYPE_LIST)
 {
-    SECTION ( "ft::vector returns same value as std::vector" ) {
-        ft::vector<TestType> ft_cnt;
-        std::vector<TestType> stl_cnt;
-        REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
-    }
+    TestType ft_cnt;
+    std::vector<VALUE_TYPE> stl_cnt;
+    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
 }

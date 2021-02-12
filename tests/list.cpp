@@ -247,7 +247,7 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", ft::li
     }
 
     SECTION( "fill assign works correctly" ) {
-        size_t n = GENERATE(0, 5, 1000);
+        size_t n = GENERATE(0, 100);
         TestType cnt;
         cnt.assign(n, VALUE_TYPE());
 
@@ -334,7 +334,7 @@ TEMPLATE_TEST_CASE( "insert work correctly", "[list][modifiers]", ft::list<int> 
     SECTION( "range insert works correctly" ) {
         int arr[] = {12, 1, 4, 5, 6, 7};
         cnt.push_front(0);
-        cnt.push_front(-32);
+        cnt.push_back(-32);
         cnt.insert(--cnt.end(), arr + 1, arr + 5);
         REQUIRE( cnt.size() == 6 );
         auto it = cnt.begin();
@@ -705,12 +705,10 @@ TEMPLATE_TEST_CASE( "reverse works correctly", "[list][operations]", ft::list<in
     }
 }
 
-TEMPLATE_TEST_CASE( "max_size works correctly", "[list][capacity]",
+TEMPLATE_TEST_CASE( "ft::list returns same value as std::list", "[list][capacity]",
         int, char, std::string, std::list<int>, std::vector<std::string> )
 {
-    SECTION ( "ft::list returns same value as std::list" ) {
-        ft::list<TestType> ft_cnt;
-        std::list<TestType> stl_cnt;
-        REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
-    }
+    ft::list<TestType> ft_cnt;
+    std::list<TestType> stl_cnt;
+    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
 }
