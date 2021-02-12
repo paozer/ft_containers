@@ -47,8 +47,7 @@ class list
         {
             _head->next = _tail;
             _tail->prev = _head;
-            for (size_type i = 0; i < n; ++i)
-                push_front(val);
+            assign(n, val);
         }
 
         //template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
@@ -244,8 +243,8 @@ class list
 
         iterator erase (iterator first, iterator last)
         {
-            for (; first != last; ++first)
-                erase(first);
+            while (first != last)
+                first = erase(first);
             return last;
         }
 
@@ -290,9 +289,7 @@ class list
         {
             if (_size == 0)
                 return ;
-            node_pointer node = _head->next;
-            for (; node != _tail; node = node->next)
-                delete_node(node);
+            erase(begin(), end());
             _head->next = _tail;
             _tail->prev = _head;
             _size = 0;
