@@ -3,9 +3,10 @@
 #include <vector>
 #include <list>
 
+#include "../srcs/list/list.hpp"
 #include "../srcs/vector/vector.hpp"
 
-#define TYPE_LIST ( int, char, std::string )
+#define TYPE_LIST ( int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
@@ -42,11 +43,8 @@ TEMPLATE_TEST_CASE( "range constructor works correctly", "[vector][basics]", ft:
     TestType cnt (v, v + 7);
 
     REQUIRE( cnt.size() == 7 );
-    auto it = cnt.begin();
-    for (size_t i = 0; i < 7; ++i) {
-        REQUIRE( *it == v[i] );
-        ++it;
-    }
+    for (size_t i = 0; i < 7; ++i)
+        REQUIRE( cnt[i] == v[i] );
 }
 
 TEMPLATE_TEST_CASE( "copy constructor works correctly", "[vector][basics]", ft::vector<int> )
@@ -228,7 +226,7 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[vector][modifiers]", ft::
         size_t i = 2;
         size_t j = 7;
 
-        std::vector<VALUE_TYPE> v (size, VALUE_TYPE());
+        std::vector<VALUE_TYPE> v (size);
         auto first = v.begin();
         auto last = v.begin();
         std::advance(first, i);
@@ -492,7 +490,8 @@ TEMPLATE_PRODUCT_TEST_CASE( "size works correctly", "[vector][capacity]", ft::ve
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE( "ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector,
+        (int, std::string, ft::vector<int>, std::list<int>) )
 {
     TestType ft_cnt;
     std::vector<VALUE_TYPE> stl_cnt;

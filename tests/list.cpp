@@ -4,8 +4,9 @@
 #include <vector>
 
 #include "../srcs/list/list.hpp"
+#include "../srcs/vector/vector.hpp"
 
-#define TYPE_LIST ( int, char, std::string, std::list<int>, std::vector<std::string> )
+#define TYPE_LIST ( int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
@@ -236,7 +237,7 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", ft::li
         size_t i = 2;
         size_t j = 7;
 
-        std::vector<VALUE_TYPE> v (size, VALUE_TYPE());
+        std::vector<VALUE_TYPE> v (size);
         auto first = v.begin();
         auto last = v.begin();
         std::advance(first, i);
@@ -352,7 +353,7 @@ TEMPLATE_TEST_CASE( "insert work correctly", "[list][modifiers]", ft::list<int> 
 TEMPLATE_PRODUCT_TEST_CASE( "erase work correctly", "[list][modifiers]", ft::list, TYPE_LIST )
 {
     size_t n = 5;
-    TestType cnt (n, VALUE_TYPE());
+    TestType cnt (n);
 
     SECTION( "single element erase works correctly" ) {
         cnt.erase(cnt.begin());
