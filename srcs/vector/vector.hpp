@@ -26,8 +26,8 @@ class vector
 
         typedef vector_iterator<value_type, false> iterator;
         typedef vector_iterator<value_type, true> const_iterator;
-        //typedef reverse_vector_iterator<value_type, false> reverse_iterator;
-        //typedef reverse_vector_iterator<value_type, true> const_reverse_iterator;
+        typedef reverse_vector_iterator<value_type, false> reverse_iterator;
+        typedef reverse_vector_iterator<value_type, true> const_reverse_iterator;
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
@@ -122,11 +122,10 @@ class vector
         iterator end() { return iterator(_size, _size, _element); }
         const_iterator end() const { return const_iterator(_size, _size, _element); }
 
-        //how to implement end -1 overflows
-        //reverse_iterator begin() { return iterator(_size - 1, _size, _element); }
-        //const_reverse_iterator begin() const { return const_iterator(_size - 1, _size, _element); }
-        //reverse_iterator end() { return iterator(-1, _size, _element); }
-        //const_reverse_iterator end() const { return const_iterator(-1, _size, _element); }
+        reverse_iterator rbegin() { return reverse_iterator(_size, _size, _element); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(_size, _size, _element); }
+        reverse_iterator rend() { return reverse_iterator(0, _size, _element); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(0, _size, _element); }
 
         /* Capacity */
         size_type size() const { return _size; }
