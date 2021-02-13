@@ -281,22 +281,21 @@ TEMPLATE_TEST_CASE( "pop_back works correctly", "[vector][modifiers]", ft::vecto
 TEMPLATE_TEST_CASE( "insert work correctly", "[vector][modifiers]", ft::vector<int> )
 {
     TestType cnt;
-    auto it = cnt.begin();
 
     SECTION( "single element insert works correctly" ) {
-        cnt.insert(it, 5);           // { 5 }
+        cnt.insert(cnt.begin(), 5);           // { 5 }
         REQUIRE( cnt.size() == 1 );
         REQUIRE( *cnt.begin() == 5 );
-        cnt.insert(it, 10);           // { 5, 10}
+        cnt.insert(cnt.end(), 10);            // { 5, 10 }
         REQUIRE( cnt.size() == 2 );
         REQUIRE( *--cnt.end() == 10 );
     }
     SECTION( "fill insert works correctly" ) {
-        cnt.insert(it, 5, 10);
+        cnt.insert(cnt.begin(), 5, 10);
         REQUIRE( cnt.size() == 5 );
-        for (auto ite = cnt.begin(); ite != cnt.end(); ++ite)
-            REQUIRE( *ite == 10 );
-        cnt.insert(it, 1, 100);
+        for (auto it = cnt.begin(); it != cnt.end(); ++it)
+            REQUIRE( *it == 10 );
+        cnt.insert(cnt.end(), 1, 100);
         REQUIRE( cnt.size() == 6 );
         REQUIRE( *--cnt.end() == 100 );
     }
@@ -321,7 +320,7 @@ TEMPLATE_TEST_CASE( "insert work correctly", "[vector][modifiers]", ft::vector<i
 TEMPLATE_PRODUCT_TEST_CASE( "erase work correctly", "[vector][modifiers]", ft::vector, TYPE_LIST )
 {
     size_t n = 5;
-    TestType cnt (n, VALUE_TYPE());
+    TestType cnt (n);
 
     SECTION( "single element erase works correctly" ) {
         cnt.erase(cnt.begin());
@@ -447,11 +446,19 @@ TEMPLATE_TEST_CASE( "back works correctly", "[vector][element access]", ft::vect
     }
 }
 
-// vector test at()
 TEMPLATE_PRODUCT_TEST_CASE( "at works correctly", "[vector][element access]", ft::vector, TYPE_LIST )
 {
-    TestType cnt;
-    REQUIRE_THROWS_AS( cnt.at(100), std::out_of_range);
+    SECTION("throws out_of_range exception if n is greater than the vector size") {
+        TestType cnt1;
+        TestType cnt2 (50);
+        const TestType const_cnt1;
+        const TestType const_cnt2 (50);
+
+        REQUIRE_THROWS_AS( cnt1.at(100), std::out_of_range);
+        REQUIRE_THROWS_AS( cnt2.at(100), std::out_of_range);
+        REQUIRE_THROWS_AS( const_cnt1.at(100), std::out_of_range);
+        REQUIRE_THROWS_AS( const_cnt2.at(100), std::out_of_range);
+    }
 }
 // vector test operator[]
 
