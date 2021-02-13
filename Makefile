@@ -5,11 +5,12 @@ CC		=	clang++
 MAIN_SRC =	tests/main.cpp
 
 TEST_SRC =	tests/list.cpp\
-		   	tests/vector.cpp
+			tests/vector.cpp\
+			tests/stack_queue.cpp
 
-CFLAGS	=	-Wall -Wextra -std=c++11
+CFLAGS	=	-fsanitize=address -g3 -Wall -Wextra -std=c++11
 
-CFLAGS_ =	-Wall -Wextra -std=c++98
+CFLAGS_ =	-fsanitize=address -g3 -Wall -Wextra -std=c++98
 
 all:		$(NAME)
 
@@ -26,10 +27,10 @@ clean:
 			@rm -rf $(NAME).dSYM
 			@echo "make clean done..."
 
-fclean: 	clean
+fclean:		clean
 			@rm -rf $(NAME)
 			@echo "make fclean done..."
 
 re:			fclean all
 
-.PHONY: 	all fclean clean re
+.PHONY:		all fclean clean re

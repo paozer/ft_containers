@@ -2,13 +2,14 @@
 
 #include "../srcs/list/list.hpp"
 #include "../srcs/vector/vector.hpp"
+#include "../srcs/stack/stack.hpp"
+#include "../srcs/queue/queue.hpp"
+
 #include <list>
 #include <vector>
 
 int main(void)
 {
-    ft::vector<int> v;
-    v.at(800);
     return 0;
 }
 

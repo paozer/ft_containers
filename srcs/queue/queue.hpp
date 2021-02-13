@@ -32,7 +32,7 @@ class queue
         const value_type& back() const { return _cntr.back(); }
 
         void push (const value_type& val) { _cntr.push_back(val); }
-        void pop(void) { _cntr.pop_back(); }
+        void pop(void) { _cntr.pop_front(); }
 
         bool operator== (const queue<T, Container>& rhs) { return _cntr == rhs._cntr; }
         bool operator< (const queue<T, Container>& rhs) { return _cntr < rhs._cntr; }
