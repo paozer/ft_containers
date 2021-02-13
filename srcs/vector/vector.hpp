@@ -117,7 +117,7 @@ class vector
 
         /* Capacity */
         size_type size() const { return _size; }
-        size_type max_size() const { return std::numeric_limits<size_type>::max() / sizeof(value_type); }
+        size_type max_size() const { return _alloc.max_size(); }
 
         void resize (size_type n, value_type val = value_type())
         {

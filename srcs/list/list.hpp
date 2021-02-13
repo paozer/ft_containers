@@ -139,7 +139,7 @@ class list
         /* Capacity */
         bool empty() const { return _size == 0; }
         size_type size() const { return _size; }
-        size_type max_size() const { return std::numeric_limits<size_type>::max() / sizeof(node); }
+        size_type max_size() const { return _alloc.max_size(); }
 
         /* Element Access */
         reference front () { return _head->next->content; }
