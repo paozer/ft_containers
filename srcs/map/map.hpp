@@ -4,8 +4,9 @@
 #include <memory>
 #include <limits>
 #include <type_traits>
-#include "map_node.hpp"
+
 #include "map_iterator.hpp"
+#include "../utils/llrb_tree.hpp"
 
 namespace ft {
 
@@ -35,17 +36,13 @@ class map
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
-    private:
-        typedef map_node<value_type> node;
-        typedef node * node_pointer;
-        typedef typename Alloc::template rebind<node>::other node_allocator;
-
     public:
         /* Constructors */
         explicit map (const allocator_type& alloc = allocator_type())
-            : _size(0), _root(NULL), _key_comp(key_compare())
+            : _key_comp(key_compare())
         {
         }
+
         explicit map (size_t n, const value_type & val = value_type(), const allocator_type& alloc = allocator_type());
         template <class InputIterator>
         map (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
@@ -77,12 +74,16 @@ class map
         //const_reverse_iterator rend() const { return const_reverse_iterator(_head); }
 
         /* Capacity */
-        bool empty() const { return _size == 0; }
-        size_type size() const { return _size; }
+        bool empty() const { return _tree.empty(); }
+        size_type size() const { return _tree.size(); }
         size_type max_size() const { return _alloc.max_size(); }
 
         /* Modifiers */
-        std::pair<iterator, bool> insert (const value_type& val);
+        std::pair<iterator, bool> insert (const value_type& val)
+        {
+            return _tree.insert(val);
+        }
+
         iterator insert (iterator position, const value_type& val);
         template <class InputIterator>
         void insert (InputIterator first, InputIterator last,
@@ -111,9 +112,8 @@ class map
         //value_compare value_comp() const;
 
     private:
-        size_type _size;
-        node_pointer _root;
-        node_allocator _alloc;
+        LLRB<value_type> _tree;
+        allocator_type _alloc;
         key_compare _key_comp;
 
 }; // class map
