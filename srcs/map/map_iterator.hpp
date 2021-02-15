@@ -46,7 +46,10 @@ class map_iterator
         self_type & operator++(void)
         {
             node_pointer parent = _node->prev;
+            // handle special case where node is at the root of tree
             if (!parent) {
+                // if root has a right subtree goto it's smallest node
+                // else we are done
                 if (_node->right) {
                     _node = _node->right;
                     while (_node->left)
@@ -57,6 +60,9 @@ class map_iterator
                 return *this;
             }
             else {
+                // if right subtree exists go to smallest node of right subtree
+                // else if we are in left subtree and done with it goto subtree root
+                // else if we are in right subtree and done with it go to subtree root
                 if (_node->right) {
                     _node = _node->right;
                     while (_node->left)
@@ -64,8 +70,13 @@ class map_iterator
                 }
                 else if (_node == parent->left)
                     _node = parent;
-                else if (_node == parent->right)
-                    _node = parent->prev;
+                else if (_node == parent->right) {
+                    while (_node == parent->right) {
+                        _node = parent;
+                        parent = _node->prev;
+                    }
+                    _node = _node->prev;
+                }
             }
             return *this;
         }
