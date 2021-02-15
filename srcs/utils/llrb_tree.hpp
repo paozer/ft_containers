@@ -56,13 +56,16 @@ class LLRB
 
         ~LLRB()
         {
+            clear();
         }
 
         /* ELEMENT ACCESS */
+        node_pointer get_min(void) { return _low_node; }
+        node_pointer get_max(void) { return _high_node; }
 
         /* CAPACITY */
 
-        size_type size(void) { return _size; }
+        size_type size(void) const { return _size; }
         bool empty(void) { return _size == 0; }
         size_type max_size(void) { return _alloc.max_size(); }
 
@@ -138,8 +141,9 @@ class LLRB
                 return ;
             print_tree(n->left);
             //std::cout << "node [" << n->content << "]\n";
-            std::cout << "node [" << n->content.first << "] ";
-            std::cout << "content [" << n->content.second << "]\n";
+            std::cout << "node [" << n->content.first << "]" << " left [" << (n->left ? std::to_string(n->left->content.first) : "") << "] right [" << (n->right ? std::to_string(n->right->content.first) : "") << "]";
+            //std::cout << "content [" << n->content.second << "]\n";
+            std::cout << "\n";
             print_tree(n->right);
         }
 

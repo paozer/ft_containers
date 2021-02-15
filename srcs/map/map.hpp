@@ -50,7 +50,10 @@ class map
         map (const map & x);
 
         /* Destructor */
-        ~map();
+        ~map()
+        {
+            _tree.print_tree();
+        }
 
         /* Operators */
         map &operator=(const map & x);
@@ -63,10 +66,10 @@ class map
         friend bool operator>= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(lhs < rhs); }
 
         /* Iterators */
-        //iterator begin() { return iterator(_head->next); }
-        //const_iterator begin() const { return const_iterator(_head->next); }
-        //iterator end() { return iterator(_tail); }
-        //const_iterator end() const { return const_iterator(_tail); }
+        iterator begin() { return iterator(_tree.get_min()); }
+        const_iterator begin() const { return const_iterator(_tree.get_min()); }
+        iterator end() { return iterator(_tree.get_max()); }
+        const_iterator end() const { return const_iterator(_tree.get_max()); }
 
         //reverse_iterator rbegin() { return reverse_iterator(_tail->prev); }
         //const_reverse_iterator rbegin() const { return const_reverse_iterator(_tail->prev); }
@@ -112,9 +115,18 @@ class map
         //value_compare value_comp() const;
 
     private:
-        LLRB<value_type> _tree;
+        struct comp_s {
+            bool operator()(const value_type& l, const value_type& r) {
+                Compare comp = Compare();
+                return comp(l.first, r.first);
+            };
+        };
+
+    private:
+        LLRB<value_type, comp_s> _tree;
         allocator_type _alloc;
         key_compare _key_comp;
+
 
 }; // class map
 
