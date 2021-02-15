@@ -66,15 +66,14 @@ class map
         friend bool operator>= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(lhs < rhs); }
 
         /* Iterators */
-        iterator begin() { return iterator(_tree.get_min()); }
-        const_iterator begin() const { return const_iterator(_tree.get_min()); }
-        iterator end() { return iterator(_tree.get_max()); }
-        const_iterator end() const { return const_iterator(_tree.get_max()); }
-
-        //reverse_iterator rbegin() { return reverse_iterator(_tail->prev); }
-        //const_reverse_iterator rbegin() const { return const_reverse_iterator(_tail->prev); }
-        //reverse_iterator rend() { return reverse_iterator(_head); }
-        //const_reverse_iterator rend() const { return const_reverse_iterator(_head); }
+        iterator begin() { return iterator(_tree.begin()); }
+        const_iterator begin() const { return const_iterator(_tree.begin()); }
+        iterator end() { return iterator(_tree.end()); }
+        const_iterator end() const { return const_iterator(_tree.end()); }
+        reverse_iterator rbegin() { return reverse_iterator(_tree.rbegin()); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(_tree.rbegin()); }
+        reverse_iterator rend() { return reverse_iterator(_tree.rend()); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(_tree.rend()); }
 
         /* Capacity */
         bool empty() const { return _tree.empty(); }
