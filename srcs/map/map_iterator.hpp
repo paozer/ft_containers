@@ -45,38 +45,24 @@ class map_iterator
 
         self_type & operator++(void)
         {
+            // if there is a right subtree goto it's smallest node
+            // else if we are done w/ left subtree go to subtree root
+            // else if we are done w/ right subtree go to subtree root parent
             node_pointer parent = _node->prev;
-            // handle special case where node is at the root of tree
-            if (!parent) {
-                // if root has a right subtree goto it's smallest node
-                // else we are done
-                if (_node->right) {
-                    _node = _node->right;
-                    while (_node->left)
-                        _node = _node->left;
-                }
-                else
-                    _node = NULL;
-                return *this;
+            if (_node->right) {
+                _node = _node->right;
+                while (_node->left)
+                    _node = _node->left;
+            }
+            else if (_node == parent->left) {
+                _node = parent;
             }
             else {
-                // if right subtree exists go to smallest node of right subtree
-                // else if we are in left subtree and done with it goto subtree root
-                // else if we are in right subtree and done with it go to subtree root
-                if (_node->right) {
-                    _node = _node->right;
-                    while (_node->left)
-                        _node = _node->left;
-                }
-                else if (_node == parent->left)
+                while (_node == parent->right) {
                     _node = parent;
-                else if (_node == parent->right) {
-                    while (_node == parent->right) {
-                        _node = parent;
-                        parent = _node->prev;
-                    }
-                    _node = _node->prev;
+                    parent = _node->prev;
                 }
+                _node = _node->prev;
             }
             return *this;
         }
