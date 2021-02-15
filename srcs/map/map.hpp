@@ -39,25 +39,42 @@ class map
     public:
         /* Constructors */
         explicit map (const allocator_type& alloc = allocator_type())
-            : _key_comp(key_compare())
+            : _alloc(alloc), _key_comp(key_compare())
         {
         }
 
-        explicit map (size_t n, const value_type & val = value_type(), const allocator_type& alloc = allocator_type());
         template <class InputIterator>
         map (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0);
-        map (const map & x);
+              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+            : _alloc(alloc), _key_comp(key_compare())
+        {
+            for (; first != last; ++first)
+                _tree.insert(*first);
+        }
+
+        map (const map & x)
+            : _alloc(x._alloc), _key_comp(x._key_comp)
+        {
+            *this = x;
+        }
 
         /* Destructor */
         ~map()
         {
-            _tree.print_tree();
         }
 
         /* Operators */
-        map &operator=(const map & x);
+        map &operator=(const map & x)
+        {
+            if (this != &x) {
+                _tree.clear();
+                for (iterator it = x.begin(); it != x.end(); ++it)
+                    _tree.insert(*it);
+            }
+        }
+
         mapped_type& operator[] (const key_type& k);
+
         friend bool operator== (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs);
         friend bool operator< (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs);
         friend bool operator!= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(lhs == rhs); }
@@ -81,26 +98,33 @@ class map
         size_type max_size() const { return _alloc.max_size(); }
 
         /* Modifiers */
-        std::pair<iterator, bool> insert (const value_type& val)
-        {
-            return _tree.insert(val);
-        }
+        std::pair<iterator, bool> insert (const value_type& val) { return _tree.insert(val); }
+        iterator insert (iterator position, const value_type& val) { return _tree.insert(position, val)->first; }
 
-        iterator insert (iterator position, const value_type& val);
         template <class InputIterator>
         void insert (InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0);
+              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+        {
+            for (; first != last; ++first)
+                _tree.insert(*first);
+        }
 
         void erase (iterator position);
         size_type erase (const key_type& k);
         void erase (iterator first, iterator last);
-        void clear (void);
+        void clear (void) { _tree.clear(); }
         void swap (map& x); // usage of std::swap in <algorithm> forbidden ?
 
         /* Operations */
-        size_type count (const key_type& k) const;
-        iterator find (const key_type& k);
-        const_iterator find (const key_type& k) const;
+        size_type count (const key_type& k) const
+        {
+            if (_tree.find(k))
+                return 1;
+            return 0;
+        }
+
+        iterator find (const key_type& k) { return iterator(_tree.find(k)); }
+        const_iterator find (const key_type& k) const { return const_iterator(_tree.find(k)); }
 
         std::pair<iterator, iterator> equal_range (const key_type& k);
         std::pair<const_iterator, const_iterator> equal_range (const key_type& k) const;
@@ -121,7 +145,6 @@ class map
             };
         };
 
-    private:
         LLRB<value_type, comp_s> _tree;
         allocator_type _alloc;
         key_compare _key_comp;
