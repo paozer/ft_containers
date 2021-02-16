@@ -102,8 +102,14 @@ class LLRB
             clear(tmp);
         }
 
+        size_type erase (const value_type& val)
+        {
+            _root = erase(_root, val);
+            _root->color = BLACK;
+        }
+
         /* OPERATIONS */
-        node_pointer find(value_type val)
+        node_pointer find(const value_type& val)
         {
             node_pointer x = _root;
             while (x != NULL) {
@@ -182,6 +188,43 @@ class LLRB
             return node;
         }
 
+        node_pointer erase(node_pointer n, const value_type& val)
+        {
+            if (_comp(val, n->content)) {
+                if (!is_red(n->left) && !is_red(n->left->left))
+                    n = move_red_left(n);
+                n->left = erase(n->left, val);
+            }
+            else {
+                if (is_red(n->left))
+                    n = rotate_right(n);
+                if (!_comp(val, n->content) && !_comp(n->content, val) && !n->right)
+                    return NULL;
+                if (!is_red(n->right) && !is_red(n->right->left))
+                    n = move_red_right(n);
+                if (!_comp(val, n->content) && !_comp(n->content, val)) {
+                    node_pointer tmp = n->right;
+                    while (tmp->left)
+                        tmp = tmp->left;
+                    n->content = tmp->content;
+                    n->right = erase_min(n->right);
+                }
+                else
+                    n->right = erase(n->right, val);
+            }
+            return fix(n);
+        }
+
+        node_pointer erase_min(node_pointer n)
+        {
+            if (!n->left)
+                return NULL;
+            if (!is_red(n->left) && !is_red(n->left->left))
+                n = move_red_left(n);
+            n->left = erase_min(n->left);
+            return fix(n);
+        }
+
         void clear(node_pointer node)
         {
             if (!node)
@@ -206,11 +249,28 @@ class LLRB
             return n;
         }
 
-        void flip_colors (node_pointer n)
+        /*
+         * Add description of what it do
+         */
+        node_pointer move_red_left(node_pointer n)
         {
-            n->switch_color();
-            n->left->switch_color();
-            n->right->switch_color();
+            flip_colors(n);
+            if (is_red(n->right->left)) {
+                n->right = rotate_right(n->right);
+                n = rotate_left(n);
+                flip_colors(n);
+            }
+            return n;
+        }
+
+        node_pointer move_red_right(node_pointer n)
+        {
+            flip_colors(n);
+            if (is_red(n->left->left)) {
+                n = rotate_right(n);
+                flip_colors(n);
+            }
+            return n;
         }
 
         /*
@@ -264,6 +324,13 @@ class LLRB
             if (!n)
                 return false;
             return n->color == RED;
+        }
+
+        void flip_colors (node_pointer n)
+        {
+            n->switch_color();
+            n->left->switch_color();
+            n->right->switch_color();
         }
 
         /* MEMORY MANAGEMENT */
