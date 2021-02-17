@@ -9,17 +9,17 @@ namespace ft {
 
 enum color_t { RED, BLACK };
 
-template <class T>
-struct node_s
+template <class Key, class Value>
+struct map_node
 {
-    T content;
-    node_s * left;
-    node_s * right;
-    node_s * parent;
+    std::pair<Key, Value> p;
+    map_node * left;
+    map_node * right;
+    map_node * parent;
     enum color_t color;
 
-    node_s (T c = T())
-        : content(c), left(NULL), right(NULL), parent(NULL), color(RED)
+    map_node (std::pair<Key, Value> pair)
+        : p(pair), left(NULL), right(NULL), parent(NULL), color(RED)
     {
     }
 
@@ -31,16 +31,22 @@ struct node_s
             color = RED;
     }
 
-}; // struct node_s
+}; // struct map_node
 
-template <class T, class Compare = std::less<T>, class Alloc = std::allocator<T> >
+template <class Key,
+          class T,
+          class Compare = std::less<Key>,
+          class Alloc = std::allocator<std::pair<const Key, T> >
+          >
 class LLRB
 {
     public:
-        typedef T value_type;
-        typedef node_s<value_type> node;
+        typedef Key key_type;
+        typedef T mapped_type;
+        typedef std::pair<const key_type, mapped_type> value_type;
+        typedef map_node<key_type, mapped_type> node;
         typedef node * node_pointer;
-        typedef Compare value_compare;
+        typedef Compare key_compare;
         typedef Alloc allocator_type;
         typedef size_t size_type;
 
@@ -48,15 +54,18 @@ class LLRB
         typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
-        LLRB (const value_compare& comp = value_compare(), const allocator_type& alloc = allocator_type())
+        LLRB (const allocator_type& alloc = allocator_type())
             : _root(NULL), _size(0), _added_node_flag(false), _added_node_ptr(NULL),
-              _begin(new_node()), _end(new_node()), _alloc(alloc), _comp(comp)
+              _begin(new_node()), _end(new_node()), _alloc(alloc), _comp(key_compare())
         {
             _begin->parent = _end;
             _end->parent = _begin;
         }
 
-        ~LLRB() { clear(); }
+        ~LLRB()
+        {
+            clear();
+        }
 
         /* ELEMENT ACCESS */
         node_pointer begin(void) { return _begin->parent; }
@@ -84,7 +93,7 @@ class LLRB
         // else insert recursively from root
         node_pointer insert (node_pointer position, const value_type& val)
         {
-            if (_comp(val, position->content))
+            if (_comp(val, position->first))
                 position->left = insert(position->left, position, val);
             else
                 _root = insert(_root, NULL, val);
@@ -102,18 +111,31 @@ class LLRB
             clear(tmp);
         }
 
-        size_type erase (const value_type& val)
+        size_type erase (const key_type& key)
         {
-            _root = erase(_root, val);
+            _begin->parent->left = NULL;
+            _end->parent->right = NULL;
+            _begin->parent = NULL;
+            _end->parent = NULL;
+
+            _root = erase(_root, key);
             _root->color = BLACK;
+
+            _begin->parent = get_min(_root);
+            _end->parent = get_max(_root);
+            _begin->parent->left = _begin;
+            _end->parent->right = _end;
+
+            //fix return value
+            return 0;
         }
 
         /* OPERATIONS */
-        node_pointer find(const value_type& val)
+        node_pointer find(const key_type& key)
         {
             node_pointer x = _root;
             while (x != NULL) {
-                int cmp = _comp(x->content, val);
+                int cmp = _comp(x->p.first, key);
                 if (cmp == 0)
                     return x;
                 else if (cmp > 0)
@@ -127,17 +149,25 @@ class LLRB
         /* DEBUG */
         void print_tree(void)
         {
+            std::cout << "ROOT: " << _root->p.first << " left "
+                      << " left [" << (_root->left ? std::to_string(_root->left->p.first) : "")
+                      << "] right [" << (_root->right ? std::to_string(_root->right->p.first) : "") << "]";
+            std::cout << "\n";
+            std::cout << "BEGIN: " << _begin->parent->p.first << "\n";
+            std::cout << "END: " << _end->parent->p.first << "\n";
+            std::cout << "SIZE: " << _size << "\n";
+            std::cout << "\n";
             print_tree(_root);
         }
 
         void print_tree(node_pointer n)
         {
-            if (!n)
+            if (!n || n == _begin || n == _end)
                 return ;
             print_tree(n->left);
-            std::cout << "node [" << n->content.first << "]" << " color " << (is_red(n) ? "red" : "black")
-                      << " left [" << (n->left ? std::to_string(n->left->content.first) : "")
-                      << "] right [" << (n->right ? std::to_string(n->right->content.first) : "") << "]";
+            std::cout << "node [" << n->p.first << "]" << " color " << (is_red(n) ? "red" : "black")
+                      << " left [" << (n->left ? std::to_string(n->left->p.first) : "")
+                      << "] right [" << (n->right ? std::to_string(n->right->p.first) : "") << "]";
             std::cout << "\n";
             print_tree(n->right);
         }
@@ -148,25 +178,26 @@ class LLRB
 
         bool _added_node_flag;
         node_pointer _added_node_ptr;
+
         node_pointer _begin;
         node_pointer _end;
 
         node_allocator _alloc;
-        value_compare _comp;
+        key_compare _comp;
 
         /* MODIFIERS */
-        node_pointer insert (node_pointer node, node_pointer parent, value_type val)
+        node_pointer insert (node_pointer node, node_pointer parent, const value_type& val)
         {
             // if we're at a leaf (real or _begin/_end) insert the new node
             if (!node || node == _end || node == _begin) {
                 node_pointer p = new_node(val);
                 p->parent = parent;
                 // update _begin/_end nodes
-                if (_begin->parent == _end || _comp(val, _begin->parent->content)) {
+                if (_begin->parent == _end || _comp(val.first, _begin->parent->p.first)) {
                     _begin->parent = p;
                     p->left = _begin;
                 }
-                if (_end->parent == _begin || _comp(_end->parent->content, val)) {
+                if (_end->parent == _begin || _comp(_end->parent->p.first, val.first)) {
                     _end->parent = p;
                     p->right = _end;
                 }
@@ -175,9 +206,9 @@ class LLRB
                 _added_node_flag = true;
                 return p;
             }
-            if (_comp(val, node->content))
+            if (_comp(val.first, node->p.first))
                 node->left = insert(node->left, node, val);
-            else if (_comp(node->content, val))
+            else if (_comp(node->p.first, val.first))
                 node->right = insert(node->right, node, val);
             else {
                 // need to remember node in order to create iterator after return from recursion
@@ -188,37 +219,46 @@ class LLRB
             return node;
         }
 
-        node_pointer erase(node_pointer n, const value_type& val)
+        node_pointer erase(node_pointer n, const key_type& key)
         {
-            if (_comp(val, n->content)) {
-                if (!is_red(n->left) && !is_red(n->left->left))
-                    n = move_red_left(n);
-                n->left = erase(n->left, val);
+            if (_comp(key, n->p.first)) {
+                if (n->left) {
+                    if (!is_red(n->left) && !is_red(n->left->left))
+                        n = move_red_left(n);
+                    n->left = erase(n->left, key);
+                }
             }
             else {
                 if (is_red(n->left))
                     n = rotate_right(n);
-                if (!_comp(val, n->content) && !_comp(n->content, val) && !n->right)
+                if (!_comp(key, n->p.first) && !_comp(n->p.first, key) && !n->right) {
+                    delete_node(n);
+                    --_size;
                     return NULL;
-                if (!is_red(n->right) && !is_red(n->right->left))
-                    n = move_red_right(n);
-                if (!_comp(val, n->content) && !_comp(n->content, val)) {
-                    node_pointer tmp = n->right;
-                    while (tmp->left)
-                        tmp = tmp->left;
-                    n->content = tmp->content;
-                    n->right = erase_min(n->right);
                 }
-                else
-                    n->right = erase(n->right, val);
+                if (n->right) {
+                    if (!is_red(n->right) && !is_red(n->right->left))
+                        n = move_red_right(n);
+                    if (!_comp(key, n->p.first) && !_comp(n->p.first, key)) {
+                        node_pointer min = get_min(n->right);
+                        n->p.first = min->p.first;
+                        n->p.second = min->p.second;
+                        n->right = erase_min(n->right);
+                    }
+                    else
+                        n->right = erase(n->right, key);
+                }
             }
             return fix(n);
         }
 
         node_pointer erase_min(node_pointer n)
         {
-            if (!n->left)
+            if (!n->left) {
+                delete_node(n);
+                --_size;
                 return NULL;
+            }
             if (!is_red(n->left) && !is_red(n->left->left))
                 n = move_red_left(n);
             n->left = erase_min(n->left);
@@ -235,6 +275,20 @@ class LLRB
         }
 
         /* UTILITIES */
+        node_pointer get_min(node_pointer n)
+        {
+            while (n->left)
+                n = n->left;
+            return n;
+        }
+
+        node_pointer get_max(node_pointer n)
+        {
+            while (n->right)
+                n = n->right;
+            return n;
+        }
+
         node_pointer fix(node_pointer n)
         {
             //fix right-leaning red node
@@ -255,7 +309,7 @@ class LLRB
         node_pointer move_red_left(node_pointer n)
         {
             flip_colors(n);
-            if (is_red(n->right->left)) {
+            if (n->right && is_red(n->right->left)) {
                 n->right = rotate_right(n->right);
                 n = rotate_left(n);
                 flip_colors(n);
@@ -266,7 +320,7 @@ class LLRB
         node_pointer move_red_right(node_pointer n)
         {
             flip_colors(n);
-            if (is_red(n->left->left)) {
+            if (n->left && is_red(n->left->left)) {
                 n = rotate_right(n);
                 flip_colors(n);
             }
@@ -329,8 +383,10 @@ class LLRB
         void flip_colors (node_pointer n)
         {
             n->switch_color();
-            n->left->switch_color();
-            n->right->switch_color();
+            if (n->left)
+                n->left->switch_color();
+            if (n->right)
+                n->right->switch_color();
         }
 
         /* MEMORY MANAGEMENT */

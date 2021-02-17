@@ -29,10 +29,10 @@ class map
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
 
-        typedef map_iterator<value_type, false> iterator;
-        typedef map_iterator<value_type, true> const_iterator;
-        typedef reverse_map_iterator<value_type, false> reverse_iterator;
-        typedef reverse_map_iterator<value_type, true> const_reverse_iterator;
+        typedef map_iterator<key_type, mapped_type, false> iterator;
+        typedef map_iterator<key_type, mapped_type, true> const_iterator;
+        typedef reverse_map_iterator<key_type, mapped_type, false> reverse_iterator;
+        typedef reverse_map_iterator<key_type, mapped_type, true> const_reverse_iterator;
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
@@ -110,12 +110,17 @@ class map
         }
 
         void erase (iterator position);
-        size_type erase (const key_type& k);
+
+        size_type erase (const key_type& k)
+        {
+            return _tree.erase(k);
+        }
+
         void erase (iterator first, iterator last);
         void clear (void) { _tree.clear(); }
         void swap (map& x); // usage of std::swap in <algorithm> forbidden ?
 
-        /* Operations */
+        /* OPERATIONS */
         size_type count (const key_type& k) const
         {
             if (_tree.find(k))
@@ -133,19 +138,19 @@ class map
         iterator upper_bound (const key_type& k);
         const_iterator upper_bound (const key_type& k) const;
 
-        /* Observers */
+        /* DEBUG */
+        void print_tree(void)
+        {
+            _tree.print_tree();
+        }
+
+
+        /* OBSERVERS */
         key_compare key_comp() const { return _key_comp; }
         //value_compare value_comp() const;
 
     private:
-        struct comp_s {
-            bool operator()(const value_type& l, const value_type& r) {
-                Compare comp = Compare();
-                return comp(l.first, r.first);
-            };
-        };
-
-        LLRB<value_type, comp_s> _tree;
+        LLRB<key_type, mapped_type> _tree;
         allocator_type _alloc;
         key_compare _key_comp;
 
