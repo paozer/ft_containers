@@ -11,7 +11,7 @@
 #include "../srcs/vector/vector.hpp"
 
 #define CONTAINER_LIST ( ft::stack, ft::queue )
-#define TYPE_LIST ( int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
 #define VALUE_TYPE typename TestType::value_type
 
 

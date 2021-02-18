@@ -6,7 +6,7 @@
 #include "../srcs/list/list.hpp"
 #include "../srcs/vector/vector.hpp"
 
-#define TYPE_LIST ( int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#define TYPE_LIST ( int, char, const int,std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
