@@ -1,45 +1,37 @@
-
-        /* TRY SHIT OUT */
-
-        node_pointer right_rotate (node_pointer node_to_be_balanced)
-        {
-            node_pointer temp = node_to_be_balanced->left;
-            node_pointer right_child = temp->right;
-            temp->right = node_to_be_balanced;
-            node_to_be_balanced->left = right_child;
-            node_to_be_balanced->height = height_of_node(node_to_be_balanced);
-            temp->height = height_of_node(temp);
-            return temp;
-        }
-
-        node_pointer left_rotate (node_pointer node_to_be_balanced)
-        {
-            node_pointer temp = node_to_be_balanced->right;
-            node_pointer left_child = (node_to_be_balanced->right->left);
-            temp->left = node_to_be_balanced;
-            node_to_be_balanced->right = left_child;
-            node_to_be_balanced->height = height_of_node(node_to_be_balanced);
-            temp->height = height_of_node(temp);
-            return temp;
-        }
-
-        node_pointer left_right_rotate (node_pointer node_to_be_balanced)
-        {
-            node_to_be_balanced->left = left_rotate (node_to_be_balanced->left);
-            return right_rotate(node_to_be_balanced);
-        }
-
-        node_pointer right_left_rotate (node_pointer node_to_be_balanced)
-        {
-            node_to_be_balanced->right = right_rotate (node_to_be_balanced->right);
-            return left_rotate(node_to_be_balanced);
-        }
-
-        size_t height_of_node (node_pointer root)
-        {
-            if (!root)
-                return 0;
-            return std::max(height_of_node(root->left), height_of_node(root->right)) + 1;
-        }
-
-        /* END TRY SHIT OUT */
+///* SWAP NODES*/
+//std::cout << "DELETE NODE WITH 2 CHILD" << std::endl;
+//std::cout << "FOUND MIN AT " << min->pair.first << std::endl;
+//
+//child->left->parent = min;
+//child->right->parent = min;
+//
+//if (min->right) {
+//    min->right->parent = child;
+//    child->right = min->right;
+//}
+//else
+//    child->right = NULL;
+//// ??
+//min->right = child;
+//min->left = child->left;
+//
+//if (parent && parent->left == child)
+//    parent->left = min;
+//else if (parent && parent->right == child)
+//    parent->right = min;
+//
+//if (min->parent == child)
+//    child->parent = min;
+//else
+//    child->parent = min->parent;
+//
+//min->parent = parent;
+//child->left = NULL;
+//
+//if (!parent)
+//    _root = min;
+//
+//std::cout << std::endl << "JUST AFTER SWISCHING NODES" << std::endl;
+//std::cout << "************************************************" << std::endl;
+//print_debug();
+//std::cout << "************************************************" << std::endl;

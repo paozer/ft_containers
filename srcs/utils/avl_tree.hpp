@@ -35,9 +35,7 @@ class avl_tree
         {
         }
 
-        ~avl_tree()
-        {
-        }
+        ~avl_tree() { clear(); }
 
         /* ELEMENT ACCESS */
 
@@ -66,9 +64,7 @@ class avl_tree
             return NULL;
         }
 
-        void clear(void)
-        {
-        }
+        void clear(void) { aux_clear(_root); }
 
         size_type erase (const key_type& key)
         {
@@ -100,10 +96,8 @@ class avl_tree
     private:
         node_pointer _root;
         size_type _size;
-
         bool _added_node_flag;
         node_pointer _added_node_ptr;
-
         node_allocator _alloc;
         key_compare _comp;
 
@@ -140,11 +134,11 @@ class avl_tree
             check_balance(parent->right);
         }
 
-        void rebalance(node_pointer node)
+        void rebalance(node_pointer node, int bf)
         {
             // if left child imbalanced
             // else right child imbalanced
-            if (height(node->left) - height(node->right) > 1) {
+            if (bf > 1) {
                 // if left subtree -> R Rotation
                 // else right subtree -> LR Rotation
                 if (height(node->left->left) > height(node->left->right))
@@ -168,11 +162,21 @@ class avl_tree
         {
             if (!node)
                 return ;
-            if (std::abs(height(node->left) - height(node->right)) > 1)
-                rebalance(node);
+            int bf = height(node->left) - height(node->right);
+            if (std::abs(bf) > 1)
+                rebalance(node, bf);
             if (!node->parent)
                 return ;
             check_balance(node->parent);
+        }
+
+        void aux_clear(node_pointer node)
+        {
+            if (!node)
+                return ;
+            aux_clear(node->left);
+            aux_clear(node->right);
+            delete_node(node);
         }
 
         int height(node_pointer node)
@@ -182,43 +186,19 @@ class avl_tree
             return std::max(height(node->left), height(node->right)) + 1;
         }
 
-        node_pointer aux_erase(node_pointer n, const key_type& key)
+        node_pointer get_min(node_pointer node)
         {
+            while (node->left)
+                node = node->left;
+            return node;
         }
 
-        /* UTILITIES */
-        void aux_clear(node_pointer node)
+        /* ROTATIONS */
+        node_pointer left_rotate(node_pointer node)
         {
-        }
-
-        /*
-         * Rotate node to it's left (right) subtree.
-         * The root of it's right (left) subtree takes its place.
-         * The new root is returned.
-         *
-         *      rotate_left(B):
-         *
-         *      B                    C
-         *    /   \      ->         /  \
-         *   A     C               B    E
-         *       /   \           /   \
-         *      D     E         A     D
-         */
-
-        node_pointer left_rotate (node_pointer node)
-        {
-            //std::cout << "L ROTATE" << std::endl;
             node_pointer tmp = node->right;
-
-            //node->right = tmp->left;
-            //tmp->left ? tmp->left->parent = node : 0;
-            //tmp->left = node;
-            //node->parent = tmp;
-
-            // attach B to D and D to B
             node->right = tmp->left;
             node->right ? node->right->parent = node : 0;
-            // attach C > B and C < B
             tmp->left = node;
             tmp->parent = node->parent;
             if (node->parent && node->parent->left == node)
@@ -226,20 +206,12 @@ class avl_tree
             else if (node->parent && node->parent->right == node)
                 node->parent->right = tmp;
             node->parent = tmp;
-
             return tmp;
         }
 
-        node_pointer right_rotate (node_pointer node)
+        node_pointer right_rotate(node_pointer node)
         {
-            //std::cout << "R ROTATE" << std::endl;
             node_pointer tmp = node->left;
-
-            //node->left = tmp->right;
-            //tmp->right ? tmp->right->parent = node : 0;
-            //tmp->right = node;
-            //node->parent = tmp;
-
             node->left = tmp->right;
             node->left ? node->left->parent = node : 0;
             tmp->right = node;
@@ -249,20 +221,17 @@ class avl_tree
             else if (node->parent && node->parent->right == node)
                 node->parent->right = tmp;
             node->parent = tmp;
-
             return tmp;
         }
 
         node_pointer right_left_rotate(node_pointer node)
         {
-            //std::cout << "RL ROTATE" << std::endl;
             node->right = right_rotate(node->right);
             return left_rotate(node);
         }
 
         node_pointer left_right_rotate(node_pointer node)
         {
-            //std::cout << "LR ROTATE" << std::endl;
             node->left = left_rotate(node->left);
             return right_rotate(node);
         }
