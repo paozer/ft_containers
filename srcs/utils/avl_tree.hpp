@@ -68,6 +68,8 @@ class avl_tree
 
         size_type erase (const key_type& key)
         {
+            if (_root)
+                aux_erase(NULL, _root, key);
             return 0;
         }
 
@@ -158,6 +160,105 @@ class avl_tree
                 _root = node;
         }
 
+        void aux_erase(node_pointer parent, node_pointer child, const key_type& key)
+        {
+            std::cout << "ENTERED AUX ERASE\n";
+            // key is not in the tree
+            if (!child) {
+                std::cout << "DID NOT FIND NODE\n";
+                return ;
+            }
+            if (_comp(child->pair.first, key)) {
+                // search in right child subtree
+                std::cout << "SEARCH RIGHT CHILD OF " << child->pair.first << "\n";
+                aux_erase(child, child->right, key);
+            }
+            else if (_comp(key, child->pair.first)) {
+                std::cout << "SEARCH LEFT CHILD OF " << child->pair.first << "\n";
+                // search in left child subtree
+                aux_erase(child, child->left, key);
+            }
+            else {
+                std::cout << "FOUND NODE TO DELETE " << key << std::endl;
+                // delete this node
+                if (!child->left && !child->right) {
+                    std::cout << "DELETE LEAF" << std::endl;
+                    // node is leaf
+                    if (parent && parent->left == child)
+                        parent->left = NULL;
+                    else if (parent && parent->right == child)
+                        parent->right = NULL;
+                    delete_node(child);
+                }
+                else if ((!child->left && child->right) ||
+                        (child->left && !child->right)) {
+                    std::cout << "DELETE NODE WITH 1 CHILD" << std::endl;
+                    // node has one child
+                    if (parent && parent->left == child)
+                        parent->left = (child->left ? child->left : child->right);
+                    else if (parent && parent->right == child)
+                        parent->right = (child->left ? child->left : child->right);
+                    if (child->left)
+                        child->left->parent = parent;
+                    else
+                        child->right->parent = parent;
+                    delete_node(child);
+                }
+                else {
+                    // node has two children
+                    // swap with inorder successor
+                    // delete inorder successor
+                    node_pointer min = get_min(child->right);
+
+                    node_pointer n1 = child;
+                    node_pointer n2 = min;
+
+                    node_pointer parent1 = n1->parent;
+                    node_pointer left_n1 = n1->left;
+                    node_pointer right_n1 = n1->right;
+                    node_pointer parent2 = n2->parent;
+                    node_pointer left_n2 = n2->left;
+                    node_pointer right_n2 = n2->right;
+
+                    /* SWAP n1 WITH n2 */
+                    if (parent1) {
+                        if (parent1->left == n1)
+                            parent1->left = n2;
+                        else
+                            parent1->right = n2;
+                        n2->parent = parent1;
+                    }
+                    else {
+                        _root = n2;
+                        n2->parent = NULL;
+                    }
+
+                    n2->left = left_n1;
+                    left_n1->parent = n2;
+                    n1->left = left_n2;
+                    n1->right = right_n2;
+
+                    if (right_n2)
+                        right_n2->parent = n1;
+                    if (parent2 != n1) {
+                        n2->right = right_n1;
+                        right_n1->parent = n2;
+                        parent2->left = n1;
+                        n1->parent = parent2;
+                    }
+                    else {
+                        n2->right = n1;
+                        n1->parent = n2;
+                    }
+                    aux_erase(n2, n2->right, key);
+                    return ;
+                }
+                --_size;
+            }
+            check_balance(parent);
+        }
+
+        /* UTILITIES */
         void check_balance(node_pointer node)
         {
             if (!node)
