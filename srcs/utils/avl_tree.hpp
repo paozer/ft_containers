@@ -35,15 +35,30 @@ class avl_tree
         typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
+        /* CONSTRUCTORS */
         avl_tree (const allocator_type& alloc = allocator_type())
             : _root(NULL), _size(0), _added_node_flag(false), _added_node_ptr(NULL),
-              _alloc(alloc), _comp(key_compare())
+              _alloc(alloc), _comp(key_compare()), _begin(new_node()), _end(new_node())
         {
+            _begin->parent = _end;
+            _end->parent = _begin;
         }
 
-        ~avl_tree() { clear(); }
+        /* DESTRUCTOR */
+        ~avl_tree()
+        {
+            _begin->parent->left = NULL;
+            _end->parent->right = NULL;
+            clear();
+            delete_node(_begin);
+            delete_node(_end);
+        }
 
         /* ELEMENT ACCESS */
+        node_pointer begin(void) { return _begin->parent; }
+        node_pointer end(void) { return _end; }
+        node_pointer rbegin(void) { return _begin; }
+        node_pointer rend(void) { return _end->parent; }
 
         /* CAPACITY */
         size_type size(void) const { return _size; }
@@ -53,35 +68,84 @@ class avl_tree
         /* MODIFIERS */
         std::pair<node_pointer, bool> insert(const value_type& val)
         {
-            _added_node_flag = false;
+            unset_bounds();
             _added_node_ptr = NULL;
+            _added_node_flag = false;
             if (_root)
                 aux_insert(_root, val);
             else {
                 _root = new_node(val);
                 ++_size;
-                return std::make_pair(_root, true);
+                _added_node_ptr = _root;
+                _added_node_flag = true;
             }
+            set_bounds();
             return std::make_pair(_added_node_ptr, _added_node_flag);
         }
 
-        node_pointer insert (node_pointer position, const value_type& val)
+        std::pair<node_pointer, bool> insert (node_pointer position, const value_type& val)
         {
-            (void)position;
-            (void)val;
-            return NULL;
+            if (!position)
+                return std::make_pair(NULL, false);
+            // if val's key is found in tree return pointer it's node
+            // else if position is valid and new node should be inserted left of it we start insert recursion here
+            // else start insert recursion at root
+            node_pointer node = find(val.first);
+            if (node) {
+                _added_node_ptr = node;
+                _added_node_flag = false;
+            }
+            else if (_comp(val.first, position->pair.first)) {
+                // if val is already in tree return pair(node_pointer, false)
+                unset_bounds();
+                _added_node_ptr = NULL;
+                _added_node_flag = false;
+                aux_insert(position, position->left, val);
+                set_bounds();
+            }
+            else
+                insert(val);
+            return std::make_pair(_added_node_ptr, _added_node_flag);
         }
 
         void clear(void)
         {
+            _begin->parent = _end;
+            _end->parent = _begin;
             aux_clear(_root);
         }
 
         size_type erase (const key_type& key)
         {
+            size_type old_size = _size;
+            unset_bounds();
             if (_root)
                 aux_erase(NULL, _root, key);
-            return 0;
+            set_bounds();
+            return old_size - _size;
+        }
+
+        size_type erase(node_pointer node)
+        {
+            size_type old_size = _size;
+            unset_bounds();
+            aux_erase(node->parent, node, node->pair.first);
+            set_bounds();
+            return old_size - _size;
+        }
+
+        node_pointer find(const key_type& key)
+        {
+            node_pointer node = _root;
+            while (node) {
+                if (_comp(node->pair.first, key))
+                    node = node->right;
+                else if (_comp(key, node->pair.first))
+                    node = node->left;
+                else
+                    break ;
+            }
+            return node;
         }
 
     private:
@@ -91,6 +155,8 @@ class avl_tree
         node_pointer _added_node_ptr;
         node_allocator _alloc;
         key_compare _comp;
+        node_pointer _begin;
+        node_pointer _end;
 
         /* INSERT */
         void aux_insert(node_pointer parent, const value_type& val)
@@ -269,6 +335,30 @@ class avl_tree
             delete_node(node);
         }
 
+        // after calling unset_bounds set_bounds should always be called
+        void unset_bounds(void)
+        {
+            _begin->parent->left = NULL;
+            _end->parent->right = NULL;
+        }
+
+        // unset_bound should always have been called before calling set_bounds
+        void set_bounds(void)
+        {
+            if (_root) {
+                node_pointer first = get_min(_root);
+                node_pointer last = get_max(_root);
+                first->left = _begin;
+                _begin->parent = first;
+                last->right = _end;
+                _end->parent = last;
+            }
+            else {
+                _begin->parent = _end;
+                _end->parent = _begin;
+            }
+        }
+
         int height(node_pointer node)
         {
             if (!node)
@@ -280,6 +370,13 @@ class avl_tree
         {
             while (node->left)
                 node = node->left;
+            return node;
+        }
+
+        node_pointer get_max(node_pointer node)
+        {
+            while (node->right)
+                node = node->right;
             return node;
         }
 
