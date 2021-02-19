@@ -1,11 +1,8 @@
 #pragma once
 
-#include <utility>
-#include <cstddef>
+#include <utility> // std::pair
 
 namespace ft {
-
-enum color_t { RED, BLACK };
 
 template <class Key, class Value>
 struct avl_node
@@ -20,6 +17,6 @@ struct avl_node
     {
     }
 
-}; // struct map_node
+}; // STRUCT MAP_NODE
 
-} // namespace ft
+} // NAMESPACE FT

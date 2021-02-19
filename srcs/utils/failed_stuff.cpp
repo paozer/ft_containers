@@ -35,3 +35,34 @@
 //std::cout << "************************************************" << std::endl;
 //print_debug();
 //std::cout << "************************************************" << std::endl;
+
+
+///* DEBUG */
+//void print_debug(void) {
+//    if (!_root) {
+//        std::cout << "******  TREE IS EMPTY ******" << std::endl;
+//        return ;
+//    }
+//    std::cout << "******  TREE IS NOT EMPTY ******" << std::endl;
+//    std::cout << "SIZE = " << _size << std::endl;
+//    std::cout << "EMPTY = " << std::boolalpha << (_size == 0) << std::endl;
+//
+//    node_pointer n;
+//    ft::queue<node_pointer> q;
+//    q.push(_root);
+//    while (!q.empty()) {
+//        n = q.front();
+//        aux_print_debug(n);
+//        q.pop();
+//        if (n->left)
+//            q.push(n->left);
+//        if (n->right)
+//            q.push(n->right);
+//    }
+//}
+//
+//void aux_print_debug(node_pointer n) {
+//    std::cout << "NODE {" << n->pair.first << "} ";
+//    std::cout << "PARENT {" << (n->parent ? std::to_string(n->parent->pair.first) : "NONE") << "} ";
+//    std::cout << "CHILDREN {" << (n->left ? std::to_string(n->left->pair.first) : "NONE") << ", " << (n->right ? std::to_string(n->right->pair.first) : "NONE") << "}" << std::endl;
+//}

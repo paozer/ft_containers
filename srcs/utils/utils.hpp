@@ -18,4 +18,12 @@ struct choose<false, is_true, is_false> {
    typedef is_false type;
 };
 
+template <class T>
+T max(const T& a, const T& b)
+{
+    if (a >= b)
+        return a;
+    return b;
+}
+
 } // namespace ft

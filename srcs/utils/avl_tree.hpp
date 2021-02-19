@@ -1,9 +1,15 @@
 #pragma once
 
-#include <memory>
-#include <cstddef>
+#include <cstddef> // size_t
+#include <memory> // std::allocator
+#include <functional> // std::less
+#include <cmath> // std::abs
+
+#include "utils.hpp" // ft::max
 #include "avl_node.hpp"
 
+/* DEBUG */
+#include "../queue/queue.hpp"
 #include <iostream>
 
 namespace ft {
@@ -61,10 +67,15 @@ class avl_tree
 
         node_pointer insert (node_pointer position, const value_type& val)
         {
+            (void)position;
+            (void)val;
             return NULL;
         }
 
-        void clear(void) { aux_clear(_root); }
+        void clear(void)
+        {
+            aux_clear(_root);
+        }
 
         size_type erase (const key_type& key)
         {
@@ -73,27 +84,6 @@ class avl_tree
             return 0;
         }
 
-        /* DEBUG */
-        void print_debug(void) {
-            if (!_root) {
-                std::cout << "******  TREE IS EMPTY ******" << std::endl;
-                return ;
-            }
-            std::cout << "******  TREE IS NOT EMPTY ******" << std::endl;
-            std::cout << "SIZE = " << _size << std::endl;
-            std::cout << "EMPTY = " << std::boolalpha << (_size == 0) << std::endl;
-            aux_print_debug(_root);
-        }
-
-        void aux_print_debug(node_pointer n) {
-            if (!n)
-                return ;
-            std::cout << "NODE {" << n->pair.first << "} ";
-            std::cout << "PARENT {" << (n->parent ? std::to_string(n->parent->pair.first) : "NONE") << "} ";
-            std::cout << "CHILDREN {" << (n->left ? std::to_string(n->left->pair.first) : "NONE") << ", " << (n->right ? std::to_string(n->right->pair.first) : "NONE") << "}" << std::endl;
-            aux_print_debug(n->left);
-            aux_print_debug(n->right);
-        }
 
     private:
         node_pointer _root;
@@ -103,8 +93,8 @@ class avl_tree
         node_allocator _alloc;
         key_compare _comp;
 
-        /* MODIFIERS */
-        void aux_insert (node_pointer parent, const value_type& val)
+        /* INSERT */
+        void aux_insert(node_pointer parent, const value_type& val)
         {
             if (_comp(parent->pair.first, val.first)) {
                 if (!parent->right) {
@@ -133,7 +123,7 @@ class avl_tree
                 _added_node_flag = false;
                 return ;
             }
-            check_balance(parent->right);
+            check_balance(parent);
         }
 
         void rebalance(node_pointer node, int bf)
@@ -160,102 +150,62 @@ class avl_tree
                 _root = node;
         }
 
+        /* ERASE */
         void aux_erase(node_pointer parent, node_pointer child, const key_type& key)
         {
-            std::cout << "ENTERED AUX ERASE\n";
-            // key is not in the tree
-            if (!child) {
-                std::cout << "DID NOT FIND NODE\n";
+            if (!child)
                 return ;
-            }
-            if (_comp(child->pair.first, key)) {
-                // search in right child subtree
-                std::cout << "SEARCH RIGHT CHILD OF " << child->pair.first << "\n";
+            if (_comp(child->pair.first, key))
                 aux_erase(child, child->right, key);
-            }
-            else if (_comp(key, child->pair.first)) {
-                std::cout << "SEARCH LEFT CHILD OF " << child->pair.first << "\n";
-                // search in left child subtree
+            else if (_comp(key, child->pair.first))
                 aux_erase(child, child->left, key);
-            }
             else {
-                std::cout << "FOUND NODE TO DELETE " << key << std::endl;
-                // delete this node
-                if (!child->left && !child->right) {
-                    std::cout << "DELETE LEAF" << std::endl;
-                    // node is leaf
-                    if (parent && parent->left == child)
-                        parent->left = NULL;
-                    else if (parent && parent->right == child)
-                        parent->right = NULL;
-                    delete_node(child);
-                }
-                else if ((!child->left && child->right) ||
-                        (child->left && !child->right)) {
-                    std::cout << "DELETE NODE WITH 1 CHILD" << std::endl;
-                    // node has one child
-                    if (parent && parent->left == child)
-                        parent->left = (child->left ? child->left : child->right);
-                    else if (parent && parent->right == child)
-                        parent->right = (child->left ? child->left : child->right);
-                    if (child->left)
-                        child->left->parent = parent;
-                    else
-                        child->right->parent = parent;
-                    delete_node(child);
-                }
+                if (!child->left && !child->right)
+                    aux_erase_no_child_node(parent, child);
+                else if ((!child->left && child->right) || (child->left && !child->right))
+                    aux_erase_one_child_node(parent, child);
                 else {
-                    // node has two children
-                    // swap with inorder successor
-                    // delete inorder successor
-                    node_pointer min = get_min(child->right);
-
-                    node_pointer n1 = child;
-                    node_pointer n2 = min;
-
-                    node_pointer parent1 = n1->parent;
-                    node_pointer left_n1 = n1->left;
-                    node_pointer right_n1 = n1->right;
-                    node_pointer parent2 = n2->parent;
-                    node_pointer left_n2 = n2->left;
-                    node_pointer right_n2 = n2->right;
-
-                    /* SWAP n1 WITH n2 */
-                    if (parent1) {
-                        if (parent1->left == n1)
-                            parent1->left = n2;
-                        else
-                            parent1->right = n2;
-                        n2->parent = parent1;
-                    }
-                    else {
-                        _root = n2;
-                        n2->parent = NULL;
-                    }
-
-                    n2->left = left_n1;
-                    left_n1->parent = n2;
-                    n1->left = left_n2;
-                    n1->right = right_n2;
-
-                    if (right_n2)
-                        right_n2->parent = n1;
-                    if (parent2 != n1) {
-                        n2->right = right_n1;
-                        right_n1->parent = n2;
-                        parent2->left = n1;
-                        n1->parent = parent2;
-                    }
-                    else {
-                        n2->right = n1;
-                        n1->parent = n2;
-                    }
-                    aux_erase(n2, n2->right, key);
+                    aux_erase_two_child_node(child, key);
                     return ;
                 }
                 --_size;
             }
             check_balance(parent);
+        }
+
+        void aux_erase_no_child_node(node_pointer parent, node_pointer child)
+        {
+            if (parent) {
+                if (parent->left == child)
+                    parent->left = NULL;
+                else if (parent->right == child)
+                    parent->right = NULL;
+            }
+            else
+                _root = NULL;
+            delete_node(child);
+        }
+
+        void aux_erase_one_child_node(node_pointer parent, node_pointer child)
+        {
+            if (parent) {
+                if (parent->left == child)
+                    parent->left = (child->left ? child->left : child->right);
+                else if (parent->right == child)
+                    parent->right = (child->left ? child->left : child->right);
+            }
+            if (child->left)
+                child->left->parent = parent;
+            else
+                child->right->parent = parent;
+            delete_node(child);
+        }
+
+        void aux_erase_two_child_node(node_pointer child, const key_type& key)
+        {
+            node_pointer min = get_min(child->right);
+            swap_nodes(child, min);
+            aux_erase(min, min->right, key);
         }
 
         /* UTILITIES */
@@ -271,6 +221,46 @@ class avl_tree
             check_balance(node->parent);
         }
 
+        void swap_nodes(node_pointer n1, node_pointer n2)
+        {
+            node_pointer parent1 = n1->parent;
+            node_pointer left_n1 = n1->left;
+            node_pointer right_n1 = n1->right;
+            node_pointer parent2 = n2->parent;
+            node_pointer left_n2 = n2->left;
+            node_pointer right_n2 = n2->right;
+
+            if (parent1) {
+                if (parent1->left == n1)
+                    parent1->left = n2;
+                else
+                    parent1->right = n2;
+                n2->parent = parent1;
+            }
+            else {
+                _root = n2;
+                n2->parent = NULL;
+            }
+
+            n2->left = left_n1;
+            left_n1->parent = n2;
+            n1->left = left_n2;
+            n1->right = right_n2;
+
+            if (right_n2)
+                right_n2->parent = n1;
+            if (parent2 != n1) {
+                n2->right = right_n1;
+                right_n1->parent = n2;
+                parent2->left = n1;
+                n1->parent = parent2;
+            }
+            else {
+                n2->right = n1;
+                n1->parent = n2;
+            }
+        }
+
         void aux_clear(node_pointer node)
         {
             if (!node)
@@ -284,7 +274,7 @@ class avl_tree
         {
             if (!node)
                 return 0;
-            return std::max(height(node->left), height(node->right)) + 1;
+            return ft::max(height(node->left), height(node->right)) + 1;
         }
 
         node_pointer get_min(node_pointer node)
@@ -351,6 +341,6 @@ class avl_tree
             _alloc.deallocate(p, 1);
         }
 
-}; // class avl_tree
+}; // CLASS AVL_TREE
 
-} // namespace ft
+} // NAMESPACE FT
