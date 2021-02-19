@@ -12,7 +12,6 @@ namespace ft {
 template < class T, class Alloc = std::allocator<T> >
 class list
 {
-
     public:
         typedef T value_type;
         typedef Alloc allocator_type;
@@ -20,7 +19,6 @@ class list
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-
         typedef list_iterator<value_type, false> iterator;
         typedef list_iterator<value_type, true> const_iterator;
         typedef reverse_list_iterator<value_type, false> reverse_iterator;
@@ -34,7 +32,7 @@ class list
         typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
-        /* Constructors */
+        /* CONSTRUCTORS */
         explicit list (const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
@@ -69,7 +67,7 @@ class list
             *this = x;
         }
 
-        /* Operators */
+        /* OPERATORS */
         list &operator=(const list & x)
         {
             if (this != &x)
@@ -116,7 +114,7 @@ class list
         friend bool operator> (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) { return rhs < lhs; }
         friend bool operator>= (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs) { return !(lhs < rhs); }
 
-        /* Destructor */
+        /* DESTRUCTOR */
         ~list()
         {
             for (node_pointer tmp; _head; _head = tmp) {
@@ -125,29 +123,28 @@ class list
             }
         }
 
-        /* Iterators */
+        /* ITERATORS */
         iterator begin() { return iterator(_head->next); }
         const_iterator begin() const { return const_iterator(_head->next); }
         iterator end() { return iterator(_tail); }
         const_iterator end() const { return const_iterator(_tail); }
-
         reverse_iterator rbegin() { return reverse_iterator(_tail->prev); }
         const_reverse_iterator rbegin() const { return const_reverse_iterator(_tail->prev); }
         reverse_iterator rend() { return reverse_iterator(_head); }
         const_reverse_iterator rend() const { return const_reverse_iterator(_head); }
 
-        /* Capacity */
+        /* CAPACITY */
         bool empty() const { return _size == 0; }
         size_type size() const { return _size; }
         size_type max_size() const { return _alloc.max_size(); }
 
-        /* Element Access */
+        /* ELEMENT ACCESS */
         reference front () { return _head->next->content; }
         const_reference front () const { return _head->next->content; }
         reference back () { return _tail->prev->content; }
         const_reference back () const { return _tail->prev->content; }
 
-        /* Modifiers */
+        /* MODIFIERS */
         template <class InputIterator>
         void assign (InputIterator first, InputIterator last,
               typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
@@ -248,29 +245,12 @@ class list
             return last;
         }
 
-        void swap (list& x) // usage of std::swap in <algorithm> forbidden ?
+        void swap (list& x)
         {
-            {
-                // allocator swap
-                Alloc tmp = _alloc;
-                _alloc = x._alloc;
-                x._alloc = tmp;
-            }
-            {
-                // size swap
-                size_type tmp = _size;
-                _size = x._size;
-                x._size = tmp;
-            }
-            {
-                // content swap
-                node_pointer tmp = _head;
-                _head = x._head;
-                x._head = tmp;
-                tmp = _tail;
-                _tail = x._tail;
-                x._tail = tmp;
-            }
+            ft::swap(_alloc, x._alloc);
+            ft::swap(_size, x._size);
+            ft::swap(_head, x._head);
+            ft::swap(_tail, x._tail);
         }
 
         void resize (size_type n, value_type val = value_type())
@@ -295,7 +275,7 @@ class list
             _size = 0;
         }
 
-        /* Operations */
+        /* OPERATIONS */
         void splice (iterator position, list& x)
         {
             splice(position, x, x.begin(), x.end());
@@ -443,6 +423,7 @@ class list
         node_pointer _tail;
         node_allocator _alloc;
 
+        /* MEMORY MANAGEMENT */
         node_pointer new_node(const value_type & val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
@@ -456,12 +437,9 @@ class list
             _alloc.deallocate(p, 1);
         }
 
-}; // class list
+}; // CLASS LIST
 
 template <class T, class Alloc>
-void swap (list<T,Alloc>& x, list<T,Alloc>& y)
-{
-    x.swap(y);
-}
+void swap (list<T,Alloc>& x, list<T,Alloc>& y) { x.swap(y); }
 
-} // namespace ft
+} // NAMESPACE FT

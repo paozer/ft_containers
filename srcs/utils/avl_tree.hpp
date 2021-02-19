@@ -84,7 +84,6 @@ class avl_tree
             return 0;
         }
 
-
     private:
         node_pointer _root;
         size_type _size;

@@ -1,13 +1,11 @@
 #pragma once
 
-#include "../utils/utils.hpp"
-#include <iterator>
+#include <iterator> // std::ptrdiff_t, std::bidirectional_iterator_tag, std::pair
+
+#include "../utils/avl_node.hpp"
+#include "../utils/utils.hpp" // ft::choose
 
 namespace ft {
-
-
-template <class Key, class Value>
-struct map_node;
 
 template <class Key, class Value, bool is_const>
 class map_iterator
@@ -23,11 +21,15 @@ class map_iterator
         typedef Key key_type;
         typedef Value mapped_type;
         typedef map_iterator<key_type, mapped_type, is_const> self_type;
-        typedef typename ft::choose<is_const, const map_node<key_type, mapped_type> *, map_node<key_type, mapped_type> *>::type node_pointer;
+        typedef avl_node<key_type, mapped_type> map_node;
+        typedef typename ft::choose<is_const, const map_node *, map_node *>::type node_pointer;
 
     public:
+        /* CONSTRUCTORS */
         map_iterator (node_pointer node = NULL) : _node(node) {}
         map_iterator (const map_iterator<key_type, value_type, false>& other) : _node(other._node) {}
+
+        /* OPERATORS */
         map_iterator &operator=(const self_type & other)
         {
             if (this != &other)
@@ -38,8 +40,8 @@ class map_iterator
         bool operator==(const self_type & other) { return _node == other._node; }
         bool operator!=(const self_type & other) { return _node != other._node; }
 
-        reference operator*(void) { return _node->p; }
-        pointer operator->(void) { return reinterpret_cast<value_type*>(&_node->p); }
+        reference operator*(void) { return _node->pair; }
+        pointer operator->(void) { return &_node->pair; }
 
         /* if there is a right subtree goto it's smallest node
          * else if we are done w/ left subtree go to subtree root
@@ -99,10 +101,13 @@ class map_iterator
             return tmp;
         }
 
+        /* GETTER */
+        node_pointer get_node(void) const { return _node; }
+
     private:
         node_pointer _node;
 
-}; // class map_iterator
+}; // CLASS MAP_ITERATOR
 
 template <class Key, class Value, bool is_const>
 class reverse_map_iterator
@@ -118,11 +123,15 @@ class reverse_map_iterator
         typedef Key key_type;
         typedef Value mapped_type;
         typedef reverse_map_iterator<key_type, mapped_type, is_const> self_type;
-        typedef typename ft::choose<is_const, const map_node<key_type, mapped_type> *, map_node<key_type, mapped_type> *>::type node_pointer;
+        typedef ft::avl_node<key_type, mapped_type> map_node;
+        typedef typename ft::choose<is_const, const map_node *, map_node *>::type node_pointer;
 
     public:
+        /* CONSTRUCTORS */
         reverse_map_iterator (node_pointer node = NULL) : _node(node) {}
         reverse_map_iterator (const reverse_map_iterator<key_type, value_type, false>& other) : _node(other._node) {}
+
+        /* OPERATORS */
         reverse_map_iterator &operator=(const self_type & other)
         {
             if (this != &other)
@@ -134,7 +143,7 @@ class reverse_map_iterator
         bool operator!=(const self_type & other) { return _node != other._node; }
 
         reference operator*(void) { return _node->p; }
-        pointer operator->(void) { return &(_node->p); }
+        pointer operator->(void) { return &_node->p; }
 
         /* if there is a right subtree goto it's smallest node
          * else if we are done w/ left subtree go to subtree root
@@ -197,6 +206,6 @@ class reverse_map_iterator
     private:
         node_pointer _node;
 
-}; // class reverse_map_iterator
+}; // CLASS REVERSE_MAP_ITERATOR
 
-} // namespace ft
+} // NAMESPACE FT

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstddef>
+#include <cstddef> // NULL
 
 namespace ft {
 
@@ -15,6 +15,7 @@ struct list_node
             : content(c), prev(p), next(n) {};
 
         ~list_node() {}
-}; // struct list_node
 
-} // namespace ft
+}; // STRUCT LIST_NODE
+
+} // NAMESPACE FT

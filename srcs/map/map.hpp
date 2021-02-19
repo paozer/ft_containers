@@ -1,12 +1,12 @@
 #pragma once
 
-#include <iostream>
-#include <memory>
-#include <limits>
-#include <type_traits>
+#include <memory> // std::allocator
+#include <cstddef> // std::ptddiff_t, size_t
+//#include <limits>
+//#include <type_traits>
 
 #include "map_iterator.hpp"
-#include "../utils/llrb_tree.hpp"
+#include "../utils/avl_tree.hpp"
 
 namespace ft {
 
@@ -17,7 +17,6 @@ template < class Key,
            >
 class map
 {
-
     public:
         typedef Key key_type;
         typedef T mapped_type;
@@ -28,7 +27,6 @@ class map
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-
         typedef map_iterator<key_type, mapped_type, false> iterator;
         typedef map_iterator<key_type, mapped_type, true> const_iterator;
         typedef reverse_map_iterator<key_type, mapped_type, false> reverse_iterator;
@@ -36,8 +34,12 @@ class map
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
+    private:
+        typedef ft::avl_node<key_type, mapped_type> node;
+        typedef node * node_pointer;
+
     public:
-        /* Constructors */
+        /* CONSTRUCTORS */
         explicit map (const allocator_type& alloc = allocator_type())
             : _alloc(alloc), _key_comp(key_compare())
         {
@@ -58,12 +60,12 @@ class map
             *this = x;
         }
 
-        /* Destructor */
+        /* DESTRUCTOR */
         ~map()
         {
         }
 
-        /* Operators */
+        /* OPERATORS */
         map &operator=(const map & x)
         {
             if (this != &x) {
@@ -82,7 +84,7 @@ class map
         friend bool operator> (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return rhs < lhs; }
         friend bool operator>= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(lhs < rhs); }
 
-        /* Iterators */
+        /* ITERATORS */
         iterator begin() { return iterator(_tree.begin()); }
         const_iterator begin() const { return const_iterator(_tree.begin()); }
         iterator end() { return iterator(_tree.end()); }
@@ -92,7 +94,7 @@ class map
         reverse_iterator rend() { return reverse_iterator(_tree.rend()); }
         const_reverse_iterator rend() const { return const_reverse_iterator(_tree.rend()); }
 
-        /* Capacity */
+        /* CAPACITY */
         bool empty() const { return _tree.empty(); }
         size_type size() const { return _tree.size(); }
         size_type max_size() const { return _alloc.max_size(); }
@@ -118,7 +120,7 @@ class map
 
         void erase (iterator first, iterator last);
         void clear (void) { _tree.clear(); }
-        void swap (map& x); // usage of std::swap in <algorithm> forbidden ?
+        void swap (map& x);
 
         /* OPERATIONS */
         size_type count (const key_type& k) const
@@ -138,26 +140,19 @@ class map
         iterator upper_bound (const key_type& k);
         const_iterator upper_bound (const key_type& k) const;
 
-        /* DEBUG */
-        void print_tree(void)
-        {
-            _tree.print_tree();
-        }
-
-
         /* OBSERVERS */
         key_compare key_comp() const { return _key_comp; }
         //value_compare value_comp() const;
 
     private:
-        LLRB<key_type, mapped_type> _tree;
+        ft::avl_tree<key_type, mapped_type, key_compare, allocator_type> _tree;
         allocator_type _alloc;
         key_compare _key_comp;
 
 
-}; // class map
+}; // CLASS MAP
 
 template <class T, class Alloc>
 void swap (map<T,Alloc>& x, map<T,Alloc>& y);
 
-} // namespace ft
+} // NAMESPACE FT

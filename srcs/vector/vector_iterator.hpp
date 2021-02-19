@@ -1,7 +1,8 @@
 #pragma once
 
+#include <cstddef> // NULL, std::arraydiff_t, size_t
+#include <iterator> // std::random_access_iterator_tag
 #include "../utils/utils.hpp"
-#include <iterator>
 
 namespace ft {
 
@@ -20,8 +21,8 @@ class vector_iterator
         typedef size_t size_type;
 
     public:
-        vector_iterator(size_type index = 0, size_type size = 0, pointer ptr = NULL)
-            : _index(index), _size(size), _ptr(ptr)
+        vector_iterator(size_type index = 0, size_type size = 0, pointer array = NULL)
+            : _index(index), _size(size), _array(array)
         {
         }
 
@@ -30,19 +31,20 @@ class vector_iterator
             *this = other;
         }
 
+        /* OPERATORS */
         vector_iterator &operator=(const vector_iterator<value_type, is_const>& other)
         {
             if (this != &other) {
                 _index = other._index;
                 _size = other._size;
-                _ptr = other._ptr;
+                _array = other._array;
             }
             return *this;
         }
 
         friend bool operator==(const self_type & lhs, const self_type & rhs)
         {
-            if (lhs._ptr != rhs._ptr
+            if (lhs._array != rhs._array
                 || lhs._size != rhs._size
                 || lhs._index != rhs._index)
                 return false;
@@ -51,7 +53,7 @@ class vector_iterator
 
         friend bool operator<(const self_type & lhs, const self_type & rhs)
         {
-            if (lhs._ptr < rhs._ptr
+            if (lhs._array < rhs._array
                 || lhs._size < rhs._size
                 || lhs._index < rhs._index)
                 return true;
@@ -63,26 +65,29 @@ class vector_iterator
         friend bool operator<=(const self_type & lhs, const self_type & rhs) { return !(rhs < lhs); }
         friend bool operator>=(const self_type & lhs, const self_type & rhs) { return !(lhs < rhs); }
 
-        pointer operator->(void)  { return &(_ptr + _index); }
-        reference operator*(void) { return *(_ptr + _index); }
-        self_type operator[](size_type n) { return *(_ptr + _index + n); }
+        pointer operator->(void)  { return &(_array + _index); }
+        reference operator*(void) { return *(_array + _index); }
+        self_type operator[](size_type n) { return *(_array + _index + n); }
 
         self_type & operator++(void)
         {
             ++_index;
             return *this;
         }
+
         self_type operator++(int)
         {
             self_type tmp = *this;
             ++_index;
             return tmp;
         }
+
         self_type & operator--(void)
         {
             --_index;
             return *this;
         }
+
         self_type operator--(int)
         {
             self_type tmp = *this;
@@ -113,14 +118,15 @@ class vector_iterator
 
         self_type & operator-=(difference_type n) { return *this += -n; }
 
+        /* GETTERS */
         size_type get_index() const { return _index; }
 
     private:
         size_t _index;
         size_t _size;
-        pointer _ptr;
+        pointer _array;
 
-}; // class vector_iterator
+}; // CLASS VECTOR_ITERATOR
 
 template <class T, bool is_const>
 class reverse_vector_iterator
@@ -137,8 +143,9 @@ class reverse_vector_iterator
         typedef size_t size_type;
 
     public:
-        reverse_vector_iterator(size_type index = 0, size_type size = 0, pointer ptr = NULL)
-            : _index(index), _size(size), _ptr(ptr)
+        /* CONSTRUCTORS */
+        reverse_vector_iterator(size_type index = 0, size_type size = 0, pointer array = NULL)
+            : _index(index), _size(size), _array(array)
         {
         }
 
@@ -147,19 +154,20 @@ class reverse_vector_iterator
             *this = other;
         }
 
+        /* OPERATORS */
         reverse_vector_iterator &operator=(const vector_iterator<value_type, is_const>& other)
         {
             if (this != &other) {
                 _index = other._index;
                 _size = other._size;
-                _ptr = other._ptr;
+                _array = other._array;
             }
             return *this;
         }
 
         friend bool operator==(const self_type & lhs, const self_type & rhs)
         {
-            if (lhs._ptr != rhs._ptr
+            if (lhs._array != rhs._array
                 || lhs._size != rhs._size
                 || lhs._index != rhs._index)
                 return false;
@@ -168,7 +176,7 @@ class reverse_vector_iterator
 
         friend bool operator<(const self_type & lhs, const self_type & rhs)
         {
-            if (lhs._ptr < rhs._ptr
+            if (lhs._array < rhs._array
                 || lhs._size < rhs._size
                 || lhs._index < rhs._index)
                 return true;
@@ -180,26 +188,29 @@ class reverse_vector_iterator
         friend bool operator<=(const self_type & lhs, const self_type & rhs) { return !(rhs < lhs); }
         friend bool operator>=(const self_type & lhs, const self_type & rhs) { return !(lhs < rhs); }
 
-        pointer operator->(void)  { return &(_ptr + _index - 1); }
-        reference operator*(void) { return *(_ptr + _index - 1); }
-        self_type operator[](size_type n) { return *(_ptr + _index - 1 + n); }
+        pointer operator->(void)  { return &(_array + _index - 1); }
+        reference operator*(void) { return *(_array + _index - 1); }
+        self_type operator[](size_type n) { return *(_array + _index - 1 + n); }
 
         self_type & operator++(void)
         {
             --_index;
             return *this;
         }
+
         self_type operator++(int)
         {
             self_type tmp = *this;
             --_index;
             return tmp;
         }
+
         self_type & operator--(void)
         {
             ++_index;
             return *this;
         }
+
         self_type operator--(int)
         {
             self_type tmp = *this;
@@ -230,13 +241,14 @@ class reverse_vector_iterator
 
         self_type & operator-=(difference_type n) { return *this += n; }
 
+        /* GETTERS */
         size_type get_index() const { return _index; }
 
     private:
         size_t _index;
         size_t _size;
-        pointer _ptr;
+        pointer _array;
 
-}; // class reverse_vector_iterator
+}; // CLASS REVERSE_VECTOR_ITERATOR
 
-} // namespace ft
+} // NAMESPACE FT
