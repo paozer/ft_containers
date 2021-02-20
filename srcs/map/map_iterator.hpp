@@ -26,8 +26,10 @@ class map_iterator
 
     public:
         /* CONSTRUCTORS */
-        map_iterator (node_pointer node = NULL) : _node(node) {}
-        map_iterator (const map_iterator<key_type, value_type, false>& other) : _node(other._node) {}
+        map_iterator (avl_node<key_type, mapped_type>* node = NULL) : _node(node) {}
+        // need GETTER to node because if non-const_it to const_it the classes are not
+        // the same and we can't access private members
+        map_iterator (const map_iterator<key_type, mapped_type, false>& other) : _node(other.get_node()) {}
 
         /* OPERATORS */
         map_iterator &operator=(const self_type & other)
@@ -129,7 +131,7 @@ class reverse_map_iterator
     public:
         /* CONSTRUCTORS */
         reverse_map_iterator (node_pointer node = NULL) : _node(node) {}
-        reverse_map_iterator (const reverse_map_iterator<key_type, value_type, false>& other) : _node(other._node) {}
+        reverse_map_iterator (const reverse_map_iterator<key_type, mapped_type, false>& other) : _node(other.get_node()) {}
 
         /* OPERATORS */
         reverse_map_iterator &operator=(const self_type & other)
@@ -202,6 +204,9 @@ class reverse_map_iterator
             --*this;
             return tmp;
         }
+
+        /* GETTER */
+        node_pointer get_node(void) const { return _node; }
 
     private:
         node_pointer _node;

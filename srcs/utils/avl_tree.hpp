@@ -36,9 +36,9 @@ class avl_tree
 
     public:
         /* CONSTRUCTORS */
-        avl_tree (const allocator_type& alloc = allocator_type())
+        avl_tree (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
             : _root(NULL), _size(0), _added_node_flag(false), _added_node_ptr(NULL),
-              _alloc(alloc), _comp(key_compare()), _begin(new_node()), _end(new_node())
+              _alloc(alloc), _comp(comp), _begin(new_node()), _end(new_node())
         {
             _begin->parent = _end;
             _end->parent = _begin;
@@ -47,23 +47,21 @@ class avl_tree
         /* DESTRUCTOR */
         ~avl_tree()
         {
-            _begin->parent->left = NULL;
-            _end->parent->right = NULL;
             clear();
             delete_node(_begin);
             delete_node(_end);
         }
 
         /* ELEMENT ACCESS */
-        node_pointer begin(void) { return _begin->parent; }
-        node_pointer end(void) { return _end; }
-        node_pointer rbegin(void) { return _begin; }
-        node_pointer rend(void) { return _end->parent; }
+        node_pointer begin(void) const { return _begin->parent; }
+        node_pointer end(void) const { return _end; }
+        node_pointer rbegin(void) const { return _begin; }
+        node_pointer rend(void) const { return _end->parent; }
 
         /* CAPACITY */
         size_type size(void) const { return _size; }
         bool empty(void) const { return _size == 0; }
-        size_type max_size(void) { return _alloc.max_size(); }
+        size_type max_size(void) const { return _alloc.max_size(); }
 
         /* MODIFIERS */
         std::pair<node_pointer, bool> insert(const value_type& val)
@@ -83,10 +81,8 @@ class avl_tree
             return std::make_pair(_added_node_ptr, _added_node_flag);
         }
 
-        std::pair<node_pointer, bool> insert (node_pointer position, const value_type& val)
+        std::pair<node_pointer, bool> insert (node_pointer hint, const value_type& val)
         {
-            if (!position)
-                return std::make_pair(NULL, false);
             // if val's key is found in tree return pointer it's node
             // else if position is valid and new node should be inserted left of it we start insert recursion here
             // else start insert recursion at root
@@ -95,12 +91,12 @@ class avl_tree
                 _added_node_ptr = node;
                 _added_node_flag = false;
             }
-            else if (_comp(val.first, position->pair.first)) {
+            else if (_comp(val.first, hint->pair.first)) {
                 // if val is already in tree return pair(node_pointer, false)
                 unset_bounds();
                 _added_node_ptr = NULL;
                 _added_node_flag = false;
-                aux_insert(position, position->left, val);
+                aux_insert(hint, val);
                 set_bounds();
             }
             else
@@ -110,13 +106,21 @@ class avl_tree
 
         void clear(void)
         {
+            if (_begin->parent && _begin->parent != _end)
+                _begin->parent->left = NULL;
+            if (_end->parent && _end->parent != _begin)
+                _end->parent->right = NULL;
             _begin->parent = _end;
             _end->parent = _begin;
+            _size = 0;
             aux_clear(_root);
+            _root = NULL;
         }
 
         size_type erase (const key_type& key)
         {
+            if (_size == 0)
+                return 0;
             size_type old_size = _size;
             unset_bounds();
             if (_root)
@@ -127,6 +131,8 @@ class avl_tree
 
         size_type erase(node_pointer node)
         {
+            if (_size == 0)
+                return 0;
             size_type old_size = _size;
             unset_bounds();
             aux_erase(node->parent, node, node->pair.first);
@@ -134,18 +140,18 @@ class avl_tree
             return old_size - _size;
         }
 
-        node_pointer find(const key_type& key)
+        node_pointer find(const key_type& key) const
         {
             node_pointer node = _root;
-            while (node) {
+            while (node && node != _begin && node != _end) {
                 if (_comp(node->pair.first, key))
                     node = node->right;
                 else if (_comp(key, node->pair.first))
                     node = node->left;
                 else
-                    break ;
+                    return node;
             }
-            return node;
+            return NULL;
         }
 
     private:
@@ -211,8 +217,9 @@ class avl_tree
                 else
                     node = right_left_rotate(node);
             }
-            if (!node->parent)
+            if (!node->parent) {
                 _root = node;
+            }
         }
 
         /* ERASE */
@@ -230,6 +237,7 @@ class avl_tree
                 else if ((!child->left && child->right) || (child->left && !child->right))
                     aux_erase_one_child_node(parent, child);
                 else {
+                    // will decrement size in aux_erase_two_child_node function
                     aux_erase_two_child_node(child, key);
                     return ;
                 }
@@ -259,6 +267,8 @@ class avl_tree
                 else if (parent->right == child)
                     parent->right = (child->left ? child->left : child->right);
             }
+            else
+                _root = (child->left ? child->left : child->right);
             if (child->left)
                 child->left->parent = parent;
             else
@@ -338,14 +348,16 @@ class avl_tree
         // after calling unset_bounds set_bounds should always be called
         void unset_bounds(void)
         {
-            _begin->parent->left = NULL;
-            _end->parent->right = NULL;
+            if (_begin->parent && _begin->parent != _end)
+                _begin->parent->left = NULL;
+            if (_end->parent && _end->parent != _begin)
+                _end->parent->right = NULL;
         }
 
         // unset_bound should always have been called before calling set_bounds
         void set_bounds(void)
         {
-            if (_root) {
+            if (_size != 0) {
                 node_pointer first = get_min(_root);
                 node_pointer last = get_max(_root);
                 first->left = _begin;

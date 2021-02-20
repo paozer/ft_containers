@@ -6,6 +6,7 @@ MAIN_SRC =	tests/main.cpp
 
 TEST_SRC =	tests/list.cpp\
 			tests/vector.cpp\
+			tests/map.cpp\
 			tests/stack_queue.cpp
 
 CFLAGS	=	-fsanitize=address -g3 -Wall -Wextra -std=c++11
