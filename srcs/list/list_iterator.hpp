@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iterator> // std::bidirectional_iterator_tag
+#include <cstddef> // NULL, std::ptrdiff_t
 
 #include "list_node.hpp"
 #include "../utils/utils.hpp"

@@ -5,12 +5,8 @@
 #include <functional> // std::less
 #include <cmath> // std::abs
 
-#include "utils.hpp" // ft::max
+#include "utils.hpp"
 #include "avl_node.hpp"
-
-/* DEBUG */
-#include "../queue/queue.hpp"
-#include <iostream>
 
 namespace ft {
 

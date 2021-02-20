@@ -2,8 +2,9 @@
 
 #include <memory> // std::allocator
 #include <cstddef> // std::ptddiff_t, size_t
-//#include <limits>
-//#include <type_traits>
+#include <limits> // std::numeric_limits
+#include <functional> // std::less
+#include <utility> // std::pair
 
 #include "map_iterator.hpp"
 #include "../utils/avl_tree.hpp"

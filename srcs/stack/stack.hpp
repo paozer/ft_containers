@@ -1,7 +1,7 @@
 #pragma once
 
+#include <cstddef> // size_t
 #include "../list/list.hpp"
-#include <cstddef>
 
 namespace ft {
 

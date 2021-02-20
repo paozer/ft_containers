@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory> // std::allocator
-#include <cstddef> // NULL
+#include <cstddef> // NULL, size_t
 #include <utility> // std::pair
 #include <functional> // std::less
 

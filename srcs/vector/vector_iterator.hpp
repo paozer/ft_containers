@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstddef> // NULL, std::arraydiff_t, size_t
+#include <cstddef> // NULL, std::ptrdiff_t, size_t
 #include <iterator> // std::random_access_iterator_tag
+
 #include "../utils/utils.hpp"
 
 namespace ft {
