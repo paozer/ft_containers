@@ -47,7 +47,7 @@ class map
 
         template <class InputIterator>
         map (InputIterator first, InputIterator last, const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type(),
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _tree(comp, alloc), _comp(comp), _alloc(alloc)
         {
             for (; first != last; ++first)
@@ -116,7 +116,7 @@ class map
 
         template <class InputIterator>
         void insert (InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
             for (; first != last; ++first)
                 _tree.insert(*first);

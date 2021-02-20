@@ -3,6 +3,7 @@
 #include <memory> // std::allocator
 #include <cstddef> // std::ptrdiff_t, size_t, NULL
 #include <stdexcept> // std::out_of_range
+#include <limits> // std::numeric_limits
 
 #include "../utils/utils.hpp"
 #include "vector_iterator.hpp"
@@ -41,7 +42,7 @@ class vector
 
         template <class InputIterator>
         vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _size(0), _capacity(0), _array(NULL), _alloc(alloc)
         {
             for (; first != last; ++first)
@@ -162,7 +163,7 @@ class vector
         // use insert(begin(), first, last) ?
         template <class InputIterator>
         void assign (InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
             clear();
             for (; first != last; ++first)
@@ -222,7 +223,7 @@ class vector
 
         template <class InputIterator>
         void insert (iterator position, InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
             if (position == end()) {
                 for (; first != last; ++first)

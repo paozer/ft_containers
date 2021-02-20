@@ -48,10 +48,9 @@ class list
             assign(n, val);
         }
 
-        //template <class InputIterator, typename std::iterator_traits<InputIterator>::value_type>
         template <class InputIterator>
         list (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
             _head->next = _tail;
@@ -147,7 +146,7 @@ class list
         /* MODIFIERS */
         template <class InputIterator>
         void assign (InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
             clear();
             for (; first != last; ++first)
@@ -222,7 +221,7 @@ class list
 
         template <class InputIterator>
         void insert (iterator position, InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::is_integral<InputIterator>::value , void >::type* = 0)
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
             for (; first != last; ++first)
                 insert(position, *first);
