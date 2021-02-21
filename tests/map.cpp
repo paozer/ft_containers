@@ -1,4 +1,5 @@
 #include <map>
+#include <string>
 #include "catch.hpp"
 
 #include "../srcs/map/map.hpp"
@@ -59,7 +60,6 @@ TEST_CASE("Assignment operator copies elements", "[map][operators]")
         my_map1[rand() % 93 + 33] = rand() % 10000;
     ft::map<char, int> my_map2 = my_map1;
 
-    REQUIRE_FALSE( my_map2.empty() );
     REQUIRE( my_map2.size() == my_map1.size() );
 
     auto it1 = my_map1.begin();
@@ -185,7 +185,7 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
     }
 }
 
-TEST_CASE("erase works as expected")
+TEST_CASE("erase works as expected", "[map][modifiers]")
 {
     ft::map<char, int> my_map;
 
@@ -224,11 +224,31 @@ TEST_CASE("erase works as expected")
     }
 }
 
-TEST_CASE("swap works as expected")
+TEST_CASE("swap works as expected", "[map][modifiers]")
 {
+    ft::map<int, std::string> my_map1;
+    ft::map<int, std::string> my_map2;
+
+    my_map1[14] = "fifteen";
+    my_map1[19] = "dog";
+    my_map1[132] = "78";
+    my_map1[-22] = "34";
+    my_map1[10] = "autobahn";
+    my_map2.swap(my_map1);
+    REQUIRE( my_map1.size() == 0 );
+    REQUIRE( my_map2.size() == 5 );
+    REQUIRE( my_map2[14] == "fifteen" );
+    REQUIRE( my_map2[19] == "dog" );
+    REQUIRE( my_map2[132] == "78" );
+    REQUIRE( my_map2[-22] == "34" );
+    REQUIRE( my_map2[10] == "autobahn" );
+    my_map2.erase(++my_map2.begin(), my_map2.end());
+    my_map2.swap(my_map1);
+    REQUIRE( my_map1.size() == 1 );
+    REQUIRE( my_map2.size() == 0 );
 }
 
-TEST_CASE("clear works as expected")
+TEST_CASE("clear works as expected", "[map][modifiers]")
 {
     ft::map<int, int> my_map;
     my_map.clear();
@@ -247,31 +267,101 @@ TEST_CASE("clear works as expected")
 }
 
 /* OBSERVERS */
-TEST_CASE("key_comp works as expected")
+TEST_CASE("key_comp works as expected", "[map][observers]")
 {
 }
 
-TEST_CASE("value_comp works as expected")
+TEST_CASE("value_comp works as expected", "[map][observers]")
 {
 }
 
 /* OPERATIONS */
-TEST_CASE("find works as expected")
+TEST_CASE("find works as expected", "[map][operations]")
 {
+    ft::map<char, int> mymap;
+    mymap['a'] = 20;
+    mymap['d'] = 80;
+
+    REQUIRE( mymap.find('a')->first == 'a' );
+    REQUIRE( mymap.find('a')->second == 20 );
+    REQUIRE( mymap.find('d')->first == 'd' );
+    REQUIRE( mymap.find('d')->second == 80 );
+    REQUIRE(( mymap.find('f') == mymap.end() ));
+    mymap.erase('a');
+    REQUIRE(( mymap.find('a') == mymap.end() ));
 }
 
-TEST_CASE("count works as expected")
+TEST_CASE("count works as expected", "[map][operations]")
 {
+    ft::map<char, int> mymap;
+    mymap['a'] = 20;
+    mymap['d'] = 80;
+    REQUIRE( mymap.count('a') == 1 );
+    REQUIRE( mymap.count('d') == 1 );
+    REQUIRE( mymap.count('c') == 0 );
+    REQUIRE( mymap.count('p') == 0 );
+    mymap.erase('a');
+    REQUIRE( mymap.count('a') == 0 );
 }
 
-TEST_CASE("lower_bound works as expected")
+TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
 {
+    ft::map<char, int> mymap;
+
+    SECTION("reference example") {
+        mymap['a'] = 20;
+        mymap['b'] = 40;
+        mymap['c'] = 60;
+        mymap['d'] = 80;
+        mymap['e'] = 100;
+        ft::map<char, int>::iterator itlow = mymap.lower_bound ('b');
+        ft::map<char, int>::iterator itup = mymap.upper_bound ('d');
+        REQUIRE( itlow->first == 'b' );
+        REQUIRE( itlow->second == 40 );
+        REQUIRE( itup->first == 'e' );
+        REQUIRE( itup->second == 100 );
+        mymap.erase(itlow, itup);
+        REQUIRE( mymap.size() == 2 );
+        REQUIRE( mymap.begin()->first == 'a' );
+        REQUIRE( mymap.begin()->second == 20 );
+        REQUIRE( (--mymap.end())->first == 'e' );
+        REQUIRE( (--mymap.end())->second == 100 );
+        REQUIRE( (mymap.upper_bound('z') == mymap.end()) );
+    }
+    SECTION("yes") {
+        mymap[1]=10;
+        mymap[2]=20;
+        mymap[4]=40;
+        mymap[5]=50;
+        REQUIRE( (mymap.upper_bound(3) == mymap.lower_bound(3)) );
+    }
+    SECTION("const versions") {
+        mymap['a'] = 20;
+        mymap['b'] = 40;
+        mymap['d'] = 80;
+        mymap['e'] = 100;
+        mymap['f'] = 60;
+        const ft::map<char, int> cmymap (mymap);
+        REQUIRE( (cmymap.upper_bound('c') == cmymap.lower_bound('c')) );
+        REQUIRE( (cmymap.upper_bound('a')->first == 'b') );
+        REQUIRE( (cmymap.upper_bound('b')->first == 'd') );
+        REQUIRE( (cmymap.lower_bound('d')->first == 'd') );
+        REQUIRE(( cmymap.lower_bound('z') == cmymap.end() ));
+    }
 }
 
-TEST_CASE("upper_bound works as expected")
+TEST_CASE("equal_range works as expected", "[map][operations]")
 {
-}
-
-TEST_CASE("equal_range works as expected")
-{
+    ft::map<char, int> mymap;
+    mymap['a'] = 10;
+    mymap['b'] = 20;
+    mymap['c'] = 30;
+    std::pair<ft::map<char, int>::iterator, ft::map<char, int>::iterator> ret = mymap.equal_range('b');
+    REQUIRE( ret.first->second == 20 );
+    REQUIRE( ret.second->second == 30 );
+    REQUIRE(( mymap.equal_range('c').first->first == 'c' ));
+    REQUIRE(( mymap.equal_range('c').first->second == 30 ));
+    REQUIRE(( mymap.equal_range('c').second == mymap.end() ));
+    REQUIRE(( mymap.equal_range('u').first == mymap.end() ));
+    REQUIRE(( mymap.equal_range('u').second == mymap.end() ));
 }
