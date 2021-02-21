@@ -95,8 +95,7 @@ class vector
         /* DESTRUCTOR */
         ~vector()
         {
-            for (size_type i = 0; i < _size; ++i)
-                _alloc.destroy(_array + i);
+            clear();
             _alloc.deallocate(_array, _capacity);
         }
 

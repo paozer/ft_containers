@@ -14,8 +14,6 @@ struct list_node
         list_node(T c = T(), list_node * p = NULL, list_node * n = NULL)
             : content(c), prev(p), next(n) {};
 
-        ~list_node() {}
-
 }; // STRUCT LIST_NODE
 
 } // NAMESPACE FT

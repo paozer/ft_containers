@@ -66,7 +66,7 @@ class vector_iterator
         friend bool operator<=(const self_type & lhs, const self_type & rhs) { return !(rhs < lhs); }
         friend bool operator>=(const self_type & lhs, const self_type & rhs) { return !(lhs < rhs); }
 
-        pointer operator->(void)  { return &(_array + _index); }
+        pointer operator->(void)  { return _array + _index; }
         reference operator*(void) { return *(_array + _index); }
         self_type operator[](size_type n) { return *(_array + _index + n); }
 

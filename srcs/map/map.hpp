@@ -194,7 +194,7 @@ class map
 
 }; // CLASS MAP
 
-template <class T, class Alloc>
-void swap (map<T,Alloc>& x, map<T,Alloc>& y);
+template <class Key, class T, class Compare, class Alloc>
+void swap (map<Key, T, Compare, Alloc>& x, map<Key, T, Compare, Alloc>& y);
 
 } // NAMESPACE FT

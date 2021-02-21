@@ -190,9 +190,8 @@ TEST_CASE("erase works as expected")
     ft::map<char, int> my_map;
 
     SECTION("erase at iterator") {
-        my_map.erase(my_map.begin());
-        my_map.erase(my_map.end());
-        REQUIRE( my_map.size() == 0 );
+        //my_map.erase(my_map.begin()); // UB
+        //my_map.erase(my_map.end()); // UB
         my_map['a'] = 1;
         my_map.erase(my_map.begin());
         REQUIRE( my_map.size() == 0 );
