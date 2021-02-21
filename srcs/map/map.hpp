@@ -35,6 +35,22 @@ class map
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
+        class value_compare : std::binary_function<value_type, value_type, bool>
+        {   // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
+            //friend class map;
+            protected:
+                key_compare comp;
+                value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
+            public:
+                typedef bool result_type;
+                typedef value_type first_argument_type;
+                typedef value_type second_argument_type;
+                bool operator() (const value_type& x, const value_type& y) const
+                {
+                  return comp(x.first, y.first);
+                }
+        };
+
     private:
         typedef ft::avl_node<key_type, mapped_type> node;
         typedef node * node_pointer;
@@ -58,9 +74,7 @@ class map
         map (const map & x) { *this = x; }
 
         /* DESTRUCTOR */
-        ~map()
-        {
-        }
+        ~map() {}
 
         /* OPERATORS */
         map &operator=(const map & x)
@@ -151,6 +165,10 @@ class map
             _tree.clear();
         }
 
+        /* OBSERVERS */
+        key_compare key_comp() const { return _comp; }
+        value_compare value_comp() const { return value_compare(_comp); }
+
         /* OPERATIONS */
         size_type count (const key_type& k) const
         {
@@ -175,16 +193,61 @@ class map
             return const_iterator(node);
         }
 
-        std::pair<iterator, iterator> equal_range (const key_type& k);
-        std::pair<const_iterator, const_iterator> equal_range (const key_type& k) const;
-        iterator lower_bound (const key_type& k);
-        const_iterator lower_bound (const key_type& k) const;
-        iterator upper_bound (const key_type& k);
-        const_iterator upper_bound (const key_type& k) const;
+        std::pair<iterator, iterator> equal_range (const key_type& k)
+        {
+            iterator low = lower_bound(k);
+            iterator up = upper_bound(k);
+            return std::make_pair(low, up);
+        }
 
-        /* OBSERVERS */
-        //key_compare key_comp() const;
-        //value_compare value_comp() const;
+        std::pair<const_iterator, const_iterator> equal_range (const key_type& k) const
+        {
+            const_iterator low = lower_bound(k);
+            const_iterator up = upper_bound(k);
+            return std::make_pair(low, up);
+        }
+
+        // lower_bound returns iterator to k if present or it's first successor
+        // upper_bound returns iterator to k's successor if present or it's first successor
+        iterator lower_bound (const key_type& k)
+        {
+            iterator ite = end();
+            for (iterator it = begin(); it != ite; ++it) {
+                if (!_comp(it->first, k))
+                    return it;
+            }
+            return ite;
+        }
+
+        const_iterator lower_bound (const key_type& k) const
+        {
+            const_iterator ite = end();
+            for (const_iterator it = begin(); it != ite; ++it) {
+                if (!_comp(it->first, k))
+                    return it;
+            }
+            return ite;
+        }
+
+        iterator upper_bound (const key_type& k)
+        {
+            iterator ite = end();
+            for (iterator it = begin(); it != ite; ++it) {
+                if (_comp(k, it->first))
+                    return it;
+            }
+            return ite;
+        }
+
+        const_iterator upper_bound (const key_type& k) const
+        {
+            const_iterator ite = end();
+            for (const_iterator it = begin(); it != ite; ++it) {
+                if (_comp(k, it->first))
+                    return it;
+            }
+            return ite;
+        }
 
     private:
         ft::avl_tree<key_type, mapped_type, key_compare, allocator_type> _tree;
@@ -195,6 +258,10 @@ class map
 }; // CLASS MAP
 
 template <class Key, class T, class Compare, class Alloc>
-void swap (map<Key, T, Compare, Alloc>& x, map<Key, T, Compare, Alloc>& y);
+void swap (map<Key, T, Compare, Alloc>& x, map<Key, T, Compare, Alloc>& y)
+{
+    ft::swap(x, y);
+}
+
 
 } // NAMESPACE FT

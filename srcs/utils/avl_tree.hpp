@@ -112,6 +112,7 @@ class avl_tree
             return old_size - _size;
         }
 
+        /* OPERATIONS */
         node_pointer find(const key_type& key) const
         {
             node_pointer node = _root;
