@@ -33,8 +33,8 @@ class avl_tree
     public:
         /* CONSTRUCTORS */
         avl_tree (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
-            : _root(NULL), _size(0), _added_node_flag(false), _added_node_ptr(NULL),
-              _alloc(alloc), _comp(comp), _begin(new_node()), _end(new_node())
+            : _root(NULL), _begin(new_node()), _end(new_node()), _added_node_ptr(NULL),
+              _added_node(false), _size(0), _alloc(alloc), _comp(comp)
         {
             _begin->parent = _end;
             _end->parent = _begin;
@@ -43,6 +43,7 @@ class avl_tree
         /* DESTRUCTOR */
         ~avl_tree()
         {
+            unset_bounds();
             clear();
             delete_node(_begin);
             delete_node(_end);
@@ -62,65 +63,40 @@ class avl_tree
         /* MODIFIERS */
         std::pair<node_pointer, bool> insert(const value_type& val)
         {
-            unset_bounds();
-            _added_node_ptr = NULL;
-            _added_node_flag = false;
-            if (_root)
-                aux_insert(_root, val);
-            else {
-                _root = new_node(val);
-                ++_size;
-                _added_node_ptr = _root;
-                _added_node_flag = true;
+            if (_root) {
+                unset_bounds();
+                _root = aux_insert(_root->parent, _root, val);
             }
-            set_bounds();
-            return std::make_pair(_added_node_ptr, _added_node_flag);
+            else
+                _root = aux_insert(NULL, NULL, val);
+            if (_added_node)
+                set_bounds();
+            return std::make_pair(_added_node_ptr, _added_node);
         }
 
         std::pair<node_pointer, bool> insert (node_pointer hint, const value_type& val)
         {
-            // if val's key is found in tree return pointer it's node
-            // else if position is valid and new node should be inserted left of it we start insert recursion here
-            // else start insert recursion at root
-            node_pointer node = find(val.first);
-            if (node) {
-                _added_node_ptr = node;
-                _added_node_flag = false;
-            }
-            else if (_comp(val.first, hint->pair.first)) {
-                // if val is already in tree return pair(node_pointer, false)
-                unset_bounds();
-                _added_node_ptr = NULL;
-                _added_node_flag = false;
-                aux_insert(hint, val);
-                set_bounds();
-            }
-            else
-                insert(val);
-            return std::make_pair(_added_node_ptr, _added_node_flag);
+            return insert(val);
         }
 
         void clear(void)
         {
-            if (_begin->parent && _begin->parent != _end)
-                _begin->parent->left = NULL;
-            if (_end->parent && _end->parent != _begin)
-                _end->parent->right = NULL;
-            _begin->parent = _end;
-            _end->parent = _begin;
-            _size = 0;
+            if (_size == 0)
+                return ;
+            unset_bounds();
             aux_clear(_root);
+            _size = 0;
             _root = NULL;
+            set_bounds();
         }
 
         size_type erase (const key_type& key)
         {
             if (_size == 0)
                 return 0;
-            size_type old_size = _size;
             unset_bounds();
-            if (_root)
-                aux_erase(NULL, _root, key);
+            size_type old_size = _size;
+            aux_erase(NULL, _root, key);
             set_bounds();
             return old_size - _size;
         }
@@ -129,8 +105,8 @@ class avl_tree
         {
             if (_size == 0)
                 return 0;
-            size_type old_size = _size;
             unset_bounds();
+            size_type old_size = _size;
             aux_erase(node->parent, node, node->pair.first);
             set_bounds();
             return old_size - _size;
@@ -152,70 +128,38 @@ class avl_tree
 
     private:
         node_pointer _root;
-        size_type _size;
-        bool _added_node_flag;
-        node_pointer _added_node_ptr;
-        node_allocator _alloc;
-        key_compare _comp;
         node_pointer _begin;
         node_pointer _end;
+        node_pointer _added_node_ptr;
+        bool _added_node;
+        size_type _size;
+        node_allocator _alloc;
+        key_compare _comp;
 
         /* INSERT */
-        void aux_insert(node_pointer parent, const value_type& val)
+        node_pointer aux_insert(node_pointer parent, node_pointer node, const value_type& val)
         {
-            if (_comp(parent->pair.first, val.first)) {
-                if (!parent->right) {
-                    parent->right = new_node(val);
-                    parent->right->parent = parent;
-                    ++_size;
-                    _added_node_ptr = parent->right;
-                    _added_node_flag = true;
-                }
-                else
-                    aux_insert(parent->right, val);
+            // if we're at a leaf insert key/val pair
+            // else if key goes into the left subtree
+            // else if key goes into the right subtree
+            // else key is already in the tree
+            // remember the added/found node to create iterator after return from recursion
+            if (!node) {
+                node = new_node(val);
+                node->parent = parent;
+                _added_node = true;
+                _added_node_ptr = node;
+                ++_size;
             }
-            else if (_comp(val.first, parent->pair.first)) {
-                if (!parent->left) {
-                    parent->left = new_node(val);
-                    parent->left->parent = parent;
-                    ++_size;
-                    _added_node_ptr = parent->left;
-                    _added_node_flag = true;
-                }
-                else
-                    aux_insert(parent->left, val);
-            }
+            else if (_comp(val.first, node->pair.first))
+                node->left = aux_insert(node, node->left, val);
+            else if (_comp(node->pair.first, val.first))
+                node->right = aux_insert(node, node->right, val);
             else {
-                _added_node_ptr = parent;
-                _added_node_flag = false;
-                return ;
+                _added_node = false;
+                _added_node_ptr = node;
             }
-            check_balance(parent);
-        }
-
-        void rebalance(node_pointer node, int bf)
-        {
-            // if left child imbalanced
-            // else right child imbalanced
-            if (bf > 1) {
-                // if left subtree -> R Rotation
-                // else right subtree -> LR Rotation
-                if (height(node->left->left) > height(node->left->right))
-                    node = right_rotate(node);
-                else
-                    node = left_right_rotate(node);
-            }
-            else {
-                // if right subtree -> L Rotation
-                // else left subtree -> RL Rotation
-                if (height(node->right->right) > height(node->right->left))
-                    node = left_rotate(node);
-                else
-                    node = right_left_rotate(node);
-            }
-            if (!node->parent) {
-                _root = node;
-            }
+            return node;
         }
 
         /* ERASE */
@@ -239,7 +183,7 @@ class avl_tree
                 }
                 --_size;
             }
-            check_balance(parent);
+            fix_up(parent);
         }
 
         void aux_erase_no_child_node(node_pointer parent, node_pointer child)
@@ -280,16 +224,86 @@ class avl_tree
         }
 
         /* UTILITIES */
-        void check_balance(node_pointer node)
+        void fix_up(node_pointer node)
         {
             if (!node)
                 return ;
-            int bf = height(node->left) - height(node->right);
-            if (std::abs(bf) > 1)
-                rebalance(node, bf);
-            if (!node->parent)
-                return ;
-            check_balance(node->parent);
+            // while node is unbalanced
+            while (node->bf != 0) {
+                // if left child imbalanced
+                // else right child imbalanced
+                if (node->bf == -2) {
+                    // if left subtree -> R Rotation
+                    // else right subtree -> LR Rotation
+                    if (node->left->bf == -1) {
+                        node->bf = 0;
+                        node->left->bf = 0;
+                        node = right_rotate(node);
+                    }
+                    else {
+                        int lr_bf = node->left->right->bf;
+                        node->bf = 0;
+                        node->left->bf = 0;
+                        node->left->right->bf = 0;
+                        if (lr_bf == 1)
+                            node->left->bf = -1;
+                        else if (lr_bf == -1)
+                            node->bf = 1;
+                        node = left_right_rotate(node);
+                    }
+                    break ;
+                }
+                else if (node->bf == 2) {
+                    if (node->right->bf == 1) {
+                        node->bf = 0;
+                        node->right->bf = 0;
+                        node = left_rotate(node);
+                    }
+                    else {
+                        int rl_bf = node->right->left->bf;
+                        node->bf = 0;
+                        node->right->bf = 0;
+                        node->right->left->bf = 0;
+                        if (rl_bf == 1)
+                            node->bf = -1;
+                        else if (rl_bf == -1)
+                            node->right->bf = 1;
+                        node = right_left_rotate(node);
+                    }
+                    break ;
+                }
+                if (!node->parent)
+                    return ;
+                else if (node->parent->left == node)
+                    ++node->parent->bf;
+                else
+                    --node->parent->bf;
+                node = node->parent;
+            }
+        }
+
+        void unset_bounds()
+        {
+            if (_begin->parent != _end)
+                _begin->parent->left = NULL;
+            if (_end->parent != _begin)
+                _end->parent->right = NULL;
+        }
+
+        void set_bounds()
+        {
+            if (_size != 0) {
+                node_pointer min = get_min(_root);
+                node_pointer max = get_max(_root);
+                _begin->parent = min;
+                _begin->parent->left = _begin;
+                _end->parent = max;
+                _end->parent->right = _end;
+            }
+            else {
+                _begin->parent = _end;
+                _end->parent = _begin;
+            }
         }
 
         void swap_nodes(node_pointer n1, node_pointer n2)
@@ -341,41 +355,10 @@ class avl_tree
             delete_node(node);
         }
 
-        // after calling unset_bounds set_bounds should always be called
-        void unset_bounds(void)
-        {
-            if (_begin->parent && _begin->parent != _end)
-                _begin->parent->left = NULL;
-            if (_end->parent && _end->parent != _begin)
-                _end->parent->right = NULL;
-        }
-
-        // unset_bound should always have been called before calling set_bounds
-        void set_bounds(void)
-        {
-            if (_size != 0) {
-                node_pointer first = get_min(_root);
-                node_pointer last = get_max(_root);
-                first->left = _begin;
-                _begin->parent = first;
-                last->right = _end;
-                _end->parent = last;
-            }
-            else {
-                _begin->parent = _end;
-                _end->parent = _begin;
-            }
-        }
-
-        int height(node_pointer node)
-        {
-            if (!node)
-                return 0;
-            return ft::max(height(node->left), height(node->right)) + 1;
-        }
-
         node_pointer get_min(node_pointer node)
         {
+            if (!node)
+                return NULL;
             while (node->left)
                 node = node->left;
             return node;
@@ -383,6 +366,8 @@ class avl_tree
 
         node_pointer get_max(node_pointer node)
         {
+            if (!node)
+                return NULL;
             while (node->right)
                 node = node->right;
             return node;
@@ -396,9 +381,11 @@ class avl_tree
             node->right ? node->right->parent = node : 0;
             tmp->left = node;
             tmp->parent = node->parent;
-            if (node->parent && node->parent->left == node)
+            if (!node->parent)
+                _root = tmp;
+            else if (node->parent->left == node)
                 node->parent->left = tmp;
-            else if (node->parent && node->parent->right == node)
+            else
                 node->parent->right = tmp;
             node->parent = tmp;
             return tmp;
@@ -411,9 +398,11 @@ class avl_tree
             node->left ? node->left->parent = node : 0;
             tmp->right = node;
             tmp->parent = node->parent;
-            if (node->parent && node->parent->left == node)
+            if (!node->parent)
+                _root = tmp;
+            else if (node->parent->left == node)
                 node->parent->left = tmp;
-            else if (node->parent && node->parent->right == node)
+            else
                 node->parent->right = tmp;
             node->parent = tmp;
             return tmp;
