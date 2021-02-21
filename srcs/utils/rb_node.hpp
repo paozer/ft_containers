@@ -8,7 +8,7 @@ enum color_t { RED, BLACK };
 template <class Key, class Value>
 struct rb_node
 {
-    std::pair<Key, Value> p;
+    std::pair<const Key, Value> p;
     rb_node * left;
     rb_node * right;
     rb_node * parent;

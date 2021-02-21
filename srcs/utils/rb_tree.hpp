@@ -30,9 +30,9 @@ class rb_tree
         typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
-        rb_tree (const allocator_type& alloc = allocator_type())
+        rb_tree (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
             : _root(NULL), _size(0), _added_node_flag(false), _added_node_ptr(NULL),
-              _begin(new_node()), _end(new_node()), _alloc(alloc), _comp(key_compare())
+              _begin(new_node()), _end(new_node()), _alloc(alloc), _comp(comp)
         {
             _begin->parent = _end;
             _end->parent = _begin;
@@ -41,13 +41,15 @@ class rb_tree
         ~rb_tree()
         {
             clear();
+            //delete_node(_begin);
+            //delete_node(_end);
         }
 
         /* ELEMENT ACCESS */
-        node_pointer begin(void) { return _begin->parent; }
-        node_pointer end(void) { return _end; }
-        node_pointer rbegin(void) { return _end->parent; }
-        node_pointer rend(void) { return _begin; }
+        node_pointer begin(void) const { return _begin->parent; }
+        node_pointer end(void) const { return _end; }
+        node_pointer rbegin(void) const { return _end->parent; }
+        node_pointer rend(void) const { return _begin; }
 
         /* CAPACITY */
         size_type size(void) const { return _size; }
@@ -57,67 +59,48 @@ class rb_tree
         /* MODIFIERS */
         std::pair<node_pointer, bool> insert(const value_type& val)
         {
-            _root = insert(_root, NULL, val);
+            unset_bounds();
+            _root = aux_insert(_root, NULL, val);
             _root->color = BLACK;
-            if (_added_node_flag)
-                ++_size;
+            _added_node_flag ? ++_size : 0;
+            set_bounds();
             return std::make_pair(_added_node_ptr, _added_node_flag);
-        }
-
-        // position gives a hint to where the new node could be placed
-        // if hint is correct insert recursively from here
-        // else insert recursively from root
-        node_pointer insert (node_pointer position, const value_type& val)
-        {
-            if (_comp(val, position->first))
-                position->left = insert(position->left, position, val);
-            else
-                _root = insert(_root, NULL, val);
-            _root->color = BLACK;
-            if (_added_node_flag)
-                ++_size;
-            return insert(val).first;
         }
 
         void clear(void)
         {
-            node_pointer tmp = _root;
-            _root = NULL;
+            if (_begin->parent && _begin->parent != _end)
+                _begin->parent->left = NULL;
+            if (_end->parent && _end->parent != _begin)
+                _end->parent->right = NULL;
+            _begin->parent = _end;
+            _end->parent = _begin;
             _size = 0;
-            clear(tmp);
+            aux_clear(_root);
+            _root = NULL;
         }
 
         size_type erase (const key_type& key)
         {
-            _begin->parent->left = NULL;
-            _end->parent->right = NULL;
-            _begin->parent = NULL;
-            _end->parent = NULL;
-
-            _root = erase(_root, key);
+            size_type old_size = _size;
+            unset_bounds();
+            _root = aux_erase(_root, key);
             _root->color = BLACK;
-
-            _begin->parent = get_min(_root);
-            _end->parent = get_max(_root);
-            _begin->parent->left = _begin;
-            _end->parent->right = _end;
-
-            //fix return value
-            return 0;
+            set_bounds();
+            return old_size - _size;
         }
 
         /* OPERATIONS */
         node_pointer find(const key_type& key)
         {
-            node_pointer x = _root;
-            while (x != NULL) {
-                int cmp = _comp(x->p.first, key);
-                if (cmp == 0)
-                    return x;
-                else if (cmp > 0)
-                    x = x->right;
+            node_pointer node = _root;
+            while (node && node != _begin && node != _end) {
+                if (_comp(node->pair.first, key))
+                    node = node->right;
+                else if (_comp(key, node->pair.first))
+                    node = node->left;
                 else
-                    x = x->left;
+                    return node;
             }
             return NULL;
         }
@@ -132,8 +115,8 @@ class rb_tree
         node_allocator _alloc;
         key_compare _comp;
 
-        /* MODIFIERS */
-        node_pointer insert (node_pointer node, node_pointer parent, const value_type& val)
+        /* INSERT */
+        node_pointer aux_insert (node_pointer node, node_pointer parent, const value_type& val)
         {
             // if we're at a leaf (real or _begin/_end) insert the new node
             if (!node || node == _end || node == _begin) {
@@ -154,9 +137,9 @@ class rb_tree
                 return p;
             }
             if (_comp(val.first, node->p.first))
-                node->left = insert(node->left, node, val);
+                node->left = aux_insert(node->left, node, val);
             else if (_comp(node->p.first, val.first))
-                node->right = insert(node->right, node, val);
+                node->right = aux_insert(node->right, node, val);
             else {
                 // need to remember node in order to create iterator after return from recursion
                 _added_node_ptr = node;
@@ -166,13 +149,14 @@ class rb_tree
             return node;
         }
 
-        node_pointer erase(node_pointer n, const key_type& key)
+        /* ERASE */
+        node_pointer aux_erase(node_pointer n, const key_type& key)
         {
             if (_comp(key, n->p.first)) {
                 if (n->left) {
                     if (!is_red(n->left) && !is_red(n->left->left))
                         n = move_red_left(n);
-                    n->left = erase(n->left, key);
+                    n->left = aux_erase(n->left, key);
                 }
             }
             else {
@@ -193,9 +177,22 @@ class rb_tree
                         n->right = erase_min(n->right);
                     }
                     else
-                        n->right = erase(n->right, key);
+                        n->right = aux_erase(n->right, key);
                 }
             }
+            return fix(n);
+        }
+
+        node_pointer aux_erase_min(node_pointer n)
+        {
+            if (!n->left) {
+                delete_node(n);
+                --_size;
+                return NULL;
+            }
+            if (!is_red(n->left) && !is_red(n->left->left))
+                n = move_red_left(n);
+            n->left = erase_min(n->left);
             return fix(n);
         }
 
@@ -239,41 +236,43 @@ class rb_tree
             }
         }
 
-        node_pointer erase_min(node_pointer n)
+        /* ROTATIONS */
+        node_pointer rotate_left (node_pointer root)
         {
-            if (!n->left) {
-                delete_node(n);
-                --_size;
-                return NULL;
-            }
-            if (!is_red(n->left) && !is_red(n->left->left))
-                n = move_red_left(n);
-            n->left = erase_min(n->left);
-            return fix(n);
+            node_pointer right_root = root->right;
+            root->right = right_root->left;
+            root->right ? root->right->parent = root : 0;
+            right_root->left = root;
+            right_root->parent = root->parent;
+            root->parent = right_root;
+
+            right_root->color = root->color;
+            root->color = RED;
+            return right_root;
         }
 
-        void clear(node_pointer node)
+        node_pointer rotate_right (node_pointer root)
         {
-            if (!node)
-                return ;
-            clear(node->left);
-            clear(node->right);
-            delete_node(node);
+            node_pointer left_root = root->left;
+            root->left = left_root->right;
+            root->left ? root->left->parent = root : 0;
+            left_root->right = root;
+            left_root->parent = root->parent;
+            root->parent = left_root;
+
+            left_root->color = root->color;
+            root->color = RED;
+            return left_root;
         }
 
         /* UTILITIES */
-        node_pointer get_min(node_pointer n)
+        void aux_clear(node_pointer node)
         {
-            while (n->left)
-                n = n->left;
-            return n;
-        }
-
-        node_pointer get_max(node_pointer n)
-        {
-            while (n->right)
-                n = n->right;
-            return n;
+            if (!node)
+                return ;
+            aux_clear(node->left);
+            aux_clear(node->right);
+            delete_node(node);
         }
 
         node_pointer fix(node_pointer n)
@@ -290,9 +289,6 @@ class rb_tree
             return n;
         }
 
-        /*
-         * Add description of what it do
-         */
         node_pointer move_red_left(node_pointer n)
         {
             flip_colors(n);
@@ -314,57 +310,30 @@ class rb_tree
             return n;
         }
 
-        /*
-         * Rotate node to it's left (right) subtree.
-         * The root of it's right (left) subtree takes its place.
-         * The new root is returned.
-         *
-         *      rotate_left(B):
-         *
-         *      B                    C
-         *    /   \      ->         /  \
-         *   A     C               B    E
-         *       /   \           /   \
-         *      D     E         A     D
-         */
-
-        node_pointer rotate_left (node_pointer root)
+        // after calling unset_bounds set_bounds should always be called
+        void unset_bounds(void)
         {
-            node_pointer right_root = root->right;
-
-            root->right = right_root->left;
-            root->right ? root->right->parent = root : 0;
-
-            right_root->left = root;
-            right_root->parent = root->parent;
-            root->parent = right_root;
-
-            right_root->color = root->color;
-            root->color = RED;
-            return right_root;
+            if (_begin->parent && _begin->parent != _end)
+                _begin->parent->left = NULL;
+            if (_end->parent && _end->parent != _begin)
+                _end->parent->right = NULL;
         }
 
-        node_pointer rotate_right (node_pointer root)
+        // unset_bound should always have been called before calling set_bounds
+        void set_bounds(void)
         {
-            node_pointer left_root = root->left;
-
-            root->left = left_root->right;
-            root->left ? root->left->parent = root : 0;
-
-            left_root->right = root;
-            left_root->parent = root->parent;
-            root->parent = left_root;
-
-            left_root->color = root->color;
-            root->color = RED;
-            return left_root;
-        }
-
-        bool is_red(node_pointer n)
-        {
-            if (!n)
-                return false;
-            return n->color == RED;
+            if (_size != 0) {
+                node_pointer first = get_min(_root);
+                node_pointer last = get_max(_root);
+                first->left = _begin;
+                _begin->parent = first;
+                last->right = _end;
+                _end->parent = last;
+            }
+            else {
+                _begin->parent = _end;
+                _end->parent = _begin;
+            }
         }
 
         void flip_colors (node_pointer n)
@@ -374,6 +343,27 @@ class rb_tree
                 n->left->switch_color();
             if (n->right)
                 n->right->switch_color();
+        }
+
+        node_pointer get_min(node_pointer n)
+        {
+            while (n->left)
+                n = n->left;
+            return n;
+        }
+
+        node_pointer get_max(node_pointer n)
+        {
+            while (n->right)
+                n = n->right;
+            return n;
+        }
+
+        bool is_red(node_pointer n)
+        {
+            if (!n)
+                return false;
+            return n->color == RED;
         }
 
         /* MEMORY MANAGEMENT */
