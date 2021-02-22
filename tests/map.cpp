@@ -1,9 +1,10 @@
-#include <map>
-#include <string>
-#include "catch.hpp"
-
 #include "../srcs/map/map.hpp"
 #include "../srcs/vector/vector.hpp"
+
+#include "catch.hpp"
+
+#include <map>
+#include <string>
 
 /* CONSTRUCTION */
 TEST_CASE("map contructors work as expected", "[map][basics]")
@@ -56,7 +57,7 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
 TEST_CASE("Assignment operator copies elements", "[map][operators]")
 {
     ft::map<char, int> my_map1;
-    for (int i = 0; i < 25; ++i)
+    for (int i = 0; i < 10; ++i)
         my_map1[rand() % 93 + 33] = rand() % 10000;
     ft::map<char, int> my_map2 = my_map1;
 
@@ -82,11 +83,15 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
 
     ft::map<char, int>::iterator it = my_map.begin();
     ft::map<char, int>::const_iterator cit = it;
-    REQUIRE( (cit == my_map.begin()) );
+    ft::map<char, int>::const_iterator cit2 = my_map.begin();
+    REQUIRE(( cit == my_map.begin() ));
+    REQUIRE(( cit2 == my_map.begin() ));
 
     ft::map<char, int>::reverse_iterator rit = my_map.rbegin();
     ft::map<char, int>::const_reverse_iterator rcit = rit;
-    REQUIRE( (rcit == my_map.rbegin()) );
+    ft::map<char, int>::const_reverse_iterator rcit2 = my_map.rbegin();
+    REQUIRE(( rcit == my_map.rbegin() ));
+    REQUIRE(( rcit2 == my_map.rbegin() ));
 }
 
 /* CAPACITY */

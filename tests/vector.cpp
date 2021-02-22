@@ -1,16 +1,16 @@
+#include "../srcs/list/list.hpp"
+#include "../srcs/vector/vector.hpp"
+
 #include "catch.hpp"
 
 #include <vector>
 #include <list>
 
-#include "../srcs/list/list.hpp"
-#include "../srcs/vector/vector.hpp"
 
 #define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
-
 TEMPLATE_PRODUCT_TEST_CASE( "default constructor works correctly", "[vector][basics]", ft::vector, TYPE_LIST )
 {
     TestType cnt;
@@ -73,10 +73,7 @@ TEMPLATE_TEST_CASE( "copy constructor works correctly", "[vector][basics]", ft::
     }
 }
 
-//TEST_CASE( "destructor works correctly", "[vector][basics]" );
-
 /* RELATIONAL OPERATORS */
-
 TEMPLATE_TEST_CASE( "operator= works correctly", "[vector][relational operators]", ft::vector<int> )
 {
     TestType cnt1 (10, 10);
@@ -183,38 +180,60 @@ TEMPLATE_TEST_CASE( "operator>= works correctly", "[vector][relational operators
 }
 
 /* ITERATORS */
-
-// add const_iterator tests & non const to const construction
-// add tests using std::distance
-
 TEMPLATE_TEST_CASE( "begin works correctly", "[vector][iterators]", ft::vector<int> )
 {
-    TestType cnt (1, 10);               // { 10 }
-    REQUIRE( *cnt.begin() == 10 );
-    cnt.push_back(5);                   // { 10, 5 }
-    REQUIRE( *cnt.begin() == 10 );
-    cnt.push_back(20);
-    cnt[0] = 2;                         // { 2, 14, 20 }
-    REQUIRE( *cnt.begin() == 2 );
-    cnt.pop_back();                     // { 2, 14 }
-    REQUIRE( *cnt.begin() == 2 );
-    *cnt.begin() = 5;                   // { 5, 14 }
-    REQUIRE( *cnt.begin() == 5 );
+    SECTION("non-const iterator behaviour") {
+        TestType cnt (1, 10);               // { 10 }
+        REQUIRE( *cnt.begin() == 10 );
+        cnt.push_back(5);                   // { 10, 5 }
+        REQUIRE( *cnt.begin() == 10 );
+        cnt.push_back(20);
+        cnt[0] = 2;                         // { 2, 14, 20 }
+        REQUIRE( *cnt.begin() == 2 );
+        cnt.pop_back();                     // { 2, 14 }
+        REQUIRE( *cnt.begin() == 2 );
+        *cnt.begin() = 5;                   // { 5, 14 }
+        REQUIRE( *cnt.begin() == 5 );
+    }
+    SECTION("const iterator behaviour") {
+        const TestType cnt (1, 10);
+        REQUIRE( *cnt.begin() == 10 );
+
+        const TestType cnt1;
+        REQUIRE( cnt1.begin() == cnt1.end() );
+
+        TestType cnt2 (1, 9);
+        ft::vector<int>::const_iterator it = cnt2.begin();
+        REQUIRE( *it == 9 );
+    }
 }
 
 TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int> )
 {
-    TestType cnt (1, 10);               // { 10 }
-    REQUIRE( *--cnt.end() == 10 );
-    cnt.push_back(5);                   // { 10, 5 }
-    REQUIRE( *--cnt.end() == 5 );
-    cnt.push_back(20);
-    cnt[0] = 2;                         // { 2, 5, 20 }
-    REQUIRE( *--cnt.end() == 20 );
-    cnt.pop_back();                     // { 2, 5 }
-    REQUIRE( *--cnt.end() == 5 );
-    *--cnt.end() = 1;                     // { 2, 1 }
-    REQUIRE( *--cnt.end() == 1 );
+    SECTION("non-const iterator behaviour") {
+        TestType cnt (1, 10);               // { 10 }
+        REQUIRE( *--cnt.end() == 10 );
+        cnt.push_back(5);                   // { 10, 5 }
+        REQUIRE( *--cnt.end() == 5 );
+        cnt.push_back(20);
+        cnt[0] = 2;                         // { 2, 5, 20 }
+        REQUIRE( *--cnt.end() == 20 );
+        cnt.pop_back();                     // { 2, 5 }
+        REQUIRE( *--cnt.end() == 5 );
+        *--cnt.end() = 1;                     // { 2, 1 }
+        REQUIRE( *--cnt.end() == 1 );
+    }
+    SECTION("const iterator behaviour") {
+        const TestType cnt (1, 10);
+        REQUIRE( *(--cnt.end()) == 10 );
+
+        const TestType cnt1;
+        REQUIRE( cnt1.begin() == cnt1.end() );
+
+        TestType cnt2 (1, 9);
+        typename TestType::const_iterator it = --cnt2.end();
+        REQUIRE( *it == 9 );
+    }
 }
 
 /* MODIFIERS */
@@ -320,30 +339,38 @@ TEMPLATE_PRODUCT_TEST_CASE( "erase work correctly", "[vector][modifiers]", ft::v
     size_t n = 5;
     TestType cnt (n);
 
-    SECTION( "single element erase works correctly" ) {
+    SECTION("single element erase works correctly") {
         cnt.erase(cnt.begin());
         REQUIRE( cnt.size() == --n );
+
         cnt.erase(--cnt.end());
         REQUIRE( cnt.size() == --n );
-        auto it = cnt.begin();
-        std::advance(it, 2);
+
+        auto it = cnt.begin() + 2;
         cnt.erase(it);
         REQUIRE( cnt.size() == --n );
     }
-    SECTION( "multiple elements erase works correctly" ) {
-        auto first = cnt.begin();
-        std::advance(first, 2);
-        auto last = first;
-        std::advance(last, 2);
+    SECTION("multiple elements erase works correctly") {
+        auto first = cnt.begin() + 2;
+        auto last = first + 2;
         cnt.erase(first, last);
         REQUIRE( cnt.size() == (n - 2) );
     }
+    SECTION("erase return value is correct") {
+        int arr[] = {23, 1, 233, 4, 55, 3};
+        ft::vector<int> v (arr, arr + 6);
+        auto it = v.erase(v.begin());
+        REQUIRE( *it == 1 );
+        it = v.erase(--v.end());
+        REQUIRE( it == v.end() );
+        it = v.erase(v.begin(), v.end());
+        REQUIRE( it == v.end() );
+    }
 }
 
-// add check of allocator swap ? don't have to implement get_allocator
 TEMPLATE_TEST_CASE( "swap works correctly", "[vector][modifiers]", ft::vector<int> )
 {
-    SECTION( "non-empty lists swap swaps sizes and elements" ) {
+    SECTION("non-empty lists swap swaps sizes and elements") {
         TestType cnt1 (10, 100);
         TestType cnt2 (2, -12);
 
@@ -355,7 +382,7 @@ TEMPLATE_TEST_CASE( "swap works correctly", "[vector][modifiers]", ft::vector<in
         for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
             REQUIRE( *it == 100 );
     }
-    SECTION( "empty w/ non-empty lists swap swaps sizes and elements" ) {
+    SECTION("empty w/ non-empty lists swap swaps sizes and elements") {
         TestType cnt1 (10, 100);
         TestType cnt2;
 
@@ -366,7 +393,7 @@ TEMPLATE_TEST_CASE( "swap works correctly", "[vector][modifiers]", ft::vector<in
         for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
             REQUIRE( *it == 100 );
     }
-    SECTION( "empty w/ empty lists swap swaps sizes and elements" ) {
+    SECTION("empty w/ empty lists swap swaps sizes and elements") {
         TestType cnt1;
         TestType cnt2;
 

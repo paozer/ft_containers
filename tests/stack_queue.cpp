@@ -1,14 +1,14 @@
+#include "../srcs/stack/stack.hpp"
+#include "../srcs/queue/queue.hpp"
+#include "../srcs/list/list.hpp"
+#include "../srcs/vector/vector.hpp"
+
 #include "catch.hpp"
 
 #include <list>
 #include <vector>
 #include <stack>
 #include <queue>
-
-#include "../srcs/stack/stack.hpp"
-#include "../srcs/queue/queue.hpp"
-#include "../srcs/list/list.hpp"
-#include "../srcs/vector/vector.hpp"
 
 #define CONTAINER_LIST ( ft::stack, ft::queue )
 #define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )

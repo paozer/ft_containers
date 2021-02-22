@@ -1,171 +1,163 @@
+#include "../srcs/list/list.hpp"
+#include "../srcs/vector/vector.hpp"
+
 #include "catch.hpp"
 
 #include <list>
 #include <vector>
-
-#include "../srcs/list/list.hpp"
-#include "../srcs/vector/vector.hpp"
 
 #define TYPE_LIST ( int, char, const int,std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
 
-TEMPLATE_PRODUCT_TEST_CASE( "default constructor works correctly", "[list][basics]", ft::list, TYPE_LIST )
+TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::list<int>)
 {
-    TestType cnt;
-    REQUIRE( cnt.empty() );
-    REQUIRE( cnt.size() == 0 );
-}
-
-TEMPLATE_TEST_CASE( "fill constructor works correctly", "[list][basics]", ft::list<int> )
-{
-    SECTION( "cnt(0, 5) returns cnt w/ size 0" ) {
-        TestType cnt (0, 5);
-        REQUIRE( cnt.size() == 0 );
+    SECTION("default constructor creates empty list") {
+        TestType c;
+        REQUIRE( c.empty() );
+        REQUIRE( c.size() == 0 );
     }
-    SECTION( "cnt(1, 5) returns cnt w/ size 1 and 5 at the front" ) {
-        TestType cnt (1, 5);
-        REQUIRE( cnt.size() == 1 );
-        REQUIRE( cnt.front() == 5 );
+    SECTION("fill constructor creates list of specified size & filled with elements") {
+        size_t i = GENERATE(0, 1, 100);
+        size_t j = GENERATE(-100, 914);
+        TestType c (i, j);
+        REQUIRE( c.size() == i );
+        for (auto it = c.begin(); it != c.end(); ++it)
+            REQUIRE( *it == (int)j );
     }
-    SECTION( "cnt(1000, 5) returns cnt w/ size 1000 and filled w/ 5" ) {
-        TestType cnt (1000, 5);
-        REQUIRE( cnt.size() == 1000 );
-        for (auto it = cnt.begin(); it != cnt.end(); ++it)
-            REQUIRE( *it == 5 );
+    SECTION("range constructor creates list with correct elements from range") {
+        size_t s = GENERATE(0, 4, 7);
+        int v[] = {2, 4, 12, 5, 60, 99, -12};
+        TestType c1 (v, v + s);
+        REQUIRE( c1.size() == s );
+
+        size_t i = 0;
+        for (auto it = c1.begin(); it != c1.end(); ++it)
+            REQUIRE( *it == v[i++] );
+        REQUIRE_FALSE( i != s);
+
+        TestType c2 (v, v);
+        REQUIRE( c2.size() == 0 );
+        TestType c3 (v + 2, v + 4);
+        REQUIRE( c3.size() == 2 );
     }
-}
+    SECTION("copy constructor constructs an exact copy of a given list") {
+        SECTION ( "works on construction from non-empty list" ) {
+            size_t s = GENERATE(0, 4, 7);
+            int v[] = {2, 4, 12, 5, 60, 99, -12};
+            TestType c1 (v, v + s);
+            TestType c2 (c1);
 
-TEMPLATE_TEST_CASE( "range constructor works correctly", "[list][basics]", ft::list<int> )
-{
-    int v[] = {2, 4, 12, 5, 60, 99, -12};
-    size_t v_size = sizeof(v) / sizeof(int);
-    TestType cnt (v, v + v_size);
+            REQUIRE( c1.size() == c2.size() );
 
-    REQUIRE( cnt.size() == v_size );
-    auto it = cnt.begin();
-    for (size_t i = 0; i < v_size; ++i) {
-        REQUIRE( *it == v[i] );
-        ++it;
-    }
-}
-
-TEMPLATE_TEST_CASE( "copy constructor works correctly", "[list][basics]", ft::list<int> )
-{
-    SECTION ( "works on construction from non-empty list" ) {
-        TestType cnt1;
-        for (int i = 0; i < 10; ++i)
-            cnt1.push_back(i);
-        TestType cnt2 (cnt1);
-        REQUIRE( cnt1.size() == cnt2.size() );
-
-        auto it1 = cnt1.begin();
-        auto it2 = cnt2.begin();
-        while (it1 != cnt1.end() || it2 != cnt2.end()) {
-            REQUIRE( *it1 == *it2 );
-            ++it1;
-            ++it2;
+            auto it1 = c1.begin();
+            auto it2 = c2.begin();
+            while (it1 != c1.end() || it2 != c2.end()) {
+                REQUIRE( *it1 == *it2 );
+                ++it1;
+                ++it2;
+            }
+        }
+        SECTION ( "works on construction from empty list" ) {
+            TestType c1;
+            TestType c2 (c1);
+            REQUIRE( c1.empty() );
         }
     }
-    SECTION ( "works on construction from empty list" ) {
-        TestType cnt1;
-        TestType cnt2 (cnt1);
-
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt1.size() == cnt2.size() );
-    }
 }
 
-//TEST_CASE( "destructor works correctly", "[list][basics]" );
-
 /* RELATIONAL OPERATORS */
-
 TEMPLATE_TEST_CASE( "operator= works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2 = cnt1;
+    size_t s = GENERATE(0, 4, 7);
+    int v[] = {2, 4, 12, 5, 60, 99, -12};
+    TestType c1 (v, v + s);
+    TestType c2 = c1;
 
-    REQUIRE( cnt2.size() == 10 );
-    for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
-        REQUIRE( *it == 10 );
+    REQUIRE( c2.size() == s );
+    size_t i = 0;
+    for (auto it = c2.begin(); it != c2.end(); ++it) {
+        REQUIRE( *it == v[i] );
+        ++i;
+    }
 }
 
 TEMPLATE_TEST_CASE( "operator== works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2;
-    TestType cnt3;
-    TestType cnt4;
+    TestType c1 (10, 10);
+    TestType c2;
+    TestType c3;
+    TestType c4;
 
-    REQUIRE_FALSE( (cnt1 == cnt2) );
-    cnt2 = cnt1;
-    REQUIRE( (cnt1 == cnt2) );
-    REQUIRE( (cnt3 == cnt4) );
+    REQUIRE_FALSE( (c1 == c2) );
+    c2 = c1;
+    REQUIRE( (c1 == c2) );
+    REQUIRE( (c3 == c4) );
 }
 
 TEMPLATE_TEST_CASE( "operator!= works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2;
-    TestType cnt3;
-    TestType cnt4;
+    TestType c1 (10, 10);
+    TestType c2;
+    TestType c3;
+    TestType c4;
 
-    REQUIRE( (cnt1 != cnt2) );
-    cnt2 = cnt1;
-    REQUIRE_FALSE( (cnt1 != cnt2) );
-    REQUIRE_FALSE( (cnt3 != cnt4) );
+    REQUIRE( (c1 != c2) );
+    c2 = c1;
+    REQUIRE_FALSE( (c1 != c2) );
+    REQUIRE_FALSE( (c3 != c4) );
 }
 
 TEMPLATE_TEST_CASE( "operator< works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2 (11, 10);
-    TestType cnt3 (10, 99);
-    TestType cnt4;
-    TestType cnt5 (10, 10);
+    TestType c1 (10, 10);
+    TestType c2 (11, 10);
+    TestType c3 (10, 99);
+    TestType c4;
+    TestType c5 (10, 10);
 
-    REQUIRE( (cnt1 < cnt2) );
-    REQUIRE( (cnt2 < cnt3) );
-    REQUIRE( (cnt4 < cnt3) );
-    REQUIRE_FALSE( (cnt3 < cnt4) );
-    REQUIRE_FALSE( (cnt1 < cnt5) );
-    REQUIRE_FALSE( (cnt4 < cnt4) );
+    REQUIRE( (c1 < c2) );
+    REQUIRE( (c2 < c3) );
+    REQUIRE( (c4 < c3) );
+    REQUIRE_FALSE( (c3 < c4) );
+    REQUIRE_FALSE( (c1 < c5) );
+    REQUIRE_FALSE( (c4 < c4) );
 }
 
 TEMPLATE_TEST_CASE( "operator<= works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2 (11, 10);
-    TestType cnt3 (10, 99);
-    TestType cnt4;
-    TestType cnt5 (10, 10);
+    TestType c1 (10, 10);
+    TestType c2 (11, 10);
+    TestType c3 (10, 99);
+    TestType c4;
+    TestType c5 (10, 10);
 
-    REQUIRE( (cnt1 <= cnt2) );
-    REQUIRE( (cnt2 <= cnt3) );
-    REQUIRE( (cnt4 <= cnt3) );
-    REQUIRE( (cnt1 <= cnt5) );
-    REQUIRE( (cnt4 <= cnt4) );
-    REQUIRE_FALSE( (cnt3 <= cnt4) );
-    REQUIRE_FALSE( (cnt2 <= cnt1) );
+    REQUIRE( (c1 <= c2) );
+    REQUIRE( (c2 <= c3) );
+    REQUIRE( (c4 <= c3) );
+    REQUIRE( (c1 <= c5) );
+    REQUIRE( (c4 <= c4) );
+    REQUIRE_FALSE( (c3 <= c4) );
+    REQUIRE_FALSE( (c2 <= c1) );
 }
 
 TEMPLATE_TEST_CASE( "operator> works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2 (11, 10);
-    TestType cnt3 (10, 99);
-    TestType cnt4;
-    TestType cnt5 (10, 10);
+    TestType c1 (10, 10);
+    TestType c2 (11, 10);
+    TestType c3 (10, 99);
+    TestType c4;
+    TestType c5 (10, 10);
 
-    REQUIRE_FALSE( (cnt1 > cnt2) );
-    REQUIRE_FALSE( (cnt2 > cnt3) );
-    REQUIRE_FALSE( (cnt4 > cnt3) );
-    REQUIRE_FALSE( (cnt1 > cnt5) );
-    REQUIRE_FALSE( (cnt4 > cnt4) );
-    REQUIRE( (cnt3 > cnt4) );
-    REQUIRE( (cnt3 > cnt1) );
-    REQUIRE( (cnt2 > cnt1) );
+    REQUIRE_FALSE( (c1 > c2) );
+    REQUIRE_FALSE( (c2 > c3) );
+    REQUIRE_FALSE( (c4 > c3) );
+    REQUIRE_FALSE( (c1 > c5) );
+    REQUIRE_FALSE( (c4 > c4) );
+    REQUIRE( (c3 > c4) );
+    REQUIRE( (c3 > c1) );
+    REQUIRE( (c2 > c1) );
 }
 
 TEMPLATE_TEST_CASE( "operator>= works correctly", "[list][basics]", ft::list<int> )
@@ -173,172 +165,175 @@ TEMPLATE_TEST_CASE( "operator>= works correctly", "[list][basics]", ft::list<int
     int a[] = { 1, 4, -1, 2, 33 };
     int b[] = { 1, 4, -6, 4, 2 };
     int c[] = { 0, 12, -6, 4, 2 };
-    TestType cnt1 (a, a + sizeof(a) / sizeof(int));
-    TestType cnt2 (cnt1);
-    TestType cnt3 (b, b + sizeof(b) / sizeof(int));
-    TestType cnt4 (c, c + sizeof(c) / sizeof(int));
+    TestType c1 (a, a + sizeof(a) / sizeof(int));
+    TestType c2 (c1);
+    TestType c3 (b, b + sizeof(b) / sizeof(int));
+    TestType c4 (c, c + sizeof(c) / sizeof(int));
 
-    REQUIRE( (cnt1 >= cnt2) );
-    REQUIRE( (cnt1 >= cnt3) );
-    REQUIRE( (cnt1 >= cnt4) );
+    REQUIRE( (c1 >= c2) );
+    REQUIRE( (c1 >= c3) );
+    REQUIRE( (c1 >= c4) );
 
-    cnt2.push_back(-13);
-    REQUIRE_FALSE( (cnt1 >= cnt2) );
+    c2.push_back(-13);
+    REQUIRE_FALSE( (c1 >= c2) );
 }
 
 /* ITERATORS */
-
-// add const_iterator tests & non const to const construction
-// add tests using std::distance
-
 TEMPLATE_TEST_CASE( "begin works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt (1, 10);       // { 10 }
-    REQUIRE( *cnt.begin() == 10 );
-    cnt.push_front(5);               // { 5, 10 }
-    REQUIRE( *cnt.begin() == 5 );
-    cnt.push_back(20);               // { 5, 10, 20 }
-    REQUIRE( *cnt.begin() == 5 );
-    cnt.pop_front();                 // { 10, 20 }
-    REQUIRE( *cnt.begin() == 10 );
-    *cnt.begin() = 5;                // { 5, 20 }
-    REQUIRE( *cnt.begin() == 5 );
+    SECTION("non-const iterator behaviour") {
+        TestType c (1, 10);       // { 10 }
+    REQUIRE( *c.begin() == 10 );
+    c.push_front(5);               // { 5, 10 }
+    REQUIRE( *c.begin() == 5 );
+    c.push_back(20);               // { 5, 10, 20 }
+    REQUIRE( *c.begin() == 5 );
+    c.pop_front();                 // { 10, 20 }
+    REQUIRE( *c.begin() == 10 );
+    *c.begin() = 5;                // { 5, 20 }
+    REQUIRE( *c.begin() == 5 );
+    }
+    SECTION("const iterator behaviour") {
+        const TestType c (1, 10);
+        REQUIRE( *c.begin() == 10 );
+        const TestType c1;
+        REQUIRE(( c1.begin() == c1.end() ));
+        TestType c2 (1, 9);
+        ft::list<int>::const_iterator it = c2.begin();
+        REQUIRE( *it == 9 );
+    }
 }
 
 TEMPLATE_TEST_CASE( "end works correctly", "[list][basics]", ft::list<int> )
 {
-    TestType cnt (1, 10);       // { 10 }
-    REQUIRE( *--cnt.end() == 10 );
-    cnt.push_front(5);               // { 5, 10 }
-    REQUIRE( *--cnt.end() == 10 );
-    cnt.push_back(20);               // { 5, 10, 20 }
-    REQUIRE( *--cnt.end() == 20 );
-    cnt.pop_back();                 // { 5, 10 }
-    REQUIRE( *--cnt.end() == 10 );
-    *--cnt.end() = 5;                // { 5, 5 }
-    REQUIRE( *--cnt.end() == 5 );
+    SECTION("non-const iterator behaviour") {
+        TestType c (1, 10);               // { 10 }
+    REQUIRE( *--c.end() == 10 );
+    c.push_front(5);                  // { 5, 10 }
+    REQUIRE( *--c.end() == 10 );
+    c.push_back(20);                  // { 5, 10, 20 }
+    REQUIRE( *--c.end() == 20 );
+    c.pop_back();                     // { 5, 10 }
+    REQUIRE( *--c.end() == 10 );
+    *--c.end() = 5;                   // { 5, 5 }
+    REQUIRE( *--c.end() == 5 );
+    }
+    SECTION("const iterator behaviour") {
+        const TestType c (1, 10);
+        REQUIRE( *(--c.end()) == 10 );
+        const TestType c1;
+        REQUIRE(( c1.begin() == c1.end() ));
+        TestType c2 (1, 9);
+        typename TestType::const_iterator it = --c2.end();
+        REQUIRE( *it == 9 );
+    }
 }
 
 /* MODIFIERS */
 
 TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", ft::list, TYPE_LIST )
 {
-    SECTION( "range assign works correctly" ) {
-        // generate starting index between 0 and vector_size
-        // generate advance step between 0 and vector_size - index
-        // call assign with iterators from starting to starting + step
-
-        //auto size = GENERATE(range(0, 100));
-        //auto i = GENERATE_COPY(range(0, size));
-        //auto j = GENERATE_COPY(range(i, size - i));
-
-        // automate
-        size_t size = 10;
-        size_t i = 2;
-        size_t j = 7;
-
-        std::vector<VALUE_TYPE> v (size);
-        auto first = v.begin();
-        auto last = v.begin();
-        std::advance(first, i);
-        std::advance(last, j);
-        TestType l;
-        l.assign(first, last);
-        REQUIRE( (l.size() == j - i) );
+    SECTION("range assign works correctly") {
+        std::vector<VALUE_TYPE> v (10);
+        TestType c;
+        c.assign(v.begin() + 2, v.begin() + 7);
+        REQUIRE( c.size() == 5 );
+        for (auto it = c.begin(); it != c.end(); ++it)
+            REQUIRE( *it == VALUE_TYPE() );
     }
-
-    SECTION( "fill assign works correctly" ) {
+    SECTION("fill assign works correctly") {
         size_t n = GENERATE(0, 100);
-        TestType cnt;
-        cnt.assign(n, VALUE_TYPE());
-
-        REQUIRE( cnt.size() == n);
-        for (auto it = cnt.begin(); it != cnt.end(); ++it)
-            REQUIRE( *it == VALUE_TYPE());
+        TestType c;
+        c.assign(n, VALUE_TYPE() );
+        REQUIRE( c.size() == n );
+        for (auto it = c.begin(); it != c.end(); ++it)
+            REQUIRE( *it == VALUE_TYPE() );
     }
 }
 
 TEMPLATE_TEST_CASE( "push_front works correctly", "[list][modifiers]", ft::list<int> )
 {
-    SECTION( "containers size is incremented & the element is added at the front" ) {
-        TestType cnt;
-        int size = 100;
-        for (int i = 0; i < size; ++i) {
-            cnt.push_front(i);
-            REQUIRE( *cnt.begin() == i );
+    SECTION( "the element is added at the front & size is incremented" ) {
+        TestType c;
+        int value;
+        for (int i = 0; i < 50; ++i) {
+            value = rand();
+            c.push_front(value);
+            REQUIRE( *c.begin() == value );
         }
-        REQUIRE( (int)cnt.size() == size );
+        REQUIRE( (int)c.size() == 50 );
     }
 }
 
 TEMPLATE_TEST_CASE( "push_back works correctly", "[list][modifiers]", ft::list<int> )
 {
     SECTION( "containers size is incremented & the element is added at the back" ) {
-        TestType cnt;
-        int size = 100;
-        for (int i = 0; i < size; ++i) {
-            cnt.push_back(i);
-            REQUIRE( *--cnt.end() == i );
+        int value;
+        TestType c;
+        for (int i = 0; i < 50; ++i) {
+            value = rand();
+            c.push_back(value);
+            REQUIRE( *(--c.end()) == value );
         }
-        REQUIRE( (int)cnt.size() == size );
+        REQUIRE( (int)c.size() == 50 );
     }
 }
 
 TEMPLATE_TEST_CASE( "pop_front works correctly", "[list][modifiers]", ft::list<int> )
 {
-    TestType cnt (10, 100);
-    size_t i = cnt.size();
-    while (!cnt.empty()) {
-        REQUIRE( cnt.size() == i);
-        REQUIRE( *cnt.begin() == 100);
-        REQUIRE( *--cnt.end() == 100);
-        cnt.pop_front();
+    TestType c (10, 100);
+    size_t i = c.size();
+    while (!c.empty()) {
+        REQUIRE( c.size() == i);
+        REQUIRE( *c.begin() == 100);
+        REQUIRE( *(--c.end()) == 100);
+        c.pop_front();
         --i;
     }
 }
 
 TEMPLATE_TEST_CASE( "pop_back works correctly", "[list][modifiers]", ft::list<int> )
 {
-    TestType cnt (10, 100);
-    size_t i = cnt.size();
-    while (!cnt.empty()) {
-        REQUIRE( cnt.size() == i);
-        REQUIRE( *cnt.begin() == 100);
-        REQUIRE( *--cnt.end() == 100);
-        cnt.pop_back();
+    TestType c (10, 100);
+    size_t i = c.size();
+    while (!c.empty()) {
+        REQUIRE( c.size() == i);
+        REQUIRE( *c.begin() == 100);
+        REQUIRE( *--c.end() == 100);
+        c.pop_back();
         --i;
     }
 }
 
 TEMPLATE_TEST_CASE( "insert work correctly", "[list][modifiers]", ft::list<int> )
 {
-    TestType cnt;
-    auto it = cnt.begin();
+    TestType c;
+    auto it = c.begin();
 
     SECTION( "single element insert works correctly" ) {
-        cnt.insert(it, 5);           // { 5 }
-        REQUIRE( cnt.size() == 1 );
-        REQUIRE( *cnt.begin() == 5 );
-        cnt.insert(it, 10);           // { 5, 10}
-        REQUIRE( cnt.size() == 2 );
-        REQUIRE( *--cnt.end() == 10 );
+        c.insert(it, 5);           // { 5 }
+    REQUIRE( c.size() == 1 );
+    REQUIRE( *c.begin() == 5 );
+    c.insert(it, 10);           // { 5, 10}
+    REQUIRE( c.size() == 2 );
+    REQUIRE( *--c.end() == 10 );
     }
     SECTION( "fill insert works correctly" ) {
-        cnt.insert(it, 5, 10);
-        REQUIRE( cnt.size() == 5 );
-        for (auto ite = cnt.begin(); ite != cnt.end(); ++ite)
+        c.insert(it, 5, 10);
+        REQUIRE( c.size() == 5 );
+        for (auto ite = c.begin(); ite != c.end(); ++ite)
             REQUIRE( *ite == 10 );
-        cnt.insert(it, 1, 100);
-        REQUIRE( cnt.size() == 6 );
-        REQUIRE( *--cnt.end() == 100 );
+        c.insert(it, 1, 100);
+        REQUIRE( c.size() == 6 );
+        REQUIRE( *--c.end() == 100 );
     }
     SECTION( "range insert works correctly" ) {
         int arr[] = {12, 1, 4, 5, 6, 7};
-        cnt.push_front(0);
-        cnt.push_back(-32);
-        cnt.insert(--cnt.end(), arr + 1, arr + 5);
-        REQUIRE( cnt.size() == 6 );
-        auto it = cnt.begin();
+        c.push_front(0);
+        c.push_back(-32);
+        c.insert(--c.end(), arr + 1, arr + 5);
+        REQUIRE( c.size() == 6 );
+        auto it = c.begin();
         REQUIRE( *it == 0 );
         REQUIRE( *++it == 1 );
         REQUIRE( *++it == 4 );
@@ -348,264 +343,285 @@ TEMPLATE_TEST_CASE( "insert work correctly", "[list][modifiers]", ft::list<int> 
     }
 }
 
-// add test of return value
-// add test of consistency of values after erase
-TEMPLATE_PRODUCT_TEST_CASE( "erase work correctly", "[list][modifiers]", ft::list, TYPE_LIST )
+TEST_CASE("erase return value & remaining values are consistent", "[list][modifiers]")
 {
-    size_t n = 5;
-    TestType cnt (n);
+    int arr[] = {1, 2, 3, 4, 5, 6};
+    ft::list<int> mylist (arr, arr + 6);
+    ft::list<int>::iterator ret;
 
-    SECTION( "single element erase works correctly" ) {
-        cnt.erase(cnt.begin());
-        REQUIRE( cnt.size() == --n );
-        cnt.erase(--cnt.end());
-        REQUIRE( cnt.size() == --n );
-        auto it = cnt.begin();
-        std::advance(it, 2);
-        cnt.erase(it);
-        REQUIRE( cnt.size() == --n );
+    ret = mylist.erase(mylist.begin());
+    REQUIRE( mylist.size() == 5 );
+    REQUIRE( *ret == 2 );
+    ret = mylist.erase(--mylist.end());
+    REQUIRE( mylist.size() == 4 );
+    REQUIRE(( ret == mylist.end() ));
+    REQUIRE( *(--mylist.end()) == 5 );
+    ret = mylist.erase(++mylist.begin(), --mylist.end());
+    REQUIRE( mylist.size() == 2 );
+    REQUIRE( *ret == 5 );
+    ret = mylist.erase(mylist.begin(), mylist.end());
+    REQUIRE( mylist.size() == 0 );
+    REQUIRE(( ret == mylist.end() ));
+}
+
+TEST_CASE( "swap works correctly", "[list][modifiers]")
+{
+    int arr1[] = {1, 2, 3, 4, 5, 6};
+    int arr2[] = {-3, 69, 1};
+    ft::list<int>::iterator it;
+    int i;
+
+    SECTION("non-empty lists can be swapped") {
+        ft::list<int> mylist1 (arr1, arr1 + 6);
+        ft::list<int> mylist2 (arr2, arr2 + 3);
+
+        mylist1.swap(mylist2);
+        REQUIRE( mylist1.size() == 3 );
+        REQUIRE( mylist2.size() == 6 );
+        i = 0;
+        for (it = mylist1.begin(); it != mylist1.end(); ++it) {
+            REQUIRE( *it == arr2[i] );
+            ++i;
+        }
+        i = 0;
+        for (it = mylist2.begin(); it != mylist2.end(); ++it) {
+            REQUIRE( *it == arr1[i] );
+            ++i;
+        }
     }
-    SECTION( "multiple elements erase works correctly" ) {
-        auto first = cnt.begin();
-        std::advance(first, 2);
-        auto last = first;
-        std::advance(last, 2);
-        cnt.erase(first, last);
-        REQUIRE( cnt.size() == (n - 2) );
+    SECTION("empty lists can be swapped w/ filled lists") {
+        ft::list<int> mylist1 (arr1, arr1 + 6);
+        ft::list<int> mylist2;
+
+        mylist1.swap(mylist2);
+        REQUIRE( mylist1.size() == 0 );
+        REQUIRE( mylist2.size() == 6 );
+        i = 0;
+        for (it = mylist2.begin(); it != mylist2.end(); ++it) {
+            REQUIRE( *it == arr1[i] );
+            ++i;
+        }
+    }
+    SECTION("empty lists can be swapped") {
+        ft::list<int> mylist1;
+        ft::list<int> mylist2;
+
+        mylist1.swap(mylist2);
+        REQUIRE( mylist1.size() == 0 );
+        REQUIRE( mylist2.size() == 0 );
+    }
+    SECTION("lists with const content can be swapped") {
+        ft::list<const int> mylist1 (arr1, arr1 + 6);
+        ft::list<const int> mylist2;
+        ft::list<const int>::iterator cit;
+
+        mylist1.swap(mylist2);
+        REQUIRE( mylist1.size() == 0 );
+        REQUIRE( mylist2.size() == 6 );
+        i = 0;
+        for (cit = mylist2.begin(); cit != mylist2.end(); ++cit) {
+            REQUIRE( *cit == arr1[i] );
+            ++i;
+        }
     }
 }
 
-// add check of allocator swap ? don't have to implement get_allocator
-TEMPLATE_TEST_CASE( "swap works correctly", "[list][modifiers]", ft::list<int>)
-{
-    SECTION( "non-empty lists swap swaps sizes and elements" ) {
-        TestType cnt1 (10, 100);
-        TestType cnt2 (2, -12);
-
-        cnt1.swap(cnt2);
-        REQUIRE( cnt1.size() == 2 );
-        REQUIRE( cnt2.size() == 10 );
-        for (auto it = cnt1.begin(); it != cnt1.end(); ++it)
-            REQUIRE( *it == -12 );
-        for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
-            REQUIRE( *it == 100 );
-    }
-    SECTION( "empty w/ non-empty lists swap swaps sizes and elements" ) {
-        TestType cnt1 (10, 100);
-        TestType cnt2;
-
-        cnt1.swap(cnt2);
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt2.size() == 10 );
-        REQUIRE( (cnt1.begin() == cnt1.end()) );
-        for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
-            REQUIRE( *it == 100 );
-    }
-    SECTION( "empty w/ empty lists swap swaps sizes and elements" ) {
-        TestType cnt1;
-        TestType cnt2;
-
-        cnt1.swap(cnt2);
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt2.size() == 0 );
-        REQUIRE( (cnt1.begin() == cnt1.end()) );
-        REQUIRE( (cnt2.begin() == cnt2.end()) );
-    }
-}
-
-// add test to check if resize adds elements @ the end if needed
 TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[list][modifiers]", ft::list, TYPE_LIST )
 {
-    TestType cnt;
+    TestType c;
 
-    SECTION( "container size is reduced when n is smaller than current size" ) {
-        cnt.resize(0);
-        REQUIRE( cnt.size() == 0 );
-        cnt.push_front(VALUE_TYPE());
-        cnt.push_front(VALUE_TYPE());
-        cnt.push_front(VALUE_TYPE());
-        cnt.push_front(VALUE_TYPE());
-        cnt.resize(2);
-        REQUIRE( cnt.size() == 2 );
-        cnt.resize(1);
-        REQUIRE( cnt.size() == 1 );
-        cnt.resize(0);
-        REQUIRE( cnt.size() == 0 );
+    SECTION( "size is reduced when n is smaller than current size" ) {
+        c.resize(0);
+        REQUIRE( c.size() == 0 );
+        c.assign(4, VALUE_TYPE());
+        c.resize(2);
+        REQUIRE( c.size() == 2 );
+        c.resize(1);
+        REQUIRE( c.size() == 1 );
+        c.resize(0);
+        REQUIRE( c.size() == 0 );
     }
-    SECTION( "container is expanded at it's end when n is greater than current size" ) {
+    SECTION( "size is expanded at it's end when n is greater than current size" ) {
         SECTION( "empty list" ) {
-            cnt.resize(5);
-            REQUIRE( cnt.size() == 5 );
+            c.resize(5);
+            REQUIRE( c.size() == 5 );
         }
         SECTION( "non-empty list" ) {
-            cnt.push_front(VALUE_TYPE());
-            cnt.resize(5);
-            REQUIRE( cnt.size() == 5 );
-            cnt.push_front(VALUE_TYPE());
-            cnt.resize(20);
-            REQUIRE( cnt.size() == 20 );
+            c.push_front(VALUE_TYPE());
+            c.resize(5);
+            REQUIRE( c.size() == 5 );
+            c.push_front(VALUE_TYPE());
+            c.resize(20);
+            REQUIRE( c.size() == 20 );
         }
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "clear works correctly", "[list][modifiers]", ft::list, TYPE_LIST )
+TEST_CASE("resize added elements are consistent")
 {
-    TestType cnt;
-    cnt.clear();
-    REQUIRE( cnt.size() == 0 );
-    cnt.assign(10, VALUE_TYPE());
-    REQUIRE( cnt.size() == 10 );
-    cnt.clear();
-    REQUIRE( cnt.size() == 0 );
+    int arr[] = {1, 2, 3, 4, 5};
+    ft::list<int> mylist (arr, arr + 5);
+    mylist.resize(4);
+    REQUIRE( mylist.size() == 4 );
+    REQUIRE( *(--mylist.end()) == 4 );
+    mylist.resize(5);
+    REQUIRE( mylist.size() == 5 );
+    REQUIRE( *(--mylist.end()) == int() );
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("clear works correctly", "[list][modifiers]", ft::list, TYPE_LIST)
+{
+    TestType c;
+    c.clear();
+    REQUIRE( c.size() == 0 );
+    c.assign(10, VALUE_TYPE());
+    REQUIRE( c.size() == 10 );
+    c.clear();
+    REQUIRE( c.size() == 0 );
 }
 
 /* ELEMENT ACCESS */
 
-TEMPLATE_TEST_CASE( "front works correctly", "[list][element access]", ft::list<int> )
+TEST_CASE("element access works correctly", "[list][element access]")
 {
-    SECTION( "first element is changed when assigning to reference" ) {
-        TestType cnt (1, 77);
-        cnt.front() -= 22;
-        REQUIRE( cnt.front() == 55 );
-    }
-}
-
-TEMPLATE_TEST_CASE( "back works correctly", "[list][element access]", ft::list<int> )
-{
-    SECTION( "last element is changed when assigning to reference" ) {
-        TestType cnt (1, 77);
-        cnt.back() -= 22;
-        REQUIRE( cnt.back() == 55 );
-    }
+    int arr[] = {1, 2, 3, 4, 5};
+    ft::list<int> mylist (arr, arr + 5);
+    mylist.front() -= 21;
+    REQUIRE( mylist.front() == -20 );
+    mylist.back() -= 42;
+    REQUIRE( mylist.back() == -37 );
 }
 
 /* CAPACITY */
 
-TEMPLATE_PRODUCT_TEST_CASE( "empty reflects list state", "[list][basics]", ft::list, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects list state", "[list][basics]", ft::list, TYPE_LIST)
 {
-    TestType cnt;
-    REQUIRE( cnt.empty() );
-    cnt.push_back(VALUE_TYPE());
-    REQUIRE_FALSE( cnt.empty() );
-    cnt.pop_front();
-    REQUIRE( cnt.empty() );
+    TestType c;
+    REQUIRE( c.empty() );
+    c.push_back(VALUE_TYPE());
+    REQUIRE_FALSE( c.empty() );
+    c.pop_front();
+    REQUIRE( c.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "size works correctly", "[list][capacity]", ft::list, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("size works correctly", "[list][capacity]", ft::list, TYPE_LIST)
 {
-    TestType cnt;
+    TestType c;
 
-    SECTION( "uninitialized list has size 0" ) {
-        REQUIRE( cnt.size() == 0 );
-    }
-    SECTION( "size() returns updated size when elements are added" ) {
-        for (int i = 0; i < 5; ++i)
-            cnt.push_front(VALUE_TYPE());
-        REQUIRE( cnt.size() == 5 );
-        SECTION( "size() returns updated size after clearing the list" ) {
-            cnt.clear();
-            REQUIRE( cnt.size() == 0 );
-        }
-    }
+    REQUIRE( c.size() == 0 );
+    c.assign(5, VALUE_TYPE());
+    REQUIRE( c.size() == 5 );
+    c.clear();
+    REQUIRE( c.size() == 0 );
 }
 
 /* LIST OPERATIONS */
 
-// add test to check consistency of removed/added values
-TEMPLATE_PRODUCT_TEST_CASE( "splice work correctly", "[list][operations]", ft::list, int )
+TEST_CASE("splice work correctly", "[list][operations]")
 {
     int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-    TestType cnt1 (v, v + 7);
-    TestType cnt2;
+    ft::list<int> c1 (v, v + 8);
+    ft::list<int> c2;
+    ft::list<int>::iterator it;
+    int i;
 
     SECTION( "entire list splice works correctly" ) {
-        cnt2.splice(cnt2.begin(), cnt1);
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt2.size() == 7 );
+        c2.splice(c2.begin(), c1);
+        REQUIRE( c1.size() == 0 );
+        REQUIRE( c2.size() == 8 );
+        i = 0;
+        for (it = c2.begin(); it != c2.end(); ++it) {
+            REQUIRE( *it == v[i] );
+            ++i;
+        }
     }
     SECTION( "single element splice works correctly" ) {
-        cnt2.splice(cnt2.begin(), cnt1, ++cnt1.begin());
-        REQUIRE( cnt1.size() == 6 );
-        REQUIRE( cnt2.size() == 1 );
+        c2.splice(c2.begin(), c1, ++c1.begin());
+        REQUIRE( c1.size() == 7 );
+        REQUIRE( c2.size() == 1 );
+        REQUIRE( *c1.begin() == 0 );
+        REQUIRE( *c2.begin() == 1 );
     }
     SECTION( "element range splice works correctly" ) {
-        auto first = cnt1.begin();
-        std::advance(first, 3);
-        auto last = first;
-        std::advance(last, 4);
-
-        cnt2.splice(cnt2.begin(), cnt1, first, last);
-        REQUIRE( cnt1.size() == 3 );
-        REQUIRE( cnt2.size() == 4 );
+        c2.splice(c2.begin(), c1, c1.begin(), c1.begin());
+        REQUIRE( c1.size() == 8 );
+        REQUIRE( c2.size() == 0 );
+        c2.splice(c2.begin(), c1, c1.begin(), c1.end());
+        REQUIRE( c1.size() == 0 );
+        REQUIRE( c2.size() == 8 );
+        it = c2.begin();
+        std::advance(it, 4);
+        c1.splice(c1.begin(), c2, ++c2.begin(), it);
+        REQUIRE( c1.size() == 3 );
+        REQUIRE( c2.size() == 5 );
     }
 }
 
-// check consistency of removed elements
-TEMPLATE_PRODUCT_TEST_CASE( "remove(_if) work correctly", "[list][operations]", ft::list, int )
+TEST_CASE("remove(_if) works correctly", "[list][operations]")
 {
     int v[] = { 0, 1, 2, 3, 3, 5, 1, 7 };
-    TestType cnt (v, v + 8);
+    ft::list<int> c (v, v + 8);
 
     SECTION( "remove works correctly" ) {
-        cnt.remove(42);
-        REQUIRE( cnt.size() == 8 );
-        cnt.remove(1);
-        REQUIRE( cnt.size() == 6 );
-        cnt.remove(3);
-        REQUIRE( cnt.size() == 4 );
-        cnt.remove(7);
-        REQUIRE( cnt.size() == 3 );
-        cnt.remove(0);
-        REQUIRE( cnt.size() == 2 );
-        cnt.remove(2);
-        REQUIRE( cnt.size() == 1 );
-        cnt.remove(5);
-        REQUIRE( cnt.size() == 0 );
-        cnt.remove(0);
-        REQUIRE( cnt.size() == 0 );
+        c.remove(42);
+        REQUIRE( c.size() == 8 );
+        c.remove(1);
+        REQUIRE( c.size() == 6 );
+        c.remove(3);
+        REQUIRE( c.size() == 4 );
+        c.remove(7);
+        REQUIRE( c.size() == 3 );
+        c.remove(0);
+        REQUIRE( c.size() == 2 );
+        c.remove(2);
+        REQUIRE( c.size() == 1 );
+        c.remove(5);
+        REQUIRE( c.size() == 0 );
+        c.remove(0);
+        REQUIRE( c.size() == 0 );
     }
     SECTION( "remove_if works correctly" ) {
-        cnt.remove_if([](int i) { return i == 42; });
-        REQUIRE( cnt.size() == 8 );
-        cnt.remove_if([](int i) { return i == 1; });
-        REQUIRE( cnt.size() == 6 );
-        cnt.remove_if([](int i) { return i == 3; });
-        REQUIRE( cnt.size() == 4 );
-        cnt.remove_if([](int i) { return i == 7; });
-        REQUIRE( cnt.size() == 3 );
-        cnt.remove_if([](int i) { return i == 0; });
-        REQUIRE( cnt.size() == 2 );
-        cnt.remove_if([](int i) { return i == 2; });
-        REQUIRE( cnt.size() == 1 );
-        cnt.remove_if([](int i) { return i == 5; });
-        REQUIRE( cnt.size() == 0 );
-        cnt.remove_if([](int i) { return i == 0; });
-        REQUIRE( cnt.size() == 0 );
+        c.remove_if([](int i) { return i == 42; });
+        REQUIRE( c.size() == 8 );
+        c.remove_if([](int i) { return i == 1; });
+        REQUIRE( c.size() == 6 );
+        c.remove_if([](int i) { return i == 3; });
+        REQUIRE( c.size() == 4 );
+        c.remove_if([](int i) { return i == 7; });
+        REQUIRE( c.size() == 3 );
+        c.remove_if([](int i) { return i == 0; });
+        REQUIRE( c.size() == 2 );
+        c.remove_if([](int i) { return i == 2; });
+        REQUIRE( c.size() == 1 );
+        c.remove_if([](int i) { return i == 5; });
+        REQUIRE( c.size() == 0 );
+        c.remove_if([](int i) { return i == 0; });
+        REQUIRE( c.size() == 0 );
     }
 }
 
-TEMPLATE_TEST_CASE( "unique work correctly", "[list][operations]", ft::list<int> )
+TEMPLATE_TEST_CASE( "unique works correctly", "[list][operations]", ft::list<int> )
 {
     int a[] = { 1, 1, -66, -22, -22, -1, -22, 2, 2, 2, 9, 9, 109, 109, 109 };
-    TestType cnt (a, a + sizeof(a) / sizeof(int));
+    TestType c (a, a + sizeof(a) / sizeof(int));
 
     SECTION( "unique without specifying how to compare" ) {
         int unique[] = { 1, -66, -22, -1, -22, 2, 9, 109 };
-        cnt.unique();
-        REQUIRE( cnt.size() == (sizeof(unique) / sizeof(int)) );
+        c.unique();
+        REQUIRE( c.size() == (sizeof(unique) / sizeof(int)) );
         int i = 0;
-        for (auto it = cnt.begin(); it != cnt.end(); ++it) {
+        for (auto it = c.begin(); it != c.end(); ++it) {
             REQUIRE( *it == unique[i] );
             ++i;
         }
     }
     SECTION( "unique w/ specifying how to compare" ) {
         int duplicates[] = { 1, -66, -22, -22, -1, -22, 2, 9, 9, 109, 109, 109 };
-        cnt.unique( [] (int i, int j) { return i + j == 2 || i + j == 4; });
+        c.unique( [] (int i, int j) { return i + j == 2 || i + j == 4; });
 
-        REQUIRE( cnt.size() == (sizeof(duplicates) / sizeof(int)) );
+        REQUIRE( c.size() == (sizeof(duplicates) / sizeof(int)) );
         int i = 0;
-        for (auto it = cnt.begin(); it != cnt.end(); ++it) {
+        for (auto it = c.begin(); it != c.end(); ++it) {
             REQUIRE( *it == duplicates[i] );
             ++i;
         }
@@ -618,13 +634,13 @@ TEMPLATE_TEST_CASE( "merge work correctly", "[list][operations]", ft::list<int> 
         int a[] = { -66, -22, -1, 9, 109 };
         int b[] = { -12, 2, 2, 4, 5, 12, 99 };
         int c[] = { -66, -22, -12, -1, 2, 2, 4, 5, 9, 12, 99, 109 };
-        TestType cnt1 (a, a + sizeof(a) / sizeof(int));
-        TestType cnt2 (b, b + sizeof(b) / sizeof(int));
+        TestType c1 (a, a + sizeof(a) / sizeof(int));
+        TestType c2 (b, b + sizeof(b) / sizeof(int));
 
-        cnt1.merge(cnt2);
-        REQUIRE( cnt2.empty() );
+        c1.merge(c2);
+        REQUIRE( c2.empty() );
         int i = 0;
-        for (auto it = cnt1.begin(); it != cnt1.end(); ++it) {
+        for (auto it = c1.begin(); it != c1.end(); ++it) {
             REQUIRE( *it == c[i] );
             ++i;
         }
@@ -633,27 +649,27 @@ TEMPLATE_TEST_CASE( "merge work correctly", "[list][operations]", ft::list<int> 
         int a[] = { 109, 9, -1, -22, -66 };
         int b[] = { 99, 12, 5, 4, 2, 2, -12 };
         int c[] = { 109, 99, 12, 9, 5, 4, 2, 2, -1, -12, -22, -66 };
-        TestType cnt1 (a, a + sizeof(a) / sizeof(int));
-        TestType cnt2 (b, b + sizeof(b) / sizeof(int));
+        TestType c1 (a, a + sizeof(a) / sizeof(int));
+        TestType c2 (b, b + sizeof(b) / sizeof(int));
 
-        cnt1.merge(cnt2, std::greater<int>());
-        REQUIRE( cnt2.empty() );
+        c1.merge(c2, std::greater<int>());
+        REQUIRE( c2.empty() );
         int i = 0;
-        for (auto it = cnt1.begin(); it != cnt1.end(); ++it) {
+        for (auto it = c1.begin(); it != c1.end(); ++it) {
             REQUIRE( *it == c[i] );
             ++i;
         }
     }
     SECTION( "mergin w/ empty list" ) {
-        TestType cnt1 (5, 10);
-        TestType cnt2;
-        TestType cnt3;
+        TestType c1 (5, 10);
+        TestType c2;
+        TestType c3;
 
-        cnt1.merge(cnt2);
-        REQUIRE( cnt1.size() == 5 );
-        cnt2.merge(cnt3);
-        REQUIRE( cnt2.size() == 0 );
-        REQUIRE( cnt3.size() == 0 );
+        c1.merge(c2);
+        REQUIRE( c1.size() == 5 );
+        c2.merge(c3);
+        REQUIRE( c2.size() == 0 );
+        REQUIRE( c3.size() == 0 );
     }
 }
 
@@ -662,54 +678,54 @@ TEMPLATE_TEST_CASE( "sort work correctly", "[list][operations]", ft::list<int> )
     int v[] = {2, 4, 12, 5, 2, 99, -12};
     int v_sorted[] = {-12, 2, 2, 4, 5, 12, 99};
     size_t v_size = sizeof(v) / sizeof(int);
-    TestType cnt (v, v + v_size);
+    TestType c (v, v + v_size);
 
     SECTION( "sorting without specifying how to compare" ) {
-        cnt.sort();
-        REQUIRE( cnt.size() == v_size );
+        c.sort();
+        REQUIRE( c.size() == v_size );
         int i = 0;
-        for (auto it = cnt.begin(); it != cnt.end(); ++it) {
+        for (auto it = c.begin(); it != c.end(); ++it) {
             REQUIRE( *it == v_sorted[i] );
             ++i;
         }
     }
     SECTION( "sorting with specified comparing function" ) {
-        cnt.sort(std::greater<int>());
-        REQUIRE( cnt.size() == v_size );
+        c.sort(std::greater<int>());
+        REQUIRE( c.size() == v_size );
         int j = v_size;
-        for (auto it = cnt.begin(); it != cnt.end(); ++it) {
+        for (auto it = c.begin(); it != c.end(); ++it) {
             --j;
             REQUIRE( *it == v_sorted[j] );
         }
     }
-    SECTION ( "sorting unfit lists" ) {
-        TestType cnt1;
-        TestType cnt2 (1, 0);
+    SECTION ( "sorting unsortable lists" ) {
+        TestType c1;
+        TestType c2 (1, 0);
 
-        cnt1.sort();
-        REQUIRE( cnt1.size() == 0 );
-        cnt2.sort();
-        REQUIRE( cnt2.size() == 1 );
+        c1.sort();
+        REQUIRE( c1.size() == 0 );
+        c2.sort();
+        REQUIRE( c2.size() == 1 );
     }
 }
 
 TEMPLATE_TEST_CASE( "reverse works correctly", "[list][operations]", ft::list<int> )
 {
-    int v[] = { 2, 4, 2, 5, 2, 99, -12, 1, 312 };
-    TestType cnt (v, v + sizeof(v) / sizeof(int));
-    cnt.reverse();
-    REQUIRE( cnt.size() == (sizeof(v) / sizeof(int)) );
-    int i = sizeof(v) / sizeof(int);
-    for (auto it = cnt.begin(); it != cnt.end(); ++it) {
-        --i;
+    int v[] = {2, 4, 2, 5, 2, 99, -12, 1, 312};
+    TestType c (v, v + 9);
+    c.reverse();
+    REQUIRE( c.size() == 9 );
+    int i = 8;
+    for (auto it = c.begin(); it != c.end(); ++it) {
         REQUIRE( *it == v[i] );
+        --i;
     }
 }
 
 TEMPLATE_TEST_CASE( "ft::list returns same value as std::list", "[list][capacity]",
         int, char, std::string, std::list<int>, std::vector<std::string> )
 {
-    ft::list<TestType> ft_cnt;
-    std::list<TestType> stl_cnt;
-    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
+    ft::list<TestType> ft_c;
+    std::list<TestType> stl_c;
+    REQUIRE( ft_c.max_size() == stl_c.max_size() );
 }
