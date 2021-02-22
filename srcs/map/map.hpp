@@ -130,7 +130,13 @@ class map
 
         iterator insert (iterator position, const value_type& val)
         {
-            return iterator(_tree.insert(position.get_node(), val).first);
+            if (position != end() && _comp(position->first, val.first)) {
+                iterator next = position;
+                ++next;
+                if (next == end() || _comp(val.first, next->first))
+                    return iterator(_tree.insert(position.get_node(), val).first);
+            }
+            return iterator(_tree.insert(val).first);
         }
 
         template <class InputIterator>

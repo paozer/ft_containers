@@ -70,14 +70,16 @@ class avl_tree
             }
             else
                 _root = aux_insert(NULL, NULL, val);
-            if (_added_node)
-                set_bounds();
+            set_bounds();
             return std::make_pair(_added_node_ptr, _added_node);
         }
 
-        std::pair<node_pointer, bool> insert (node_pointer hint, const value_type& val)
+        std::pair<node_pointer, bool> insert (node_pointer position, const value_type& val)
         {
-            return insert(val);
+            unset_bounds();
+            position = aux_insert(position->parent, position, val);
+            set_bounds();
+            return std::make_pair(_added_node_ptr, _added_node);
         }
 
         void clear (void)
