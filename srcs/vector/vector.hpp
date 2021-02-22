@@ -266,11 +266,14 @@ class vector
         // first == begin ? valid return ?
         iterator erase (iterator first, iterator last)
         {
+            if (first == last)
+                return first;
             if (last == end()) {
                 while (first != last) {
                     pop_back();
                     ++first;
                 }
+                return end();
             }
             else {
                 size_type count_deleted = 0;
@@ -284,7 +287,7 @@ class vector
                 }
                 _size -= count_deleted;
             }
-            return iterator(first.get_index() - 1, _size, _array);
+            return iterator(first.get_index(), _size, _array);
         }
 
         void swap (vector& x)
