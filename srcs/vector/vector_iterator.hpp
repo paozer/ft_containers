@@ -46,30 +46,17 @@ class vector_iterator
         reference operator* (void) { return *(_array + _index); }
         self_type operator[] (size_type n) { return *(_array + _index + n); }
 
-        friend bool operator== (const self_type& lhs, const self_type& rhs)
-        {
-            if (lhs._array != rhs._array
-                || lhs._size != rhs._size
-                || lhs._index != rhs._index)
-                return false;
-            return true;
-        }
-
-        friend bool operator< (const self_type& lhs, const self_type& rhs)
-        {
-            if (lhs._array < rhs._array
-                || lhs._size < rhs._size
-                || lhs._index < rhs._index)
-                return true;
-            return false;
-        }
-
+        friend bool operator== (const self_type& lhs, const self_type& rhs) { return rhs - lhs == 0; }
+        friend bool operator< (const self_type& lhs, const self_type& rhs) { return rhs - lhs > 0; }
         friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
         friend bool operator> (const self_type& lhs, const self_type& rhs) { return rhs < lhs; }
         friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
         friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
 
-        /* INCREMENTING/DECREMENTING */
+        /* ITERATOR SUBTRACTION */
+        friend difference_type operator- (const self_type& lhs, const self_type& rhs) { return lhs._index - rhs._index; }
+
+        /* INCREMENTING & DECREMENTING */
         self_type& operator++ (void)
         {
             ++_index;
@@ -95,9 +82,6 @@ class vector_iterator
             --_index;
             return tmp;
         }
-
-        /* ITERATOR SUBTRACTION */
-        friend difference_type operator- (const self_type& lhs, const self_type& rhs) { return lhs._index - rhs._index; }
 
         /* ITERATOR & INTEGER ARITHMETIC */
         self_type& operator+= (difference_type n)
@@ -188,30 +172,17 @@ class reverse_vector_iterator
         reference operator* (void) { return *(_array + _index); }
         self_type operator[] (size_type n) { return *(_array + _index + n); }
 
-        friend bool operator== (const self_type& lhs, const self_type& rhs)
-        {
-            if (lhs._array != rhs._array
-                || lhs._size != rhs._size
-                || lhs._index != rhs._index)
-                return false;
-            return true;
-        }
-
-        friend bool operator< (const self_type& lhs, const self_type& rhs)
-        {
-            if (lhs._array < rhs._array
-                || lhs._size < rhs._size
-                || lhs._index < rhs._index)
-                return true;
-            return false;
-        }
-
+        friend bool operator== (const self_type& lhs, const self_type& rhs) { return rhs - lhs == 0; }
+        friend bool operator< (const self_type& lhs, const self_type& rhs) { return lhs - rhs > 0; }
         friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
-        friend bool operator> (const self_type& lhs, const self_type& rhs) { return rhs < lhs; }
-        friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
-        friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
+        friend bool operator> (const self_type& lhs, const self_type& rhs) { return lhs < rhs; }
+        friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
+        friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
 
-        /* INCREMENTING/DECREMENTING */
+        /* ITERATOR SUBTRACTION */
+        friend difference_type operator- (const self_type& lhs, const self_type& rhs) { return lhs._index + rhs._index; }
+
+        /* INCREMENTING & DECREMENTING */
         self_type& operator++ (void)
         {
             --_index;
@@ -237,8 +208,6 @@ class reverse_vector_iterator
             ++_index;
             return tmp;
         }
-
-        friend difference_type operator- (const self_type& lhs, const self_type& rhs) { return lhs._index + rhs._index; }
 
         /* ITERATOR & INTEGER ARITHMETIC */
         self_type& operator+= (difference_type n)

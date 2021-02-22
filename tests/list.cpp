@@ -10,7 +10,6 @@
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
-
 TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::list<int>)
 {
     SECTION("default constructor creates empty list") {

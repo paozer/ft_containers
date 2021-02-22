@@ -80,9 +80,8 @@ class list
         {
             if (lhs._size != rhs._size)
                 return false;
-            typedef list<T, Alloc>::const_iterator iterator;
-            iterator lit = lhs.begin();
-            iterator rit = rhs.begin();
+            const_iterator lit = lhs.begin();
+            const_iterator rit = rhs.begin();
             while (lit != lhs.end() && rit != rhs.end()) {
                 if (*lit != *rit)
                     return false;
@@ -94,13 +93,12 @@ class list
 
         friend bool operator< (const list<T, Alloc>& lhs, const list<T, Alloc>& rhs)
         {
-            typedef list<T, Alloc>::const_iterator iterator;
-            iterator lit = lhs.begin();
-            iterator rit = rhs.begin();
+            const_iterator lit = lhs.begin();
+            const_iterator rit = rhs.begin();
             while (lit != lhs.end() && rit != rhs.end()) {
                 if (*lit < *rit)
                     return true;
-                else if (*lit > *rit)
+                if (*lit > *rit)
                     return false;
                 ++lit;
                 ++rit;

@@ -98,12 +98,42 @@ class map
             return _tree.insert(std::make_pair(k, mapped_type())).first->pair.second;
         }
 
-        friend bool operator== (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs);
-        friend bool operator< (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs);
-        friend bool operator!= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(lhs == rhs); }
-        friend bool operator<= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(rhs < lhs); }
-        friend bool operator> (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return rhs < lhs; }
-        friend bool operator>= (const map<T, Alloc>& lhs, const map<T, Alloc>& rhs) { return !(lhs < rhs); }
+        friend bool operator== (const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs)
+        {
+            if (lhs.size() != rhs.size())
+                return false;
+            const_iterator lit = lhs.begin();
+            const_iterator rit = rhs.begin();
+            while (lit != lhs.end()) {
+                if (*lit != *rit)
+                    return false;
+                ++lit;
+                ++rit;
+            }
+            return true;
+        }
+
+        friend bool operator< (const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs)
+        {
+            const_iterator lit = lhs.begin();
+            const_iterator rit = rhs.begin();
+            while (lit != lhs.end() && rit != rhs.end()) {
+                if (*lit < *rit)
+                    return true;
+                if (*lit > *rit)
+                    return false;
+                ++lit;
+                ++rit;
+            }
+            if (lhs.size() >= rhs.size())
+                return false;
+            return true;
+        }
+
+        friend bool operator!= (const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs) { return !(lhs == rhs); }
+        friend bool operator<= (const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs) { return !(rhs < lhs); }
+        friend bool operator> (const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs) { return rhs < lhs; }
+        friend bool operator>= (const map<Key, T, Compare, Alloc>& lhs, const map<Key, T, Compare, Alloc>& rhs) { return !(lhs < rhs); }
 
         /* ITERATORS */
         // explicit construction not necessary

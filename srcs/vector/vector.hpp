@@ -80,7 +80,7 @@ class vector
             for (size_type i = 0; i < lhs._size && i < rhs._size; ++i) {
                 if (lhs[i] < rhs[i])
                     return true;
-                else if (lhs[i] > rhs[i])
+                if (lhs[i] > rhs[i])
                     return false;
             }
             if (lhs._size >= rhs._size)
