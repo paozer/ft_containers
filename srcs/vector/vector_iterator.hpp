@@ -1,9 +1,8 @@
 #pragma once
 
+#include "../utils/utils.hpp"
 #include <cstddef> // NULL, std::ptrdiff_t, size_t
 #include <iterator> // std::random_access_iterator_tag
-
-#include "../utils/utils.hpp"
 
 namespace ft {
 
@@ -22,18 +21,18 @@ class vector_iterator
         typedef size_t size_type;
 
     public:
-        vector_iterator(size_type index = 0, size_type size = 0, pointer array = NULL)
+        vector_iterator (size_type index = 0, size_type size = 0, pointer array = NULL)
             : _index(index), _size(size), _array(array)
         {
         }
 
         vector_iterator (const vector_iterator<value_type, false>& other)
+            : _index(other.get_index()), _size(other.get_size()), _array(other.get_array())
         {
-            *this = other;
         }
 
         /* OPERATORS */
-        vector_iterator &operator=(const vector_iterator<value_type, is_const>& other)
+        vector_iterator &operator= (const self_type& other)
         {
             if (this != &other) {
                 _index = other._index;
@@ -43,7 +42,7 @@ class vector_iterator
             return *this;
         }
 
-        friend bool operator==(const self_type & lhs, const self_type & rhs)
+        friend bool operator== (const self_type& lhs, const self_type& rhs)
         {
             if (lhs._array != rhs._array
                 || lhs._size != rhs._size
@@ -52,7 +51,7 @@ class vector_iterator
             return true;
         }
 
-        friend bool operator<(const self_type & lhs, const self_type & rhs)
+        friend bool operator< (const self_type& lhs, const self_type& rhs)
         {
             if (lhs._array < rhs._array
                 || lhs._size < rhs._size
@@ -61,70 +60,72 @@ class vector_iterator
             return false;
         }
 
-        friend bool operator!=(const self_type & lhs, const self_type & rhs) { return !(lhs == rhs); }
-        friend bool operator>(const self_type & lhs, const self_type & rhs) { return rhs < lhs; }
-        friend bool operator<=(const self_type & lhs, const self_type & rhs) { return !(rhs < lhs); }
-        friend bool operator>=(const self_type & lhs, const self_type & rhs) { return !(lhs < rhs); }
+        friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
+        friend bool operator> (const self_type& lhs, const self_type& rhs) { return rhs < lhs; }
+        friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
+        friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
 
-        pointer operator->(void)  { return _array + _index; }
-        reference operator*(void) { return *(_array + _index); }
-        self_type operator[](size_type n) { return *(_array + _index + n); }
+        pointer operator-> (void) { return _array + _index; }
+        reference operator* (void) { return *(_array + _index); }
+        self_type operator[] (size_type n) { return *(_array + _index + n); }
 
-        self_type & operator++(void)
+        self_type& operator++ (void)
         {
             ++_index;
             return *this;
         }
 
-        self_type operator++(int)
+        self_type operator++ (int)
         {
             self_type tmp = *this;
             ++_index;
             return tmp;
         }
 
-        self_type & operator--(void)
+        self_type& operator-- (void)
         {
             --_index;
             return *this;
         }
 
-        self_type operator--(int)
+        self_type operator-- (int)
         {
             self_type tmp = *this;
             --_index;
             return tmp;
         }
 
-        friend difference_type operator+(const self_type & lhs, const self_type & rhs) { return lhs._index + rhs._index; }
-        friend difference_type operator-(const self_type & lhs, const self_type & rhs) { return lhs._index - rhs._index; }
+        friend difference_type operator+ (const self_type& lhs, const self_type& rhs) { return lhs._index + rhs._index; }
+        friend difference_type operator- (const self_type& lhs, const self_type& rhs) { return lhs._index - rhs._index; }
 
-        self_type operator+(difference_type n)
+        self_type operator+ (difference_type n)
         {
             self_type tmp = *this;
             return tmp += n;
         }
 
-        self_type operator-(difference_type n)
+        self_type operator- (difference_type n)
         {
             self_type tmp = *this;
             return tmp -= n;
         }
 
-        self_type & operator+=(difference_type n)
+        self_type& operator+= (difference_type n)
         {
             _index += n;
             return *this;
         }
 
-        self_type & operator-=(difference_type n) { return *this += -n; }
+        self_type& operator-= (difference_type n) { return *this += -n; }
 
         /* GETTERS */
-        size_type get_index() const { return _index; }
+        size_type get_index (void) const { return _index; }
+        size_type get_size (void) const { return _size; }
+        pointer get_array (void) const { return _array; }
 
     private:
-        size_t _index;
-        size_t _size;
+        size_type _index;
+        size_type _size;
         pointer _array;
 
 }; // CLASS VECTOR_ITERATOR
@@ -145,7 +146,7 @@ class reverse_vector_iterator
 
     public:
         /* CONSTRUCTORS */
-        reverse_vector_iterator(size_type index = 0, size_type size = 0, pointer array = NULL)
+        reverse_vector_iterator (size_type index = 0, size_type size = 0, pointer array = NULL)
             : _index(index), _size(size), _array(array)
         {
         }
@@ -156,7 +157,7 @@ class reverse_vector_iterator
         }
 
         /* OPERATORS */
-        reverse_vector_iterator &operator=(const vector_iterator<value_type, is_const>& other)
+        reverse_vector_iterator& operator= (const vector_iterator<value_type, is_const>& other)
         {
             if (this != &other) {
                 _index = other._index;
@@ -166,7 +167,7 @@ class reverse_vector_iterator
             return *this;
         }
 
-        friend bool operator==(const self_type & lhs, const self_type & rhs)
+        friend bool operator== (const self_type& lhs, const self_type& rhs)
         {
             if (lhs._array != rhs._array
                 || lhs._size != rhs._size
@@ -175,7 +176,7 @@ class reverse_vector_iterator
             return true;
         }
 
-        friend bool operator<(const self_type & lhs, const self_type & rhs)
+        friend bool operator< (const self_type& lhs, const self_type& rhs)
         {
             if (lhs._array < rhs._array
                 || lhs._size < rhs._size
@@ -184,70 +185,72 @@ class reverse_vector_iterator
             return false;
         }
 
-        friend bool operator!=(const self_type & lhs, const self_type & rhs) { return !(lhs == rhs); }
-        friend bool operator>(const self_type & lhs, const self_type & rhs) { return rhs < lhs; }
-        friend bool operator<=(const self_type & lhs, const self_type & rhs) { return !(rhs < lhs); }
-        friend bool operator>=(const self_type & lhs, const self_type & rhs) { return !(lhs < rhs); }
+        friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
+        friend bool operator> (const self_type& lhs, const self_type& rhs) { return rhs < lhs; }
+        friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
+        friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
 
-        pointer operator->(void)  { return &(_array + _index - 1); }
-        reference operator*(void) { return *(_array + _index - 1); }
-        self_type operator[](size_type n) { return *(_array + _index - 1 + n); }
+        pointer operator-> (void)  { return _array + _index - 1; }
+        reference operator* (void) { return *(_array + _index - 1); }
+        self_type operator[] (size_type n) { return *(_array + _index - 1 + n); }
 
-        self_type & operator++(void)
+        self_type& operator++ (void)
         {
             --_index;
             return *this;
         }
 
-        self_type operator++(int)
+        self_type operator++ (int)
         {
             self_type tmp = *this;
             --_index;
             return tmp;
         }
 
-        self_type & operator--(void)
+        self_type& operator-- (void)
         {
             ++_index;
             return *this;
         }
 
-        self_type operator--(int)
+        self_type operator-- (int)
         {
             self_type tmp = *this;
             ++_index;
             return tmp;
         }
 
-        friend difference_type operator+(const self_type & lhs, const self_type & rhs) { return lhs._index - rhs._index; }
-        friend difference_type operator-(const self_type & lhs, const self_type & rhs) { return lhs._index + rhs._index; }
+        friend difference_type operator+ (const self_type& lhs, const self_type& rhs) { return lhs._index - rhs._index; }
+        friend difference_type operator- (const self_type& lhs, const self_type& rhs) { return lhs._index + rhs._index; }
 
-        self_type operator+(difference_type n)
+        self_type operator+ (difference_type n)
         {
             self_type tmp = *this;
             return tmp -= n;
         }
 
-        self_type operator-(difference_type n)
+        self_type operator- (difference_type n)
         {
             self_type tmp = *this;
             return tmp += n;
         }
 
-        self_type & operator+=(difference_type n)
+        self_type& operator+= (difference_type n)
         {
             _index -= n;
             return *this;
         }
 
-        self_type & operator-=(difference_type n) { return *this += n; }
+        self_type& operator-= (difference_type n) { return *this += n; }
 
         /* GETTERS */
-        size_type get_index() const { return _index; }
+        size_type get_index (void) const { return _index; }
+        size_type get_size (void) const { return _size; }
+        pointer get_content (void) const { return _array; }
 
     private:
-        size_t _index;
-        size_t _size;
+        size_type _index;
+        size_type _size;
         pointer _array;
 
 }; // CLASS REVERSE_VECTOR_ITERATOR

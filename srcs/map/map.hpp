@@ -1,13 +1,14 @@
 #pragma once
 
-#include <memory> // std::allocator
+#include "map_iterator.hpp"
+#include "../utils/avl_tree.hpp"
+
 #include <cstddef> // std::ptddiff_t, size_t
+
+#include <memory> // std::allocator
 #include <limits> // std::numeric_limits
 #include <functional> // std::less
 #include <utility> // std::pair
-
-#include "map_iterator.hpp"
-#include "../utils/avl_tree.hpp"
 
 namespace ft {
 
@@ -53,7 +54,7 @@ class map
 
     private:
         typedef ft::avl_node<key_type, mapped_type> node;
-        typedef node * node_pointer;
+        typedef node* node_pointer;
 
     public:
         /* CONSTRUCTORS */
@@ -71,16 +72,19 @@ class map
                 _tree.insert(*first);
         }
 
-        map (const map & x) { *this = x; }
+        map (const map& x)
+            : _tree(x._comp, x._alloc), _comp(x._comp), _alloc(x._alloc)
+        {
+            *this = x;
+        }
 
         /* DESTRUCTOR */
         ~map() {}
 
         /* OPERATORS */
-        map &operator=(const map & x)
+        map& operator= (const map& x)
         {
             if (this != &x) {
-                //_alloc = x._alloc; // don't do this please
                 _comp = x._comp;
                 _tree.clear();
                 for (const_iterator it = x.begin(); it != x.end(); ++it)
@@ -160,14 +164,14 @@ class map
             ft::swap(*this, x);
         }
 
-        void clear(void)
+        void clear (void)
         {
             _tree.clear();
         }
 
         /* OBSERVERS */
-        key_compare key_comp() const { return _comp; }
-        value_compare value_comp() const { return value_compare(_comp); }
+        key_compare key_comp (void) const { return _comp; }
+        value_compare value_comp (void) const { return value_compare(_comp); }
 
         /* OPERATIONS */
         size_type count (const key_type& k) const
@@ -262,6 +266,5 @@ void swap (map<Key, T, Compare, Alloc>& x, map<Key, T, Compare, Alloc>& y)
 {
     ft::swap(x, y);
 }
-
 
 } // NAMESPACE FT

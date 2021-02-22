@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstddef> // size_t
 #include "../list/list.hpp"
+#include <cstddef> // size_t
 
 namespace ft {
 
@@ -13,29 +13,33 @@ class stack
         typedef Container container_type;
         typedef size_t size_type;
 
-        explicit stack (const container_type& cntr = container_type())
-            : _cntr(cntr) {}
+        explicit stack (const container_type& container = container_type())
+            : c(container)
+        {
+        }
 
-        ~stack() {}
+        ~stack()
+        {
+        }
 
-        bool empty() const { return _cntr.empty(); }
-        size_type size() const { return _cntr.size(); }
+        bool empty() const { return c.empty(); }
+        size_type size() const { return c.size(); }
 
-        value_type& top(void) { return _cntr.back(); }
-        const value_type& top(void) const { return _cntr.back(); }
+        value_type& top(void) { return c.back(); }
+        const value_type& top(void) const { return c.back(); }
 
-        void push (const value_type& val) { _cntr.push_back(val); }
-        void pop(void) { _cntr.pop_back(); }
+        void push (const value_type& val) { c.push_back(val); }
+        void pop(void) { c.pop_back(); }
 
-        bool operator== (const stack<T, Container>& rhs) { return _cntr == rhs._cntr; }
-        bool operator< (const stack<T, Container>& rhs) { return _cntr < rhs._cntr; }
-        bool operator!= (const stack<T, Container>& rhs) { return _cntr != rhs._cntr; }
-        bool operator<= (const stack<T, Container>& rhs) { return _cntr <= rhs._cntr; }
-        bool operator> (const stack<T, Container>& rhs) { return _cntr > rhs._cntr; }
-        bool operator>= (const stack<T, Container>& rhs) { return _cntr >= rhs._cntr; }
+        friend bool operator== (const stack<T, Container>& rhs, const stack<T, container_type> lhs) { return rhs.c == lhs.c; }
+        friend bool operator< (const stack<T, Container>& rhs, const stack<T, container_type> lhs) { return rhs.c < lhs.c; }
+        friend bool operator!= (const stack<T, Container>& rhs, const stack<T, container_type> lhs) { return rhs.c != lhs.c; }
+        friend bool operator<= (const stack<T, Container>& rhs, const stack<T, container_type> lhs) { return rhs.c <= lhs.c; }
+        friend bool operator> (const stack<T, Container>& rhs, const stack<T, container_type> lhs) { return rhs.c > lhs.c; }
+        friend bool operator>= (const stack<T, Container>& rhs, const stack<T, container_type> lhs) { return rhs.c >= lhs.c; }
 
-    private:
-        container_type _cntr;
+    protected:
+        container_type c;
 
 }; // CLASS STACK
 

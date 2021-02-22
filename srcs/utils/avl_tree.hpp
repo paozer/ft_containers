@@ -1,12 +1,13 @@
 #pragma once
 
-#include <cstddef> // size_t
-#include <memory> // std::allocator
-#include <functional> // std::less
-#include <cmath> // std::abs
-
 #include "utils.hpp"
 #include "avl_node.hpp"
+
+#include <cstddef> // size_t
+#include <cmath> // std::abs
+
+#include <memory> // std::allocator
+#include <functional> // std::less
 
 namespace ft {
 
@@ -50,18 +51,18 @@ class avl_tree
         }
 
         /* ELEMENT ACCESS */
-        node_pointer begin(void) const { return _begin->parent; }
-        node_pointer end(void) const { return _end; }
-        node_pointer rbegin(void) const { return _begin; }
-        node_pointer rend(void) const { return _end->parent; }
+        node_pointer begin (void) const { return _begin->parent; }
+        node_pointer end (void) const { return _end; }
+        node_pointer rbegin (void) const { return _begin; }
+        node_pointer rend (void) const { return _end->parent; }
 
         /* CAPACITY */
-        size_type size(void) const { return _size; }
-        bool empty(void) const { return _size == 0; }
-        size_type max_size(void) const { return _alloc.max_size(); }
+        size_type size (void) const { return _size; }
+        bool empty (void) const { return _size == 0; }
+        size_type max_size (void) const { return _alloc.max_size(); }
 
         /* MODIFIERS */
-        std::pair<node_pointer, bool> insert(const value_type& val)
+        std::pair<node_pointer, bool> insert (const value_type& val)
         {
             if (_root) {
                 unset_bounds();
@@ -79,7 +80,7 @@ class avl_tree
             return insert(val);
         }
 
-        void clear(void)
+        void clear (void)
         {
             if (_size == 0)
                 return ;
@@ -101,7 +102,7 @@ class avl_tree
             return old_size - _size;
         }
 
-        size_type erase(node_pointer node)
+        size_type erase (node_pointer node)
         {
             if (_size == 0)
                 return 0;
@@ -113,7 +114,7 @@ class avl_tree
         }
 
         /* OPERATIONS */
-        node_pointer find(const key_type& key) const
+        node_pointer find (const key_type& key) const
         {
             node_pointer node = _root;
             while (node && node != _begin && node != _end) {
@@ -138,7 +139,7 @@ class avl_tree
         key_compare _comp;
 
         /* INSERT */
-        node_pointer aux_insert(node_pointer parent, node_pointer node, const value_type& val)
+        node_pointer aux_insert (node_pointer parent, node_pointer node, const value_type& val)
         {
             // if we're at a leaf insert key/val pair
             // else if key goes into the left subtree
@@ -164,7 +165,7 @@ class avl_tree
         }
 
         /* ERASE */
-        void aux_erase(node_pointer parent, node_pointer child, const key_type& key)
+        void aux_erase (node_pointer parent, node_pointer child, const key_type& key)
         {
             if (!child)
                 return ;
@@ -187,7 +188,7 @@ class avl_tree
             fix_up(parent);
         }
 
-        void aux_erase_no_child_node(node_pointer parent, node_pointer child)
+        void aux_erase_no_child_node (node_pointer parent, node_pointer child)
         {
             if (parent) {
                 if (parent->left == child)
@@ -200,7 +201,7 @@ class avl_tree
             delete_node(child);
         }
 
-        void aux_erase_one_child_node(node_pointer parent, node_pointer child)
+        void aux_erase_one_child_node (node_pointer parent, node_pointer child)
         {
             if (parent) {
                 if (parent->left == child)
@@ -217,7 +218,7 @@ class avl_tree
             delete_node(child);
         }
 
-        void aux_erase_two_child_node(node_pointer child, const key_type& key)
+        void aux_erase_two_child_node (node_pointer child, const key_type& key)
         {
             node_pointer min = get_min(child->right);
             swap_nodes(child, min);
@@ -225,7 +226,7 @@ class avl_tree
         }
 
         /* UTILITIES */
-        void fix_up(node_pointer node)
+        void fix_up (node_pointer node)
         {
             if (!node)
                 return ;
@@ -283,7 +284,7 @@ class avl_tree
             }
         }
 
-        void unset_bounds()
+        void unset_bounds (void)
         {
             if (_begin->parent != _end)
                 _begin->parent->left = NULL;
@@ -291,7 +292,7 @@ class avl_tree
                 _end->parent->right = NULL;
         }
 
-        void set_bounds()
+        void set_bounds (void)
         {
             if (_size != 0) {
                 node_pointer min = get_min(_root);
@@ -307,7 +308,7 @@ class avl_tree
             }
         }
 
-        void swap_nodes(node_pointer n1, node_pointer n2)
+        void swap_nodes (node_pointer n1, node_pointer n2)
         {
             node_pointer parent1 = n1->parent;
             node_pointer left_n1 = n1->left;
@@ -347,7 +348,7 @@ class avl_tree
             }
         }
 
-        void aux_clear(node_pointer node)
+        void aux_clear (node_pointer node)
         {
             if (!node)
                 return ;
@@ -356,7 +357,7 @@ class avl_tree
             delete_node(node);
         }
 
-        node_pointer get_min(node_pointer node)
+        node_pointer get_min (node_pointer node)
         {
             if (!node)
                 return NULL;
@@ -365,7 +366,7 @@ class avl_tree
             return node;
         }
 
-        node_pointer get_max(node_pointer node)
+        node_pointer get_max (node_pointer node)
         {
             if (!node)
                 return NULL;
@@ -375,7 +376,7 @@ class avl_tree
         }
 
         /* ROTATIONS */
-        node_pointer left_rotate(node_pointer node)
+        node_pointer left_rotate (node_pointer node)
         {
             node_pointer tmp = node->right;
             node->right = tmp->left;
@@ -392,7 +393,7 @@ class avl_tree
             return tmp;
         }
 
-        node_pointer right_rotate(node_pointer node)
+        node_pointer right_rotate (node_pointer node)
         {
             node_pointer tmp = node->left;
             node->left = tmp->right;
@@ -409,27 +410,27 @@ class avl_tree
             return tmp;
         }
 
-        node_pointer right_left_rotate(node_pointer node)
+        node_pointer right_left_rotate (node_pointer node)
         {
             node->right = right_rotate(node->right);
             return left_rotate(node);
         }
 
-        node_pointer left_right_rotate(node_pointer node)
+        node_pointer left_right_rotate (node_pointer node)
         {
             node->left = left_rotate(node->left);
             return right_rotate(node);
         }
 
         /* MEMORY MANAGEMENT */
-        node_pointer new_node(const value_type& val = value_type())
+        node_pointer new_node (const value_type& val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
             _alloc.construct(p, val);
             return p;
         }
 
-        void delete_node(node_pointer p)
+        void delete_node (node_pointer p)
         {
             _alloc.destroy(p);
             _alloc.deallocate(p, 1);

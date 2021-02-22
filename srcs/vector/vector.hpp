@@ -1,12 +1,13 @@
 #pragma once
 
-#include <memory> // std::allocator
+#include "vector_iterator.hpp"
+#include "../utils/utils.hpp"
+
 #include <cstddef> // std::ptrdiff_t, size_t, NULL
+
+#include <memory> // std::allocator
 #include <stdexcept> // std::out_of_range
 #include <limits> // std::numeric_limits
-
-#include "../utils/utils.hpp"
-#include "vector_iterator.hpp"
 
 namespace ft {
 
@@ -49,14 +50,14 @@ class vector
                 push_back(*first);
         }
 
-        vector (const vector & x)
+        vector (const vector& x)
             : _size(0), _capacity(0), _array(NULL), _alloc(x._alloc)
         {
             *this = x;
         }
 
         /* OPERATORS */
-        vector &operator=(const vector & x)
+        vector& operator= (const vector& x)
         {
             if (this != &x)
                 assign(x.begin(), x.end());
@@ -339,6 +340,6 @@ class vector
 }; // CLASS VECTOR
 
 template <class T, class Alloc>
-void swap (vector<T,Alloc>& x, vector<T,Alloc>& y) { x.swap(y); }
+void swap (vector<T, Alloc>& x, vector<T, Alloc>& y) { x.swap(y); }
 
 } // NAMESPACE FT

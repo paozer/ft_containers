@@ -1,12 +1,13 @@
 #pragma once
 
-#include <memory> // std::allocator
-#include <cstddef> // NULL, std::ptrdiff_t
-#include <numeric> // std::numeric_limits
-
 #include "list_node.hpp"
 #include "list_iterator.hpp"
 #include "../utils/utils.hpp"
+
+#include <cstddef> // NULL, std::ptrdiff_t
+
+#include <memory> // std::allocator
+#include <numeric> // std::numeric_limits
 
 namespace ft {
 
@@ -29,7 +30,7 @@ class list
 
     private:
         typedef list_node<value_type> node;
-        typedef node * node_pointer;
+        typedef node* node_pointer;
         typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
@@ -41,7 +42,7 @@ class list
             _tail->prev = _head;
         }
 
-        explicit list (size_t n, const value_type & val = value_type(), const allocator_type& alloc = allocator_type())
+        explicit list (size_t n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
             : _size(0), _head(new_node()), _tail(new_node()), _alloc(alloc)
         {
             _head->next = _tail;
@@ -59,7 +60,7 @@ class list
             assign(first, last);
         }
 
-        list (const list & x)
+        list (const list& x)
             : _size(0), _head(new_node()), _tail(new_node()), _alloc(x._alloc)
         {
             _head->next = _tail;
@@ -68,7 +69,7 @@ class list
         }
 
         /* OPERATORS */
-        list &operator=(const list & x)
+        list& operator=(const list& x)
         {
             if (this != &x)
                 assign(x.begin(), x.end());
@@ -139,10 +140,10 @@ class list
         size_type max_size() const { return _alloc.max_size(); }
 
         /* ELEMENT ACCESS */
-        reference front () { return _head->next->content; }
-        const_reference front () const { return _head->next->content; }
-        reference back () { return _tail->prev->content; }
-        const_reference back () const { return _tail->prev->content; }
+        reference front (void) { return _head->next->content; }
+        const_reference front (void) const { return _head->next->content; }
+        reference back (void) { return _tail->prev->content; }
+        const_reference back (void) const { return _tail->prev->content; }
 
         /* MODIFIERS */
         template <class InputIterator>
@@ -326,7 +327,7 @@ class list
             }
         }
 
-        void unique()
+        void unique (void)
         {
             unique(std::equal_to<value_type>());
         }
@@ -381,7 +382,7 @@ class list
             result._tail->prev = result._head;
         }
 
-        void sort()
+        void sort (void)
         {
             sort(std::less<value_type>());
         }
@@ -408,7 +409,7 @@ class list
             merge(left, comp);
         }
 
-        void reverse()
+        void reverse (void)
         {
             if (_size < 2)
                 return ;
@@ -424,14 +425,14 @@ class list
         node_allocator _alloc;
 
         /* MEMORY MANAGEMENT */
-        node_pointer new_node(const value_type & val = value_type())
+        node_pointer new_node (const value_type& val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
             _alloc.construct(p, val);
             return p;
         }
 
-        void delete_node(node_pointer p)
+        void delete_node (node_pointer p)
         {
             _alloc.destroy(p);
             _alloc.deallocate(p, 1);
@@ -440,6 +441,6 @@ class list
 }; // CLASS LIST
 
 template <class T, class Alloc>
-void swap (list<T,Alloc>& x, list<T,Alloc>& y) { x.swap(y); }
+void swap (list<T, Alloc>& x, list<T, Alloc>& y) { x.swap(y); }
 
 } // NAMESPACE FT

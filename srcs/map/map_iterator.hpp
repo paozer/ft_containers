@@ -1,11 +1,12 @@
 #pragma once
 
-#include <utility> // std::pair
-#include <iterator> // std::bidirectional_iterator_tag
-#include <cstddef> // std.:ptrdiff_t
-
 #include "../utils/avl_node.hpp"
 #include "../utils/utils.hpp"
+
+#include <cstddef> // std.:ptrdiff_t
+
+#include <utility> // std::pair
+#include <iterator> // std::bidirectional_iterator_tag
 
 namespace ft {
 
@@ -15,8 +16,8 @@ class map_iterator
     public:
         typedef std::pair<const Key, Value> value_type;
         typedef std::ptrdiff_t difference_type;
-        typedef typename choose<is_const, const value_type *, value_type *>::type pointer;
-        typedef typename choose<is_const, const value_type &, value_type &>::type reference;
+        typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
+        typedef typename choose<is_const, const value_type&, value_type&>::type reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
     private:
@@ -24,7 +25,7 @@ class map_iterator
         typedef Value mapped_type;
         typedef map_iterator<key_type, mapped_type, is_const> self_type;
         typedef avl_node<key_type, mapped_type> map_node;
-        typedef typename ft::choose<is_const, const map_node *, map_node *>::type node_pointer;
+        typedef typename ft::choose<is_const, const map_node*, map_node*>::type node_pointer;
 
     public:
         /* CONSTRUCTORS */
@@ -34,24 +35,24 @@ class map_iterator
         map_iterator (const map_iterator<key_type, mapped_type, false>& other) : _node(other.get_node()) {}
 
         /* OPERATORS */
-        map_iterator &operator=(const self_type & other)
+        map_iterator& operator= (const self_type& other)
         {
             if (this != &other)
                 _node = other._node;
             return *this;
         }
 
-        bool operator==(const self_type & other) { return _node == other._node; }
-        bool operator!=(const self_type & other) { return _node != other._node; }
+        friend bool operator== (const self_type& rhs, const self_type& lhs) { return rhs._node == lhs._node; }
+        friend bool operator!= (const self_type& rhs, const self_type& lhs) { return rhs._node != lhs._node; }
 
-        reference operator*(void) { return _node->pair; }
-        pointer operator->(void) { return &_node->pair; }
+        reference operator* (void) { return _node->pair; }
+        pointer operator-> (void) { return &_node->pair; }
 
         /* if there is a right subtree goto it's smallest node
          * else if we are done w/ left subtree go to subtree root
          * else if we are done w/ right subtree go to subtree root parent
          */
-        self_type & operator++(void)
+        self_type& operator++ (void)
         {
             node_pointer parent = _node->parent;
             if (_node->right) {
@@ -71,14 +72,14 @@ class map_iterator
             return *this;
         }
 
-        self_type operator++(int)
+        self_type operator++ (int)
         {
             self_type tmp = *this;
             ++*this;
             return tmp;
         }
 
-        self_type & operator--(void)
+        self_type& operator-- (void)
         {
             node_pointer parent = _node->parent;
             if (_node->left) {
@@ -98,7 +99,7 @@ class map_iterator
             return *this;
         }
 
-        self_type operator--(int)
+        self_type operator-- (int)
         {
             self_type tmp = *this;
             --*this;
@@ -106,7 +107,7 @@ class map_iterator
         }
 
         /* GETTER */
-        node_pointer get_node(void) const { return _node; }
+        node_pointer get_node (void) const { return _node; }
 
     private:
         node_pointer _node;
@@ -119,8 +120,8 @@ class reverse_map_iterator
     public:
         typedef std::pair<const Key, Value> value_type;
         typedef std::ptrdiff_t difference_type;
-        typedef typename choose<is_const, const value_type *, value_type *>::type pointer;
-        typedef typename choose<is_const, const value_type &, value_type &>::type reference;
+        typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
+        typedef typename choose<is_const, const value_type&, value_type&>::type reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
     private:
@@ -128,7 +129,7 @@ class reverse_map_iterator
         typedef Value mapped_type;
         typedef reverse_map_iterator<key_type, mapped_type, is_const> self_type;
         typedef ft::avl_node<key_type, mapped_type> map_node;
-        typedef typename ft::choose<is_const, const map_node *, map_node *>::type node_pointer;
+        typedef typename ft::choose<is_const, const map_node*, map_node*>::type node_pointer;
 
     public:
         /* CONSTRUCTORS */
@@ -136,24 +137,24 @@ class reverse_map_iterator
         reverse_map_iterator (const reverse_map_iterator<key_type, mapped_type, false>& other) : _node(other.get_node()) {}
 
         /* OPERATORS */
-        reverse_map_iterator &operator=(const self_type & other)
+        reverse_map_iterator& operator= (const self_type& other)
         {
             if (this != &other)
                 _node = other._node;
             return *this;
         }
 
-        bool operator==(const self_type & other) { return _node == other._node; }
-        bool operator!=(const self_type & other) { return _node != other._node; }
+        friend bool operator== (const self_type& rhs, const self_type& lhs) { return rhs._node == lhs._node; }
+        friend bool operator!= (const self_type& rhs, const self_type& lhs) { return rhs._node != lhs._node; }
 
-        reference operator*(void) { return _node->p; }
-        pointer operator->(void) { return &_node->p; }
+        reference operator* (void) { return _node->p; }
+        pointer operator-> (void) { return &_node->p; }
 
         /* if there is a right subtree goto it's smallest node
          * else if we are done w/ left subtree go to subtree root
          * else if we are done w/ right subtree go to subtree root parent
          */
-        self_type & operator++(void)
+        self_type& operator++ (void)
         {
             node_pointer parent = _node->parent;
             if (_node->left) {
@@ -173,14 +174,14 @@ class reverse_map_iterator
             return *this;
         }
 
-        self_type operator++(int)
+        self_type operator++ (int)
         {
             self_type tmp = *this;
             ++*this;
             return tmp;
         }
 
-        self_type & operator--(void)
+        self_type& operator-- (void)
         {
             node_pointer parent = _node->parent;
             if (_node->right) {
@@ -200,7 +201,7 @@ class reverse_map_iterator
             return *this;
         }
 
-        self_type operator--(int)
+        self_type operator-- (int)
         {
             self_type tmp = *this;
             --*this;
@@ -208,7 +209,7 @@ class reverse_map_iterator
         }
 
         /* GETTER */
-        node_pointer get_node(void) const { return _node; }
+        node_pointer get_node (void) const { return _node; }
 
     private:
         node_pointer _node;

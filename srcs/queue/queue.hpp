@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cstddef> // size_t
 #include "../list/list.hpp"
+#include <cstddef> // size_t
 
 namespace ft {
 
@@ -13,31 +13,35 @@ class queue
         typedef Container container_type;
         typedef size_t size_type;
 
-        explicit queue (const container_type& cntr = container_type())
-            : _cntr(cntr) {}
+        explicit queue (const container_type& container = container_type())
+            : c(container)
+        {
+        }
 
-        ~queue() {}
+        ~queue()
+        {
+        }
 
-        bool empty() const { return _cntr.empty(); }
-        size_type size() const { return _cntr.size(); }
+        bool empty() const { return c.empty(); }
+        size_type size() const { return c.size(); }
 
-        value_type& front() { return _cntr.front(); }
-        value_type& back() { return _cntr.back(); }
-        const value_type& front() const { return _cntr.front(); }
-        const value_type& back() const { return _cntr.back(); }
+        value_type& front() { return c.front(); }
+        value_type& back() { return c.back(); }
+        const value_type& front() const { return c.front(); }
+        const value_type& back() const { return c.back(); }
 
-        void push (const value_type& val) { _cntr.push_back(val); }
-        void pop(void) { _cntr.pop_front(); }
+        void push (const value_type& val) { c.push_back(val); }
+        void pop(void) { c.pop_front(); }
 
-        bool operator== (const queue<T, Container>& rhs) { return _cntr == rhs._cntr; }
-        bool operator< (const queue<T, Container>& rhs) { return _cntr < rhs._cntr; }
-        bool operator!= (const queue<T, Container>& rhs) { return _cntr != rhs._cntr; }
-        bool operator<= (const queue<T, Container>& rhs) { return _cntr <= rhs._cntr; }
-        bool operator> (const queue<T, Container>& rhs) { return _cntr > rhs._cntr; }
-        bool operator>= (const queue<T, Container>& rhs) { return _cntr >= rhs._cntr; }
+        friend bool operator== (const queue<T, Container>& rhs, const queue<T, container_type> lhs) { return rhs.c == lhs.c; }
+        friend bool operator< (const queue<T, Container>& rhs, const queue<T, container_type> lhs) { return rhs.c < lhs.c; }
+        friend bool operator!= (const queue<T, Container>& rhs, const queue<T, container_type> lhs) { return rhs.c != lhs.c; }
+        friend bool operator<= (const queue<T, Container>& rhs, const queue<T, container_type> lhs) { return rhs.c <= lhs.c; }
+        friend bool operator> (const queue<T, Container>& rhs, const queue<T, container_type> lhs) { return rhs.c > lhs.c; }
+        friend bool operator>= (const queue<T, Container>& rhs, const queue<T, container_type> lhs) { return rhs.c >= lhs.c; }
 
-    private:
-        container_type _cntr;
+    protected:
+        container_type c;
 
 }; // CLASS QUEUE
 

@@ -1,11 +1,12 @@
 #pragma once
 
-#include <memory> // std::allocator
+#include "rb_node.hpp"
+
 #include <cstddef> // NULL, size_t
+
+#include <memory> // std::allocator
 #include <utility> // std::pair
 #include <functional> // std::less
-
-#include "rb_node.hpp"
 
 namespace ft {
 
