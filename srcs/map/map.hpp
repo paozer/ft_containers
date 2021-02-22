@@ -217,8 +217,8 @@ class map
             return std::make_pair(low, up);
         }
 
-        // lower_bound returns iterator to k if present or it's first successor
-        // upper_bound returns iterator to k's successor if present or it's first successor
+        // lower_bound returns iterator to first element that is not less than k
+        // upper_bound returns iterator to first element that is greater than k
         iterator lower_bound (const key_type& k)
         {
             iterator ite = end();

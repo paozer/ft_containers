@@ -69,7 +69,7 @@ class list
         }
 
         /* OPERATORS */
-        list& operator=(const list& x)
+        list& operator= (const list& x)
         {
             if (this != &x)
                 assign(x.begin(), x.end());

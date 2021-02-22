@@ -21,12 +21,19 @@ class list_iterator
 
     private:
         typedef list_iterator<value_type, is_const> self_type;
-        typedef typename choose<is_const, const list_node<T>*, list_node<T>*>::type node_pointer;
+        typedef typename choose<is_const, const list_node<value_type>*, list_node<value_type>*>::type node_pointer;
 
     public:
         /* CONSTRUCTORS */
-        list_iterator (list_node<value_type>* node = NULL) : _node(node) {}
-        list_iterator (const list_iterator<value_type, false>& other) : _node(other.get_node()) {}
+        list_iterator (node_pointer node = NULL)
+            : _node(node)
+        {
+        }
+
+        list_iterator (const list_iterator<value_type, false>& other)
+            : _node(other.get_node())
+        {
+        }
 
         /* OPERATORS */
         list_iterator& operator= (const self_type& other)
@@ -37,7 +44,7 @@ class list_iterator
         }
 
         friend bool operator== (const self_type& rhs, const self_type& lhs) { return rhs._node == lhs._node; }
-        friend bool operator!= (const self_type& rhs, const self_type& lhs) { return !(rhs == lhs); }
+        friend bool operator!= (const self_type& rhs, const self_type& lhs) { return rhs._node != lhs._node; }
 
 
         reference operator* (void) { return _node->content; }
@@ -91,12 +98,19 @@ class reverse_list_iterator
 
     private:
         typedef reverse_list_iterator<value_type, is_const> self_type;
-        typedef typename choose<is_const, const list_node<T>*, list_node<T>*>::type node_pointer;
+        typedef typename choose<is_const, const list_node<value_type>*, list_node<value_type>*>::type node_pointer;
 
     public:
         /* CONSTRUCTORS */
-        reverse_list_iterator (list_node<value_type>* node = NULL) : _node(node) {}
-        reverse_list_iterator (const reverse_list_iterator<value_type, false>& other) : _node(other.get_node()) {}
+        reverse_list_iterator (node_pointer node = NULL)
+            : _node(node)
+        {
+        }
+
+        reverse_list_iterator (const reverse_list_iterator<value_type, false>& other)
+            : _node(other.get_node())
+        {
+        }
 
         /* OPERATORS */
         reverse_list_iterator& operator= (const self_type& other)
