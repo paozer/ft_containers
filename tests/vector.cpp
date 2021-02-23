@@ -73,110 +73,82 @@ TEMPLATE_TEST_CASE( "copy constructor works correctly", "[vector][basics]", ft::
     }
 }
 
+/* ASSIGNATION OPERATOR */
+TEST_CASE("vector assignation operator works correctly", "[vector][assignation operators]")
+{
+    int a[] = {1, 4, -1, 2, 33};
+    int b[] = {1, 4};
+    ft::vector<int> myvector1 (a, a + 5);
+    ft::vector<int> myvector2 (b, b + 2);
+    ft::vector<int> myvector3;
+    ft::vector<int>::iterator lit;
+    ft::vector<int>::iterator rit;
+
+    myvector1 = myvector2;
+    REQUIRE( myvector1.size() == myvector2.size() );
+    lit = myvector1.begin();
+    rit = myvector2.begin();
+    while (lit != myvector1.end()) {
+        REQUIRE( *lit == *rit );
+        ++lit;
+        ++rit;
+    }
+
+    myvector2 = myvector3;
+    REQUIRE( myvector2.size() == myvector3.size() );
+    REQUIRE( myvector2.begin() == myvector2.end() );
+}
+
 /* RELATIONAL OPERATORS */
-TEMPLATE_TEST_CASE( "operator= works correctly", "[vector][relational operators]", ft::vector<int> )
+TEST_CASE("vector relational operators work correctly", "[vector][relational operators]")
 {
-    TestType cnt1 (10, 10);
-    TestType cnt2 = cnt1;
+    int a[] = {1, 4, -1, 2, 33};
+    int b[] = {1, 4};
+    int c[] = {1, 4, -1, 2, 33, 0};
+    ft::vector<int> myvector1 (a, a + 5);
+    ft::vector<int> myvector2 (b, b + 2);
+    ft::vector<int> myvector3;
+    ft::vector<int> myvector4 (c, c + 6);
 
-    REQUIRE( cnt2.size() == 10 );
-    for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
-        REQUIRE( *it == 10 );
-}
+    // myvector1 vs myvector2
+    REQUIRE_FALSE( myvector1 == myvector2 );
+    REQUIRE( myvector1 != myvector2 );
+    REQUIRE_FALSE( myvector1 < myvector2 );
+    REQUIRE_FALSE( myvector1 <= myvector2 );
+    REQUIRE( myvector1 > myvector2 );
+    REQUIRE( myvector1 >= myvector2 );
 
-TEMPLATE_TEST_CASE( "operator== works correctly", "[vector][relational operators]", ft::vector<int> )
-{
-    TestType cnt1 (10, 10);
-    TestType cnt2;
-    TestType cnt3;
-    TestType cnt4;
+    // myvector1 vs myvector1
+    REQUIRE( myvector1 == myvector1 );
+    REQUIRE_FALSE( myvector1 != myvector1 );
+    REQUIRE_FALSE( myvector1 < myvector1 );
+    REQUIRE( myvector1 <= myvector1 );
+    REQUIRE_FALSE( myvector1 > myvector1 );
+    REQUIRE( myvector1 >= myvector1 );
 
-    REQUIRE_FALSE( (cnt1 == cnt2) );
-    cnt2 = cnt1;
-    REQUIRE( (cnt1 == cnt2) );
-    REQUIRE( (cnt3 == cnt4) );
-}
+    // myvector1 vs myvector3
+    REQUIRE_FALSE( myvector1 == myvector3 );
+    REQUIRE( myvector1 != myvector3 );
+    REQUIRE_FALSE( myvector1 < myvector3 );
+    REQUIRE_FALSE( myvector1 <= myvector3 );
+    REQUIRE( myvector1 > myvector3 );
+    REQUIRE( myvector1 >= myvector3 );
 
-TEMPLATE_TEST_CASE( "operator!= works correctly", "[vector][relational operators]", ft::vector<int> )
-{
-    TestType cnt1 (10, 10);
-    TestType cnt2;
-    TestType cnt3;
-    TestType cnt4;
+    // myvector3 vs myvector3
+    REQUIRE( myvector3 == myvector3 );
+    REQUIRE_FALSE( myvector3 != myvector3 );
+    REQUIRE_FALSE( myvector3 < myvector3 );
+    REQUIRE( myvector3 <= myvector3 );
+    REQUIRE_FALSE( myvector3 > myvector3 );
+    REQUIRE( myvector3 >= myvector3 );
 
-    REQUIRE( (cnt1 != cnt2) );
-    cnt2 = cnt1;
-    REQUIRE_FALSE( (cnt1 != cnt2) );
-    REQUIRE_FALSE( (cnt3 != cnt4) );
-}
-
-TEMPLATE_TEST_CASE( "operator< works correctly", "[vector][relational operators]", ft::vector<int> )
-{
-    TestType cnt1 (10, 10);
-    TestType cnt2 (11, 10);
-    TestType cnt3 (10, 99);
-    TestType cnt4;
-    TestType cnt5 (10, 10);
-
-    REQUIRE( (cnt1 < cnt2) );
-    REQUIRE( (cnt2 < cnt3) );
-    REQUIRE( (cnt4 < cnt3) );
-    REQUIRE_FALSE( (cnt3 < cnt4) );
-    REQUIRE_FALSE( (cnt1 < cnt5) );
-    REQUIRE_FALSE( (cnt4 < cnt4) );
-}
-
-TEMPLATE_TEST_CASE( "operator<= works correctly", "[vector][relational operators]", ft::vector<int> )
-{
-    TestType cnt1 (10, 10);
-    TestType cnt2 (11, 10);
-    TestType cnt3 (10, 99);
-    TestType cnt4;
-    TestType cnt5 (10, 10);
-
-    REQUIRE( (cnt1 <= cnt2) );
-    REQUIRE( (cnt2 <= cnt3) );
-    REQUIRE( (cnt4 <= cnt3) );
-    REQUIRE( (cnt1 <= cnt5) );
-    REQUIRE( (cnt4 <= cnt4) );
-    REQUIRE_FALSE( (cnt3 <= cnt4) );
-    REQUIRE_FALSE( (cnt2 <= cnt1) );
-}
-
-TEMPLATE_TEST_CASE( "operator> works correctly", "[vector][relational operators]", ft::vector<int> )
-{
-    TestType cnt1 (10, 10);
-    TestType cnt2 (11, 10);
-    TestType cnt3 (10, 99);
-    TestType cnt4;
-    TestType cnt5 (10, 10);
-
-    REQUIRE_FALSE( (cnt1 > cnt2) );
-    REQUIRE_FALSE( (cnt2 > cnt3) );
-    REQUIRE_FALSE( (cnt4 > cnt3) );
-    REQUIRE_FALSE( (cnt1 > cnt5) );
-    REQUIRE_FALSE( (cnt4 > cnt4) );
-    REQUIRE( (cnt3 > cnt4) );
-    REQUIRE( (cnt3 > cnt1) );
-    REQUIRE( (cnt2 > cnt1) );
-}
-
-TEMPLATE_TEST_CASE( "operator>= works correctly", "[vector][relational operators]", ft::vector<int> )
-{
-    int a[] = { 1, 4, -1, 2, 33 };
-    int b[] = { 1, 4, -6, 4, 2 };
-    int c[] = { 0, 12, -6, 4, 2 };
-    TestType cnt1 (a, a + sizeof(a) / sizeof(int));
-    TestType cnt2 (cnt1);
-    TestType cnt3 (b, b + sizeof(b) / sizeof(int));
-    TestType cnt4 (c, c + sizeof(c) / sizeof(int));
-
-    REQUIRE( (cnt1 >= cnt2) );
-    REQUIRE( (cnt1 >= cnt3) );
-    REQUIRE( (cnt1 >= cnt4) );
-
-    cnt2.push_back(-13);
-    REQUIRE_FALSE( (cnt1 >= cnt2) );
+    // myvector1 vs myvector4
+    REQUIRE_FALSE( myvector1 == myvector4 );
+    REQUIRE( myvector1 != myvector4 );
+    REQUIRE( myvector1 < myvector4 );
+    REQUIRE( myvector1 <= myvector4 );
+    REQUIRE_FALSE( myvector1 > myvector4 );
+    REQUIRE_FALSE( myvector1 >= myvector4 );
 }
 
 /* ITERATORS */

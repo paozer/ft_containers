@@ -4,6 +4,7 @@
 #include "catch.hpp"
 
 #include <map>
+#include <array>
 #include <string>
 
 /* CONSTRUCTION */
@@ -74,6 +75,57 @@ TEST_CASE("Assignment operator copies elements", "[map][operators]")
     (--my_map1.end())->second += 1;
     REQUIRE( (my_map1.begin()->second != my_map2.begin()->second) );
     REQUIRE( ((--my_map1.end())->second != (--my_map2.end())->second) );
+}
+
+/* RELATIONAL OPERATORS */
+TEST_CASE("map relational operators work correctly", "[map][operators]")
+{
+    std::array<std::pair<char, int>, 4> a = {{ {'b', 2}, {'z', 40}, {'p', 1}, {'a', 680} }};
+    std::array<std::pair<char, int>, 4> b = {{ {'b', 1}, {'z', 10}, {'c', 1}, {'z', 680} }};
+    ft::map<char, int> mymap1 (a.begin(), a.end());
+    ft::map<char, int> mymap2 (a.begin(), a.begin() + 2);
+    ft::map<char, int> mymap3;
+    ft::map<char, int> mymap4 (b.begin(), b.end());
+
+    // mymap1 vs mymap2
+    REQUIRE_FALSE( mymap1 == mymap2 );
+    REQUIRE( mymap1 != mymap2 );
+    REQUIRE( mymap1 < mymap2 );
+    REQUIRE( mymap1 <= mymap2 );
+    REQUIRE_FALSE( mymap1 > mymap2 );
+    REQUIRE_FALSE( mymap1 >= mymap2 );
+
+    // mymap1 vs mymap1
+    REQUIRE( mymap1 == mymap1 );
+    REQUIRE_FALSE( mymap1 != mymap1 );
+    REQUIRE_FALSE( mymap1 < mymap1 );
+    REQUIRE( mymap1 <= mymap1 );
+    REQUIRE_FALSE( mymap1 > mymap1 );
+    REQUIRE( mymap1 >= mymap1 );
+
+    // mymap1 vs mymap3
+    REQUIRE_FALSE( mymap1 == mymap3 );
+    REQUIRE( mymap1 != mymap3 );
+    REQUIRE_FALSE( mymap1 < mymap3 );
+    REQUIRE_FALSE( mymap1 <= mymap3 );
+    REQUIRE( mymap1 > mymap3 );
+    REQUIRE( mymap1 >= mymap3 );
+
+    // mymap3 vs mymap3
+    REQUIRE( mymap3 == mymap3 );
+    REQUIRE_FALSE( mymap3 != mymap3 );
+    REQUIRE_FALSE( mymap3 < mymap3 );
+    REQUIRE( mymap3 <= mymap3 );
+    REQUIRE_FALSE( mymap3 > mymap3 );
+    REQUIRE( mymap3 >= mymap3 );
+
+    // mymap1 vs mymap4
+    REQUIRE_FALSE( mymap1 == mymap4 );
+    REQUIRE( mymap1 != mymap4 );
+    REQUIRE( mymap1 < mymap4 );
+    REQUIRE( mymap1 <= mymap4 );
+    REQUIRE_FALSE( mymap1 > mymap4 );
+    REQUIRE_FALSE( mymap1 >= mymap4 );
 }
 
 /* ITERATORS */
@@ -172,6 +224,16 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
         REQUIRE( my_map.size() == 10 );
         REQUIRE( it_ret->first == 'z' );
         REQUIRE( it_ret->first == 'z' );
+
+        //assert content is the sum of inserts
+        std::array< std::pair<const char, int>, 10 > arr = {{{'a','a'},{'b','b'},{'c','c'},{'e','e'},{'f','f'},{'h','h'},{'i','i'},{'s','s'},{'u','u'},{'z','z'}}};
+        auto mapit = my_map.begin();
+        auto arrit = arr.begin();
+        while (mapit != my_map.end()) {
+            REQUIRE( *mapit == *arrit );
+            ++mapit;
+            ++arrit;
+        }
     }
     SECTION("range insert inserts a copy of the ranges elements") {
         ft::vector<std::pair<char, int> > v;
@@ -333,12 +395,15 @@ TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
         REQUIRE( (--mymap.end())->second == 100 );
         REQUIRE( (mymap.upper_bound('z') == mymap.end()) );
     }
-    SECTION("yes") {
-        mymap[1]=10;
-        mymap[2]=20;
-        mymap[4]=40;
-        mymap[5]=50;
-        REQUIRE( (mymap.upper_bound(3) == mymap.lower_bound(3)) );
+    SECTION("") {
+        mymap[1] = 10;
+        mymap[2] = 20;
+        mymap[4] = 40;
+        mymap[5] = 50;
+        REQUIRE(( mymap.lower_bound(2)->first == 2 ));
+        REQUIRE(( mymap.lower_bound(6) == mymap.end() ));
+        REQUIRE(( mymap.upper_bound(3) == mymap.lower_bound(3) ));
+        REQUIRE(( mymap.upper_bound(2)->first == 4 ));
     }
     SECTION("const versions") {
         mymap['a'] = 20;
@@ -347,10 +412,10 @@ TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
         mymap['e'] = 100;
         mymap['f'] = 60;
         const ft::map<char, int> cmymap (mymap);
-        REQUIRE( (cmymap.upper_bound('c') == cmymap.lower_bound('c')) );
-        REQUIRE( (cmymap.upper_bound('a')->first == 'b') );
-        REQUIRE( (cmymap.upper_bound('b')->first == 'd') );
-        REQUIRE( (cmymap.lower_bound('d')->first == 'd') );
+        REQUIRE(( cmymap.upper_bound('c') == cmymap.lower_bound('c') ));
+        REQUIRE(( cmymap.upper_bound('a')->first == 'b' ));
+        REQUIRE(( cmymap.upper_bound('b')->first == 'd' ));
+        REQUIRE(( cmymap.lower_bound('d')->first == 'd' ));
         REQUIRE(( cmymap.lower_bound('z') == cmymap.end() ));
     }
 }

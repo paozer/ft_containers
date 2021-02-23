@@ -66,165 +66,138 @@ TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::li
     }
 }
 
-/* RELATIONAL OPERATORS */
-TEMPLATE_TEST_CASE( "operator= works correctly", "[list][basics]", ft::list<int> )
+/* ASSIGNATION OPERATOR */
+TEST_CASE("assignation operator works correctly", "[list][basics]")
 {
     size_t s = GENERATE(0, 4, 7);
     int v[] = {2, 4, 12, 5, 60, 99, -12};
-    TestType c1 (v, v + s);
-    TestType c2 = c1;
+    ft::list<int> mylist1 (v, v + s);
+    ft::list<int> mylist2 = mylist1;
 
-    REQUIRE( c2.size() == s );
+    REQUIRE( mylist2.size() == s );
     size_t i = 0;
-    for (auto it = c2.begin(); it != c2.end(); ++it) {
+    for (auto it = mylist2.begin(); it != mylist2.end(); ++it) {
         REQUIRE( *it == v[i] );
         ++i;
     }
 }
 
-TEMPLATE_TEST_CASE( "operator== works correctly", "[list][basics]", ft::list<int> )
+/* RELATIONAL OPERATORS */
+TEST_CASE("relational operators work correctly", "[list][basics]")
 {
-    TestType c1 (10, 10);
-    TestType c2;
-    TestType c3;
-    TestType c4;
+    int a[] = {1, 4, -1, 2, 33};
+    int b[] = {1, 4};
+    int c[] = {1, 4, -1, 2, 33, 0};
+    ft::list<int> mylist1 (a, a + 5);
+    ft::list<int> mylist2 (b, b + 2);
+    ft::list<int> mylist3;
+    ft::list<int> mylist4 (c, c + 6);
 
-    REQUIRE_FALSE( (c1 == c2) );
-    c2 = c1;
-    REQUIRE( (c1 == c2) );
-    REQUIRE( (c3 == c4) );
-}
+    // mylist1 vs mylist2
+    REQUIRE_FALSE( mylist1 == mylist2 );
+    REQUIRE( mylist1 != mylist2 );
+    REQUIRE_FALSE( mylist1 < mylist2 );
+    REQUIRE_FALSE( mylist1 <= mylist2 );
+    REQUIRE( mylist1 > mylist2 );
+    REQUIRE( mylist1 >= mylist2 );
 
-TEMPLATE_TEST_CASE( "operator!= works correctly", "[list][basics]", ft::list<int> )
-{
-    TestType c1 (10, 10);
-    TestType c2;
-    TestType c3;
-    TestType c4;
+    // mylist1 vs mylist1
+    REQUIRE( mylist1 == mylist1 );
+    REQUIRE_FALSE( mylist1 != mylist1 );
+    REQUIRE_FALSE( mylist1 < mylist1 );
+    REQUIRE( mylist1 <= mylist1 );
+    REQUIRE_FALSE( mylist1 > mylist1 );
+    REQUIRE( mylist1 >= mylist1 );
 
-    REQUIRE( (c1 != c2) );
-    c2 = c1;
-    REQUIRE_FALSE( (c1 != c2) );
-    REQUIRE_FALSE( (c3 != c4) );
-}
+    // mylist1 vs mylist3
+    REQUIRE_FALSE( mylist1 == mylist3 );
+    REQUIRE( mylist1 != mylist3 );
+    REQUIRE_FALSE( mylist1 < mylist3 );
+    REQUIRE_FALSE( mylist1 <= mylist3 );
+    REQUIRE( mylist1 > mylist3 );
+    REQUIRE( mylist1 >= mylist3 );
 
-TEMPLATE_TEST_CASE( "operator< works correctly", "[list][basics]", ft::list<int> )
-{
-    TestType c1 (10, 10);
-    TestType c2 (11, 10);
-    TestType c3 (10, 99);
-    TestType c4;
-    TestType c5 (10, 10);
+    // mylist3 vs mylist3
+    REQUIRE( mylist3 == mylist3 );
+    REQUIRE_FALSE( mylist3 != mylist3 );
+    REQUIRE_FALSE( mylist3 < mylist3 );
+    REQUIRE( mylist3 <= mylist3 );
+    REQUIRE_FALSE( mylist3 > mylist3 );
+    REQUIRE( mylist3 >= mylist3 );
 
-    REQUIRE( (c1 < c2) );
-    REQUIRE( (c2 < c3) );
-    REQUIRE( (c4 < c3) );
-    REQUIRE_FALSE( (c3 < c4) );
-    REQUIRE_FALSE( (c1 < c5) );
-    REQUIRE_FALSE( (c4 < c4) );
-}
-
-TEMPLATE_TEST_CASE( "operator<= works correctly", "[list][basics]", ft::list<int> )
-{
-    TestType c1 (10, 10);
-    TestType c2 (11, 10);
-    TestType c3 (10, 99);
-    TestType c4;
-    TestType c5 (10, 10);
-
-    REQUIRE( (c1 <= c2) );
-    REQUIRE( (c2 <= c3) );
-    REQUIRE( (c4 <= c3) );
-    REQUIRE( (c1 <= c5) );
-    REQUIRE( (c4 <= c4) );
-    REQUIRE_FALSE( (c3 <= c4) );
-    REQUIRE_FALSE( (c2 <= c1) );
-}
-
-TEMPLATE_TEST_CASE( "operator> works correctly", "[list][basics]", ft::list<int> )
-{
-    TestType c1 (10, 10);
-    TestType c2 (11, 10);
-    TestType c3 (10, 99);
-    TestType c4;
-    TestType c5 (10, 10);
-
-    REQUIRE_FALSE( (c1 > c2) );
-    REQUIRE_FALSE( (c2 > c3) );
-    REQUIRE_FALSE( (c4 > c3) );
-    REQUIRE_FALSE( (c1 > c5) );
-    REQUIRE_FALSE( (c4 > c4) );
-    REQUIRE( (c3 > c4) );
-    REQUIRE( (c3 > c1) );
-    REQUIRE( (c2 > c1) );
-}
-
-TEMPLATE_TEST_CASE( "operator>= works correctly", "[list][basics]", ft::list<int> )
-{
-    int a[] = { 1, 4, -1, 2, 33 };
-    int b[] = { 1, 4, -6, 4, 2 };
-    int c[] = { 0, 12, -6, 4, 2 };
-    TestType c1 (a, a + sizeof(a) / sizeof(int));
-    TestType c2 (c1);
-    TestType c3 (b, b + sizeof(b) / sizeof(int));
-    TestType c4 (c, c + sizeof(c) / sizeof(int));
-
-    REQUIRE( (c1 >= c2) );
-    REQUIRE( (c1 >= c3) );
-    REQUIRE( (c1 >= c4) );
-
-    c2.push_back(-13);
-    REQUIRE_FALSE( (c1 >= c2) );
+    // mylist1 vs mylist4
+    REQUIRE_FALSE( mylist1 == mylist4 );
+    REQUIRE( mylist1 != mylist4 );
+    REQUIRE( mylist1 < mylist4 );
+    REQUIRE( mylist1 <= mylist4 );
+    REQUIRE_FALSE( mylist1 > mylist4 );
+    REQUIRE_FALSE( mylist1 >= mylist4 );
 }
 
 /* ITERATORS */
-TEMPLATE_TEST_CASE( "begin works correctly", "[list][basics]", ft::list<int> )
+TEST_CASE( "list begin works correctly", "[list][basics]")
 {
     SECTION("non-const iterator behaviour") {
-        TestType c (1, 10);       // { 10 }
-    REQUIRE( *c.begin() == 10 );
-    c.push_front(5);               // { 5, 10 }
-    REQUIRE( *c.begin() == 5 );
-    c.push_back(20);               // { 5, 10, 20 }
-    REQUIRE( *c.begin() == 5 );
-    c.pop_front();                 // { 10, 20 }
-    REQUIRE( *c.begin() == 10 );
-    *c.begin() = 5;                // { 5, 20 }
-    REQUIRE( *c.begin() == 5 );
+        ft::list<int> mylist (1, 10);       // { 10 }
+        REQUIRE( *mylist.begin() == 10 );
+        mylist.push_front(5);               // { 5, 10 }
+        REQUIRE( *mylist.begin() == 5 );
+        REQUIRE( *++mylist.begin() == 10 );
+        mylist.push_back(20);               // { 5, 10, 20 }
+        REQUIRE( *mylist.begin() == 5 );
+        REQUIRE( *++mylist.begin() == 10 );
+        REQUIRE( *++++mylist.begin() == 20 );
+        mylist.pop_front();                 // { 10, 20 }
+        REQUIRE( *mylist.begin() == 10 );
+        REQUIRE( *++mylist.begin() == 20 );
+        *mylist.begin() = 5;                // { 5, 20 }
+        REQUIRE( *mylist.begin() == 5 );
+        REQUIRE( *++mylist.begin() == 20 );
     }
     SECTION("const iterator behaviour") {
-        const TestType c (1, 10);
-        REQUIRE( *c.begin() == 10 );
-        const TestType c1;
-        REQUIRE(( c1.begin() == c1.end() ));
-        TestType c2 (1, 9);
-        ft::list<int>::const_iterator it = c2.begin();
-        REQUIRE( *it == 9 );
+        const ft::list<int> mylist (1, 10);
+        const ft::list<int> mylist1;
+        REQUIRE( *mylist.begin() == 10 );
+        REQUIRE(( mylist1.begin() == mylist1.end() ));
+
+        int arr[] = {1, 2, 3, 4, 5, 6};
+        ft::list<int> mylist2 (arr, arr + 6);
+        ft::list<int>::const_iterator it = mylist2.begin();
+        for (int i = 0; i < 6; ++i) {
+            REQUIRE( *it == arr[i] );
+            ++it;
+        }
     }
 }
 
-TEMPLATE_TEST_CASE( "end works correctly", "[list][basics]", ft::list<int> )
+TEST_CASE("list end works correctly", "[list][basics]")
 {
     SECTION("non-const iterator behaviour") {
-        TestType c (1, 10);               // { 10 }
-    REQUIRE( *--c.end() == 10 );
-    c.push_front(5);                  // { 5, 10 }
-    REQUIRE( *--c.end() == 10 );
-    c.push_back(20);                  // { 5, 10, 20 }
-    REQUIRE( *--c.end() == 20 );
-    c.pop_back();                     // { 5, 10 }
-    REQUIRE( *--c.end() == 10 );
-    *--c.end() = 5;                   // { 5, 5 }
-    REQUIRE( *--c.end() == 5 );
+        ft::list<int> mylist (1, 10);               // { 10 }
+        REQUIRE( *--mylist.end() == 10 );
+        mylist.push_front(5);                  // { 5, 10 }
+        REQUIRE( *----mylist.end() == 5 );
+        REQUIRE( *--mylist.end() == 10 );
+        mylist.push_back(20);                  // { 5, 10, 20 }
+        REQUIRE( *------mylist.end() == 5 );
+        REQUIRE( *----mylist.end() == 10 );
+        REQUIRE( *--mylist.end() == 20 );
+        mylist.pop_back();                     // { 5, 10 }
+        REQUIRE( *----mylist.end() == 5 );
+        REQUIRE( *--mylist.end() == 10 );
+        *--mylist.end() = 5;                   // { 5, 5 }
+        REQUIRE( *----mylist.end() == 5 );
+        REQUIRE( *--mylist.end() == 5 );
     }
     SECTION("const iterator behaviour") {
-        const TestType c (1, 10);
-        REQUIRE( *(--c.end()) == 10 );
-        const TestType c1;
-        REQUIRE(( c1.begin() == c1.end() ));
-        TestType c2 (1, 9);
-        typename TestType::const_iterator it = --c2.end();
-        REQUIRE( *it == 9 );
+        int arr[] = {1, 2, 3, 4, 5, 6};
+        const ft::list<int> mylist (arr, arr + 6);
+        ft::list<int>::const_iterator it = mylist.end();
+        for (int i = 6; i > 0;) {
+            --it;
+            --i;
+            REQUIRE( *it == arr[i] );
+        }
     }
 }
 
