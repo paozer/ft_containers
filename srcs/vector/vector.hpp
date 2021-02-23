@@ -4,6 +4,7 @@
 #include "../utils/utils.hpp"
 
 #include <cstddef> // std::ptrdiff_t, size_t, NULL
+#include <cmath> // ceil
 
 #include <memory> // std::allocator
 #include <stdexcept> // std::out_of_range

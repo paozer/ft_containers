@@ -7,7 +7,8 @@
 #include <cstddef> // NULL, std::ptrdiff_t
 
 #include <memory> // std::allocator
-#include <numeric> // std::numeric_limits
+#include <limits> // std::numeric_limits
+#include <functional> // std::equal_to
 
 namespace ft {
 

@@ -10,17 +10,17 @@
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
-TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::list<int>)
+TEST_CASE("list construction works correctly", "[list][basics]")
 {
     SECTION("default constructor creates empty list") {
-        TestType c;
+        ft::list<int> c;
         REQUIRE( c.empty() );
         REQUIRE( c.size() == 0 );
     }
     SECTION("fill constructor creates list of specified size & filled with elements") {
         size_t i = GENERATE(0, 1, 100);
         size_t j = GENERATE(-100, 914);
-        TestType c (i, j);
+        ft::list<int> c (i, j);
         REQUIRE( c.size() == i );
         for (auto it = c.begin(); it != c.end(); ++it)
             REQUIRE( *it == (int)j );
@@ -28,7 +28,7 @@ TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::li
     SECTION("range constructor creates list with correct elements from range") {
         size_t s = GENERATE(0, 4, 7);
         int v[] = {2, 4, 12, 5, 60, 99, -12};
-        TestType c1 (v, v + s);
+        ft::list<int> c1 (v, v + s);
         REQUIRE( c1.size() == s );
 
         size_t i = 0;
@@ -36,17 +36,17 @@ TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::li
             REQUIRE( *it == v[i++] );
         REQUIRE_FALSE( i != s);
 
-        TestType c2 (v, v);
+        ft::list<int> c2 (v, v);
         REQUIRE( c2.size() == 0 );
-        TestType c3 (v + 2, v + 4);
+        ft::list<int> c3 (v + 2, v + 4);
         REQUIRE( c3.size() == 2 );
     }
     SECTION("copy constructor constructs an exact copy of a given list") {
         SECTION ( "works on construction from non-empty list" ) {
             size_t s = GENERATE(0, 4, 7);
             int v[] = {2, 4, 12, 5, 60, 99, -12};
-            TestType c1 (v, v + s);
-            TestType c2 (c1);
+            ft::list<int> c1 (v, v + s);
+            ft::list<int> c2 (c1);
 
             REQUIRE( c1.size() == c2.size() );
 
@@ -59,8 +59,8 @@ TEMPLATE_TEST_CASE("list construction works correctly", "[list][basics]", ft::li
             }
         }
         SECTION ( "works on construction from empty list" ) {
-            TestType c1;
-            TestType c2 (c1);
+            ft::list<int> c1;
+            ft::list<int> c2 (c1);
             REQUIRE( c1.empty() );
         }
     }
@@ -223,10 +223,10 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", ft::li
     }
 }
 
-TEMPLATE_TEST_CASE( "push_front works correctly", "[list][modifiers]", ft::list<int> )
+TEST_CASE("push_front works correctly", "[list][modifiers]")
 {
     SECTION( "the element is added at the front & size is incremented" ) {
-        TestType c;
+        ft::list<int> c;
         int value;
         for (int i = 0; i < 50; ++i) {
             value = rand();
@@ -237,11 +237,11 @@ TEMPLATE_TEST_CASE( "push_front works correctly", "[list][modifiers]", ft::list<
     }
 }
 
-TEMPLATE_TEST_CASE( "push_back works correctly", "[list][modifiers]", ft::list<int> )
+TEST_CASE("push_back works correctly", "[list][modifiers]")
 {
     SECTION( "containers size is incremented & the element is added at the back" ) {
         int value;
-        TestType c;
+        ft::list<int> c;
         for (int i = 0; i < 50; ++i) {
             value = rand();
             c.push_back(value);
@@ -251,9 +251,9 @@ TEMPLATE_TEST_CASE( "push_back works correctly", "[list][modifiers]", ft::list<i
     }
 }
 
-TEMPLATE_TEST_CASE( "pop_front works correctly", "[list][modifiers]", ft::list<int> )
+TEST_CASE("pop_front works correctly", "[list][modifiers]")
 {
-    TestType c (10, 100);
+    ft::list<int> c (10, 100);
     size_t i = c.size();
     while (!c.empty()) {
         REQUIRE( c.size() == i);
@@ -264,9 +264,9 @@ TEMPLATE_TEST_CASE( "pop_front works correctly", "[list][modifiers]", ft::list<i
     }
 }
 
-TEMPLATE_TEST_CASE( "pop_back works correctly", "[list][modifiers]", ft::list<int> )
+TEST_CASE("pop_back works correctly", "[list][modifiers]")
 {
-    TestType c (10, 100);
+    ft::list<int> c (10, 100);
     size_t i = c.size();
     while (!c.empty()) {
         REQUIRE( c.size() == i);
@@ -277,9 +277,9 @@ TEMPLATE_TEST_CASE( "pop_back works correctly", "[list][modifiers]", ft::list<in
     }
 }
 
-TEMPLATE_TEST_CASE( "insert work correctly", "[list][modifiers]", ft::list<int> )
+TEST_CASE("insert work correctly", "[list][modifiers]")
 {
-    TestType c;
+    ft::list<int> c;
     auto it = c.begin();
 
     SECTION( "single element insert works correctly" ) {
@@ -534,7 +534,7 @@ TEST_CASE("remove(_if) works correctly", "[list][operations]")
     int v[] = { 0, 1, 2, 3, 3, 5, 1, 7 };
     ft::list<int> c (v, v + 8);
 
-    SECTION( "remove works correctly" ) {
+    SECTION("remove works correctly") {
         c.remove(42);
         REQUIRE( c.size() == 8 );
         c.remove(1);
@@ -552,7 +552,7 @@ TEST_CASE("remove(_if) works correctly", "[list][operations]")
         c.remove(0);
         REQUIRE( c.size() == 0 );
     }
-    SECTION( "remove_if works correctly" ) {
+    SECTION("remove_if works correctly") {
         c.remove_if([](int i) { return i == 42; });
         REQUIRE( c.size() == 8 );
         c.remove_if([](int i) { return i == 1; });
@@ -572,12 +572,12 @@ TEST_CASE("remove(_if) works correctly", "[list][operations]")
     }
 }
 
-TEMPLATE_TEST_CASE( "unique works correctly", "[list][operations]", ft::list<int> )
+TEST_CASE("unique works correctly", "[list][operations]")
 {
     int a[] = { 1, 1, -66, -22, -22, -1, -22, 2, 2, 2, 9, 9, 109, 109, 109 };
-    TestType c (a, a + sizeof(a) / sizeof(int));
+    ft::list<int> c (a, a + sizeof(a) / sizeof(int));
 
-    SECTION( "unique without specifying how to compare" ) {
+    SECTION("unique without specifying how to compare") {
         int unique[] = { 1, -66, -22, -1, -22, 2, 9, 109 };
         c.unique();
         REQUIRE( c.size() == (sizeof(unique) / sizeof(int)) );
@@ -587,7 +587,7 @@ TEMPLATE_TEST_CASE( "unique works correctly", "[list][operations]", ft::list<int
             ++i;
         }
     }
-    SECTION( "unique w/ specifying how to compare" ) {
+    SECTION("unique w/ specifying how to compare") {
         int duplicates[] = { 1, -66, -22, -22, -1, -22, 2, 9, 9, 109, 109, 109 };
         c.unique( [] (int i, int j) { return i + j == 2 || i + j == 4; });
 
@@ -600,14 +600,14 @@ TEMPLATE_TEST_CASE( "unique works correctly", "[list][operations]", ft::list<int
     }
 }
 
-TEMPLATE_TEST_CASE( "merge work correctly", "[list][operations]", ft::list<int> )
+TEST_CASE( "merge work correctly", "[list][operations]")
 {
     SECTION( "merging without specifying how to compare" ) {
         int a[] = { -66, -22, -1, 9, 109 };
         int b[] = { -12, 2, 2, 4, 5, 12, 99 };
         int c[] = { -66, -22, -12, -1, 2, 2, 4, 5, 9, 12, 99, 109 };
-        TestType c1 (a, a + sizeof(a) / sizeof(int));
-        TestType c2 (b, b + sizeof(b) / sizeof(int));
+        ft::list<int> c1 (a, a + sizeof(a) / sizeof(int));
+        ft::list<int> c2 (b, b + sizeof(b) / sizeof(int));
 
         c1.merge(c2);
         REQUIRE( c2.empty() );
@@ -621,8 +621,8 @@ TEMPLATE_TEST_CASE( "merge work correctly", "[list][operations]", ft::list<int> 
         int a[] = { 109, 9, -1, -22, -66 };
         int b[] = { 99, 12, 5, 4, 2, 2, -12 };
         int c[] = { 109, 99, 12, 9, 5, 4, 2, 2, -1, -12, -22, -66 };
-        TestType c1 (a, a + sizeof(a) / sizeof(int));
-        TestType c2 (b, b + sizeof(b) / sizeof(int));
+        ft::list<int> c1 (a, a + sizeof(a) / sizeof(int));
+        ft::list<int> c2 (b, b + sizeof(b) / sizeof(int));
 
         c1.merge(c2, std::greater<int>());
         REQUIRE( c2.empty() );
@@ -633,9 +633,9 @@ TEMPLATE_TEST_CASE( "merge work correctly", "[list][operations]", ft::list<int> 
         }
     }
     SECTION( "mergin w/ empty list" ) {
-        TestType c1 (5, 10);
-        TestType c2;
-        TestType c3;
+        ft::list<int> c1 (5, 10);
+        ft::list<int> c2;
+        ft::list<int> c3;
 
         c1.merge(c2);
         REQUIRE( c1.size() == 5 );
@@ -645,12 +645,12 @@ TEMPLATE_TEST_CASE( "merge work correctly", "[list][operations]", ft::list<int> 
     }
 }
 
-TEMPLATE_TEST_CASE( "sort work correctly", "[list][operations]", ft::list<int> )
+TEST_CASE("sort work correctly", "[list][operations]")
 {
     int v[] = {2, 4, 12, 5, 2, 99, -12};
     int v_sorted[] = {-12, 2, 2, 4, 5, 12, 99};
     size_t v_size = sizeof(v) / sizeof(int);
-    TestType c (v, v + v_size);
+    ft::list<int> c (v, v + v_size);
 
     SECTION( "sorting without specifying how to compare" ) {
         c.sort();
@@ -671,8 +671,8 @@ TEMPLATE_TEST_CASE( "sort work correctly", "[list][operations]", ft::list<int> )
         }
     }
     SECTION ( "sorting unsortable lists" ) {
-        TestType c1;
-        TestType c2 (1, 0);
+        ft::list<int> c1;
+        ft::list<int> c2 (1, 0);
 
         c1.sort();
         REQUIRE( c1.size() == 0 );
@@ -681,10 +681,10 @@ TEMPLATE_TEST_CASE( "sort work correctly", "[list][operations]", ft::list<int> )
     }
 }
 
-TEMPLATE_TEST_CASE( "reverse works correctly", "[list][operations]", ft::list<int> )
+TEST_CASE("reverse works correctly", "[list][operations]")
 {
     int v[] = {2, 4, 2, 5, 2, 99, -12, 1, 312};
-    TestType c (v, v + 9);
+    ft::list<int> c (v, v + 9);
     c.reverse();
     REQUIRE( c.size() == 9 );
     int i = 8;
