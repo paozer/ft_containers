@@ -11,7 +11,12 @@
 #include <queue>
 
 #define CONTAINER_LIST ( ft::stack, ft::queue )
+
+#ifndef __linux__
 #define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#else
+#define TYPE_LIST ( int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#endif
 #define VALUE_TYPE typename TestType::value_type
 
 

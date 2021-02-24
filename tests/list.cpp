@@ -6,7 +6,12 @@
 #include <list>
 #include <vector>
 
+#ifndef __linux__
 #define TYPE_LIST ( int, char, const int,std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#else
+#define TYPE_LIST ( int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#endif
+
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
@@ -382,6 +387,7 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
         REQUIRE( mylist1.size() == 0 );
         REQUIRE( mylist2.size() == 0 );
     }
+#ifndef __linux__
     SECTION("lists with const content can be swapped") {
         ft::list<const int> mylist1 (arr1, arr1 + 6);
         ft::list<const int> mylist2;
@@ -396,6 +402,7 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
             ++i;
         }
     }
+#endif
 }
 
 TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[list][modifiers]", ft::list, TYPE_LIST )

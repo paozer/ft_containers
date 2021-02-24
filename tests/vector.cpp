@@ -6,8 +6,13 @@
 #include <vector>
 #include <list>
 
-
+#ifndef __linux__
 #define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#else
+#define TYPE_LIST ( char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
+#endif
+#define VALUE_TYPE typename TestType::value_type
+
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */

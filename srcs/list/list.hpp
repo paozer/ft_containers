@@ -429,12 +429,14 @@ class list
             node_pointer p = _alloc.allocate(1);
             _alloc.construct(p, val);
             return p;
+            //return new node(val);
         }
 
         void delete_node (node_pointer p)
         {
             _alloc.destroy(p);
             _alloc.deallocate(p, 1);
+            //delete p;
         }
 
 }; // CLASS LIST

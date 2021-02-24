@@ -15,15 +15,21 @@
 #include <queue>
 #include <map>
 
+template <class T, class Alloc = std::allocator<T> >
+class testClass
+{
+    public:
+        typedef typename Alloc::reference reference;
+
+        testClass()
+        {
+        }
+};
+
 int main(void)
 {
-    ft::list<int> mylist (3, 4);
-    ft::list<int>::iterator it = mylist.begin();
-    ft::list<int>::const_iterator cit = mylist.begin();
-    if (it == cit)
-        std::cout << "YES" << std::endl;
-    if (!(cit != it))
-        std::cout << "YES" << std::endl;
+    //compile under linux fails
+    testClass<const int> tc;
     return 0;
 }
 
