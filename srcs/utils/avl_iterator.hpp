@@ -1,48 +1,43 @@
 #pragma once
 
-#include "../utils/avl_node.hpp"
-#include "../utils/utils.hpp"
+#include "avl_node.hpp"
+#include "utils.hpp"
 
-#include <cstddef> // std.:ptrdiff_t
-
-#include <utility> // std::pair
+#include <cstddef> // std.:ptrdiff_t, NULL
 #include <iterator> // std::bidirectional_iterator_tag
 
 namespace ft {
 
-template <class Key, class Value, bool is_const>
-class map_iterator
+template <class T, bool is_const>
+class avl_iterator
 {
     public:
-        typedef std::pair<const Key, Value> value_type;
+        typedef T value_type;
         typedef std::ptrdiff_t difference_type;
         typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
         typedef typename choose<is_const, const value_type&, value_type&>::type reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
     private:
-        typedef Key key_type;
-        typedef Value mapped_type;
-        typedef map_iterator<key_type, mapped_type, is_const> self_type;
-        typedef avl_node<key_type, mapped_type> map_node;
-        typedef typename ft::choose<is_const, const map_node*, map_node*>::type node_pointer;
+        typedef avl_iterator<value_type, is_const> self_type;
+        typedef typename choose<is_const, const avl_node<value_type>*, avl_node<value_type>*>::type node_pointer;
 
     public:
         /* CONSTRUCTORS */
-        map_iterator (avl_node<key_type, mapped_type>* node = NULL)
+        avl_iterator (avl_node<value_type>* node = NULL)
             : _node(node)
         {
         }
 
         // need GETTER to node because if non-const_it to const_it the classes are not
         // the same and we can't access private members
-        map_iterator (const map_iterator<key_type, mapped_type, false>& other)
+        avl_iterator (const avl_iterator<value_type, false>& other)
             : _node(other.get_node())
         {
         }
 
         /* OPERATORS */
-        map_iterator& operator= (const self_type& other)
+        avl_iterator& operator= (const self_type& other)
         {
             if (this != &other)
                 _node = other._node;
@@ -52,8 +47,8 @@ class map_iterator
         friend bool operator== (const self_type& rhs, const self_type& lhs) { return rhs._node == lhs._node; }
         friend bool operator!= (const self_type& rhs, const self_type& lhs) { return rhs._node != lhs._node; }
 
-        reference operator* (void) { return _node->pair; }
-        pointer operator-> (void) { return &_node->pair; }
+        reference operator* (void) { return _node->content; }
+        pointer operator-> (void) { return &_node->content; }
 
         /* if there is a right subtree goto it's smallest node
          * else if we are done w/ left subtree go to subtree root
@@ -119,39 +114,36 @@ class map_iterator
     private:
         node_pointer _node;
 
-}; // CLASS MAP_ITERATOR
+}; // CLASS AVL_ITERATOR
 
-template <class Key, class Value, bool is_const>
-class reverse_map_iterator
+template <class T, bool is_const>
+class reverse_avl_iterator
 {
     public:
-        typedef std::pair<const Key, Value> value_type;
+        typedef T value_type;
         typedef std::ptrdiff_t difference_type;
         typedef typename choose<is_const, const value_type*, value_type*>::type pointer;
         typedef typename choose<is_const, const value_type&, value_type&>::type reference;
         typedef std::bidirectional_iterator_tag iterator_category;
 
     private:
-        typedef Key key_type;
-        typedef Value mapped_type;
-        typedef reverse_map_iterator<key_type, mapped_type, is_const> self_type;
-        typedef ft::avl_node<key_type, mapped_type> map_node;
-        typedef typename ft::choose<is_const, const map_node*, map_node*>::type node_pointer;
+        typedef reverse_avl_iterator<T, is_const> self_type;
+        typedef typename choose<is_const, const avl_node<value_type>*, avl_node<value_type>*>::type node_pointer;
 
     public:
         /* CONSTRUCTORS */
-        reverse_map_iterator (node_pointer node = NULL)
+        reverse_avl_iterator (node_pointer node = NULL)
             : _node(node)
         {
         }
 
-        reverse_map_iterator (const reverse_map_iterator<key_type, mapped_type, false>& other)
+        reverse_avl_iterator (const reverse_avl_iterator<value_type, false>& other)
             : _node(other.get_node())
         {
         }
 
         /* OPERATORS */
-        reverse_map_iterator& operator= (const self_type& other)
+        reverse_avl_iterator& operator= (const self_type& other)
         {
             if (this != &other)
                 _node = other._node;
@@ -161,8 +153,8 @@ class reverse_map_iterator
         friend bool operator== (const self_type& rhs, const self_type& lhs) { return rhs._node == lhs._node; }
         friend bool operator!= (const self_type& rhs, const self_type& lhs) { return rhs._node != lhs._node; }
 
-        reference operator* (void) { return _node->p; }
-        pointer operator-> (void) { return &_node->p; }
+        reference operator* (void) { return _node->content; }
+        pointer operator-> (void) { return &_node->content; }
 
         /* if there is a right subtree goto it's smallest node
          * else if we are done w/ left subtree go to subtree root
@@ -228,6 +220,6 @@ class reverse_map_iterator
     private:
         node_pointer _node;
 
-}; // CLASS REVERSE_MAP_ITERATOR
+}; // CLASS REVERSE_AVL_ITERATOR
 
-} // NAMESPACE FT
+}; // NAMESPACE FT

@@ -1,24 +1,23 @@
 #pragma once
 
 #include <cstddef> // NULL
-#include <utility> // std::pair
 
 namespace ft {
 
-template <class Key, class Value>
+template <class T>
 struct avl_node
 {
-    std::pair<const Key, Value> pair;
+    T content;
     int bf;
     avl_node * left;
     avl_node * right;
     avl_node * parent;
 
-    avl_node (std::pair<Key, Value> pair)
-        : pair(pair), bf(0), left(NULL), right(NULL), parent(NULL)
+    avl_node (T cont = T())
+        : content(cont), bf(0), left(NULL), right(NULL), parent(NULL)
     {
     }
 
-}; // STRUCT MAP_NODE
+}; // STRUCT AVL_NODE
 
 } // NAMESPACE FT

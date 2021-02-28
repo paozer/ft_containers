@@ -1,9 +1,10 @@
 #pragma once
 
-#include "utils.hpp"
 #include "avl_node.hpp"
+#include "avl_iterator.hpp"
+#include "utils.hpp"
 
-#include <cstddef> // size_t
+#include <cstddef> // size_t, NULL
 #include <cmath> // std::abs
 
 #include <memory> // std::allocator
@@ -11,29 +12,31 @@
 
 namespace ft {
 
-template <class Key,
-          class T,
-          class Compare = std::less<Key>,
-          class Alloc = std::allocator<std::pair<const Key, T> >
+template <class T,
+          class Compare = std::less<T>,
+          class Alloc = std::allocator<T>
           >
 class avl_tree
 {
     public:
-        typedef Key key_type;
-        typedef T mapped_type;
-        typedef std::pair<const key_type, mapped_type> value_type;
-        typedef avl_node<key_type, mapped_type> node;
-        typedef node * node_pointer;
-        typedef Compare key_compare;
+        typedef T value_type;
+        typedef avl_iterator<T, false> iterator;
+        typedef avl_iterator<T, true> const_iterator;
+        typedef reverse_avl_iterator<T, false> reverse_iterator;
+        typedef reverse_avl_iterator<T, true> const_reverse_iterator;
+        typedef Compare compare;
         typedef Alloc allocator_type;
+        typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
     private:
+        typedef avl_node<value_type> node;
+        typedef node * node_pointer;
         typedef typename Alloc::template rebind<node>::other node_allocator;
 
     public:
         /* CONSTRUCTORS */
-        avl_tree (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type())
+        explicit avl_tree (const compare& comp = compare(), const allocator_type& alloc = allocator_type())
             : _root(NULL), _begin(new_node()), _end(new_node()), _added_node_ptr(NULL),
               _added_node(false), _size(0), _alloc(alloc), _comp(comp)
         {
@@ -41,20 +44,77 @@ class avl_tree
             _end->parent = _begin;
         }
 
+        template <class InputIterator>
+        avl_tree (InputIterator first, InputIterator last, const compare& comp = compare(), const allocator_type& alloc = allocator_type(),
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
+            : _root(NULL), _begin(new_node()), _end(new_node()), _added_node_ptr(NULL),
+              _added_node(false), _size(0), _alloc(alloc), _comp(comp)
+        {
+            for (; first != last; ++first)
+                insert(*first);
+        }
+
+        avl_tree (const avl_tree& x)
+        {
+            *this = x;
+        }
+
         /* DESTRUCTOR */
         ~avl_tree()
         {
-            unset_bounds();
             clear();
             delete_node(_begin);
             delete_node(_end);
         }
 
+        /* OPERATORS */
+        friend bool operator== (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs)
+        {
+            if (lhs.size() != rhs.size())
+                return false;
+            const_iterator lit = lhs.begin();
+            const_iterator rit = rhs.begin();
+            while (lit != lhs.end()) {
+                if (*lit != *rit)
+                    return false;
+                ++lit;
+                ++rit;
+            }
+            return true;
+        }
+
+        friend bool operator< (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs)
+        {
+            const_iterator lit = lhs.begin();
+            const_iterator rit = rhs.begin();
+            while (lit != lhs.end() && rit != rhs.end()) {
+                if (*lit < *rit)
+                    return true;
+                if (*lit > *rit)
+                    return false;
+                ++lit;
+                ++rit;
+            }
+            if (lhs.size() >= rhs.size())
+                return false;
+            return true;
+        }
+
+        friend bool operator!= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(lhs == rhs); }
+        friend bool operator<= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(rhs < lhs); }
+        friend bool operator> (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return rhs < lhs; }
+        friend bool operator>= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(lhs < rhs); }
+
+
         /* ELEMENT ACCESS */
-        node_pointer begin (void) const { return _begin->parent; }
-        node_pointer end (void) const { return _end; }
-        node_pointer rbegin (void) const { return _begin; }
-        node_pointer rend (void) const { return _end->parent; }
+        iterator begin() { return iterator(_begin->parent); }
+        const_iterator begin() const { return const_iterator(_begin->parent); }
+        iterator end() { return iterator(_end); }
+        const_iterator end() const { return const_iterator(_end); }
+        reverse_iterator rbegin() { return reverse_iterator(_end->parent); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(_end->parent); }
+        reverse_iterator rend() { return reverse_iterator(_begin); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(_begin); }
 
         /* CAPACITY */
         size_type size (void) const { return _size; }
@@ -62,24 +122,15 @@ class avl_tree
         size_type max_size (void) const { return _alloc.max_size(); }
 
         /* MODIFIERS */
-        std::pair<node_pointer, bool> insert (const value_type& val)
+        void swap (avl_tree& x)
         {
-            if (_root) {
-                unset_bounds();
-                _root = aux_insert(_root->parent, _root, val);
-            }
-            else
-                _root = aux_insert(NULL, NULL, val);
-            set_bounds();
-            return std::make_pair(_added_node_ptr, _added_node);
-        }
-
-        std::pair<node_pointer, bool> insert (node_pointer position, const value_type& val)
-        {
-            unset_bounds();
-            position = aux_insert(position->parent, position, val);
-            set_bounds();
-            return std::make_pair(_added_node_ptr, _added_node);
+            ft::swap(_root, x._root);
+            ft::swap(_begin, x._begin);
+            ft::swap(_end, x._end);
+            ft::swap(_size, x._size);
+            ft::swap(_alloc, x._alloc);
+            ft::swap(_added_node_ptr, x._added_node_ptr);
+            ft::swap(_added_node, x._added_node);
         }
 
         void clear (void)
@@ -93,44 +144,7 @@ class avl_tree
             set_bounds();
         }
 
-        size_type erase (const key_type& key)
-        {
-            if (_size == 0)
-                return 0;
-            unset_bounds();
-            size_type old_size = _size;
-            aux_erase(NULL, _root, key);
-            set_bounds();
-            return old_size - _size;
-        }
-
-        size_type erase (node_pointer node)
-        {
-            if (_size == 0)
-                return 0;
-            unset_bounds();
-            size_type old_size = _size;
-            aux_erase(node->parent, node, node->pair.first);
-            set_bounds();
-            return old_size - _size;
-        }
-
-        /* OPERATIONS */
-        node_pointer find (const key_type& key) const
-        {
-            node_pointer node = _root;
-            while (node && node != _begin && node != _end) {
-                if (_comp(node->pair.first, key))
-                    node = node->right;
-                else if (_comp(key, node->pair.first))
-                    node = node->left;
-                else
-                    return node;
-            }
-            return NULL;
-        }
-
-    private:
+    protected:
         node_pointer _root;
         node_pointer _begin;
         node_pointer _end;
@@ -138,60 +152,12 @@ class avl_tree
         bool _added_node;
         size_type _size;
         node_allocator _alloc;
-        key_compare _comp;
-
-        /* INSERT */
-        node_pointer aux_insert (node_pointer parent, node_pointer node, const value_type& val)
-        {
-            // if we're at a leaf insert key/val pair
-            // else if key goes into the left subtree
-            // else if key goes into the right subtree
-            // else key is already in the tree
-            // remember the added/found node to create iterator after return from recursion
-            if (!node) {
-                node = new_node(val);
-                node->parent = parent;
-                _added_node = true;
-                _added_node_ptr = node;
-                ++_size;
-            }
-            else if (_comp(val.first, node->pair.first))
-                node->left = aux_insert(node, node->left, val);
-            else if (_comp(node->pair.first, val.first))
-                node->right = aux_insert(node, node->right, val);
-            else {
-                _added_node = false;
-                _added_node_ptr = node;
-            }
-            return node;
-        }
+        compare _comp;
 
         /* ERASE */
-        void aux_erase (node_pointer parent, node_pointer child, const key_type& key)
+        void aux_erase_no_child_node (node_pointer child)
         {
-            if (!child)
-                return ;
-            if (_comp(child->pair.first, key))
-                aux_erase(child, child->right, key);
-            else if (_comp(key, child->pair.first))
-                aux_erase(child, child->left, key);
-            else {
-                if (!child->left && !child->right)
-                    aux_erase_no_child_node(parent, child);
-                else if ((!child->left && child->right) || (child->left && !child->right))
-                    aux_erase_one_child_node(parent, child);
-                else {
-                    // will decrement size in aux_erase_two_child_node function
-                    aux_erase_two_child_node(child, key);
-                    return ;
-                }
-                --_size;
-            }
-            fix_up(parent);
-        }
-
-        void aux_erase_no_child_node (node_pointer parent, node_pointer child)
-        {
+            node_pointer parent = child->parent;
             if (parent) {
                 if (parent->left == child)
                     parent->left = NULL;
@@ -203,8 +169,9 @@ class avl_tree
             delete_node(child);
         }
 
-        void aux_erase_one_child_node (node_pointer parent, node_pointer child)
+        void aux_erase_one_child_node (node_pointer child)
         {
+            node_pointer parent = child->parent;
             if (parent) {
                 if (parent->left == child)
                     parent->left = (child->left ? child->left : child->right);
@@ -220,11 +187,14 @@ class avl_tree
             delete_node(child);
         }
 
-        void aux_erase_two_child_node (node_pointer child, const key_type& key)
+        void aux_erase_two_child_node (node_pointer child)
         {
             node_pointer min = get_min(child->right);
             swap_nodes(child, min);
-            aux_erase(min, min->right, key);
+            if (!child->left && !child->right)
+                this->aux_erase_no_child_node(child);
+            else if ((!child->left && child->right) || (child->left && !child->right))
+                this->aux_erase_one_child_node(child);
         }
 
         /* UTILITIES */
@@ -253,11 +223,14 @@ class avl_tree
                             node->left->bf = -1;
                         else if (lr_bf == -1)
                             node->bf = 1;
-                        node = left_right_rotate(node);
+                        node->left = left_rotate(node->left);
+                        node = right_rotate(node);
                     }
                     break ;
                 }
                 else if (node->bf == 2) {
+                    // if right subtree -> L Rotation
+                    // else left subtree -> RL Rotation
                     if (node->right->bf == 1) {
                         node->bf = 0;
                         node->right->bf = 0;
@@ -272,16 +245,17 @@ class avl_tree
                             node->bf = -1;
                         else if (rl_bf == -1)
                             node->right->bf = 1;
-                        node = right_left_rotate(node);
+                        node->right = right_rotate(node->right);
+                        node = left_rotate(node);
                     }
                     break ;
                 }
                 if (!node->parent)
                     return ;
                 else if (node->parent->left == node)
-                    ++node->parent->bf;
-                else
                     --node->parent->bf;
+                else
+                    ++node->parent->bf;
                 node = node->parent;
             }
         }
@@ -300,9 +274,9 @@ class avl_tree
                 node_pointer min = get_min(_root);
                 node_pointer max = get_max(_root);
                 _begin->parent = min;
-                _begin->parent->left = _begin;
+                min->left = _begin;
                 _end->parent = max;
-                _end->parent->right = _end;
+                max->right = _end;
             }
             else {
                 _begin->parent = _end;
@@ -359,6 +333,7 @@ class avl_tree
             delete_node(node);
         }
 
+        // add begin/end check
         node_pointer get_min (node_pointer node)
         {
             if (!node)
@@ -368,6 +343,7 @@ class avl_tree
             return node;
         }
 
+        // add begin/end check
         node_pointer get_max (node_pointer node)
         {
             if (!node)
@@ -412,17 +388,6 @@ class avl_tree
             return tmp;
         }
 
-        node_pointer right_left_rotate (node_pointer node)
-        {
-            node->right = right_rotate(node->right);
-            return left_rotate(node);
-        }
-
-        node_pointer left_right_rotate (node_pointer node)
-        {
-            node->left = left_rotate(node->left);
-            return right_rotate(node);
-        }
 
         /* MEMORY MANAGEMENT */
         node_pointer new_node (const value_type& val = value_type())
@@ -439,5 +404,11 @@ class avl_tree
         }
 
 }; // CLASS AVL_TREE
+
+template <class T, class Compare, class Alloc>
+void swap (avl_tree<T, Compare, Alloc>& x, avl_tree<T, Compare, Alloc>& y)
+{
+    x.swap(y);
+}
 
 } // NAMESPACE FT
