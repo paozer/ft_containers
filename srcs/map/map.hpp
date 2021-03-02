@@ -107,13 +107,8 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
             if (Base::_root) {
                 Base::unset_bounds();
                 Base::_root = aux_insert(Base::_root->parent, Base::_root, val);
-                if (Base::_added_node && Base::_added_node_ptr->parent) {
-                    if (Base::_added_node_ptr->parent->right == Base::_added_node_ptr)
-                        ++Base::_added_node_ptr->parent->bf;
-                    else
-                        --Base::_added_node_ptr->parent->bf;
-                }
-                Base::fix_up(Base::_added_node_ptr->parent);
+                if (Base::_added_node)
+                    Base::fix_after_insert(Base::_added_node_ptr);
             }
             else
                 Base::_root = aux_insert(NULL, NULL, val);
@@ -130,6 +125,8 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                     Base::unset_bounds();
                     node_pointer position_ptr = position.get_node();
                     position_ptr = aux_insert(position_ptr->parent, position_ptr, val);
+                    if (Base::_added_node)
+                        Base::fix_after_insert(Base::_added_node_ptr);
                     Base::set_bounds();
                     return iterator(Base::_added_node_ptr);
                 }

@@ -105,7 +105,6 @@ class avl_tree
         friend bool operator> (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return rhs < lhs; }
         friend bool operator>= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(lhs < rhs); }
 
-
         /* ELEMENT ACCESS */
         iterator begin() { return iterator(_begin->parent); }
         const_iterator begin() const { return const_iterator(_begin->parent); }
@@ -197,74 +196,163 @@ class avl_tree
                 this->aux_erase_one_child_node(child);
         }
 
-        /* UTILITIES */
-        void fix_up (node_pointer node)
+        /* REBALANCING */
+        void fix_after_insert (node_pointer child)
         {
-            if (!node)
+            if (!child)
                 return ;
-            // while node is unbalanced
-            while (node->bf != 0) {
-                // if left child imbalanced
-                // else right child imbalanced
-                if (node->bf == -2) {
-                    // if left subtree -> R Rotation
-                    // else right subtree -> LR Rotation
-                    if (node->left->bf == -1) {
-                        node->bf = 0;
-                        node->left->bf = 0;
-                        node = right_rotate(node);
+            for (node_pointer parent = child->parent; parent; parent = parent->parent) {
+                if (parent->right == child) {
+                    if (parent->bf == 1) {
+                        if (child->bf == -1)
+                            parent = right_left_rotate(parent);
+                        else
+                            parent = left_rotate(parent);
                     }
+                    else if (parent->bf == -1)
+                        parent->bf = 0;
                     else {
-                        int lr_bf = node->left->right->bf;
-                        node->bf = 0;
-                        node->left->bf = 0;
-                        node->left->right->bf = 0;
-                        if (lr_bf == 1)
-                            node->left->bf = -1;
-                        else if (lr_bf == -1)
-                            node->bf = 1;
-                        node->left = left_rotate(node->left);
-                        node = right_rotate(node);
+                        parent->bf = 1;
+                        child = parent;
+                        continue ;
                     }
-                    break ;
                 }
-                else if (node->bf == 2) {
-                    // if right subtree -> L Rotation
-                    // else left subtree -> RL Rotation
-                    if (node->right->bf == 1) {
-                        node->bf = 0;
-                        node->right->bf = 0;
-                        node = left_rotate(node);
+                else {
+                    if (parent->bf == -1) {
+                        if (child->bf == 1)
+                            parent = left_right_rotate(parent);
+                        else
+                            parent = right_rotate(parent);
                     }
+                    else if (parent->bf == 1)
+                        parent->bf = 0;
                     else {
-                        int rl_bf = node->right->left->bf;
-                        node->bf = 0;
-                        node->right->bf = 0;
-                        node->right->left->bf = 0;
-                        if (rl_bf == 1)
-                            node->bf = -1;
-                        else if (rl_bf == -1)
-                            node->right->bf = 1;
-                        node->right = right_rotate(node->right);
-                        node = left_rotate(node);
+                        parent->bf = -1;
+                        child = parent;
+                        continue ;
                     }
-                    break ;
                 }
-                if (!node->parent)
-                    return ;
-                else if (node->parent->left == node)
-                    --node->parent->bf;
+                break ;
+            }
+        }
+
+        /* ROTATIONS */
+        node_pointer left_rotate (node_pointer node, bool preserve_bfs = false)
+        {
+            node_pointer tmp = node->right;
+            node->right = tmp->left;
+            node->right ? node->right->parent = node : 0;
+            tmp->left = node;
+            tmp->parent = node->parent;
+            if (!node->parent)
+                _root = tmp;
+            else if (node->parent->left == node)
+                node->parent->left = tmp;
+            else
+                node->parent->right = tmp;
+            node->parent = tmp;
+            if (!preserve_bfs) {
+                node->bf = 0;
+                tmp->bf = 0;
+            }
+            return tmp;
+        }
+
+        node_pointer right_rotate (node_pointer node, bool preserve_bfs = false)
+        {
+            node_pointer tmp = node->left;
+            node->left = tmp->right;
+            node->left ? node->left->parent = node : 0;
+            tmp->right = node;
+            tmp->parent = node->parent;
+            if (!node->parent)
+                _root = tmp;
+            else if (node->parent->left == node)
+                node->parent->left = tmp;
+            else
+                node->parent->right = tmp;
+            node->parent = tmp;
+            if (!preserve_bfs) {
+                node->bf = 0;
+                tmp->bf = 0;
+            }
+            return tmp;
+        }
+
+        node_pointer right_left_rotate (node_pointer node)
+        {
+            node->right = right_rotate(node->right, true);
+            node = left_rotate(node, true);
+            node->left->bf = 0;
+            node->right->bf = 0;
+            if (node->bf > 0)
+                node->left->bf = -1;
+            else if (node->bf < 0)
+                node->right->bf = 1;
+            node->bf = 0;
+            return node;
+        }
+
+        node_pointer left_right_rotate (node_pointer node)
+        {
+            node->left = left_rotate(node->left, true);
+            node = right_rotate(node, true);
+            node->left->bf = 0;
+            node->right->bf = 0;
+            if (node->bf > 0)
+                node->left->bf = 1;
+            else if (node->bf < 0)
+                node->right->bf = -1;
+            node->bf = 0;
+            return node;
+        }
+
+        /* UTILITIES */
+        void swap_nodes (node_pointer n1, node_pointer n2)
+        {
+            node_pointer parent_n1 = n1->parent;
+            node_pointer left_n1 = n1->left;
+            node_pointer right_n1 = n1->right;
+            node_pointer parent_n2 = n2->parent;
+            node_pointer left_n2 = n2->left;
+            node_pointer right_n2 = n2->right;
+
+            if (parent_n1) {
+                if (parent_n1->left == n1)
+                    parent_n1->left = n2;
                 else
-                    ++node->parent->bf;
-                node = node->parent;
+                    parent_n1->right = n2;
+                n2->parent = parent_n1;
+            }
+            else {
+                _root = n2;
+                n2->parent = NULL;
+            }
+
+            n2->left = left_n1;
+            left_n1->parent = n2;
+            n1->left = left_n2;
+            n1->right = right_n2;
+
+            if (right_n2)
+                right_n2->parent = n1;
+            if (parent_n2 != n1) {
+                n2->right = right_n1;
+                right_n1->parent = n2;
+                parent_n2->left = n1;
+                n1->parent = parent_n2;
+            }
+            else {
+                n2->right = n1;
+                n1->parent = n2;
             }
         }
 
         void unset_bounds (void)
         {
-            if (_begin->parent != _end)
+            if (_begin->parent && _begin->parent != _end)
                 _begin->parent->left = NULL;
-            if (_end->parent != _begin)
+            if (_end->parent && _end->parent != _begin)
                 _end->parent->right = NULL;
         }
 
@@ -281,46 +369,6 @@ class avl_tree
             else {
                 _begin->parent = _end;
                 _end->parent = _begin;
-            }
-        }
-
-        void swap_nodes (node_pointer n1, node_pointer n2)
-        {
-            node_pointer parent1 = n1->parent;
-            node_pointer left_n1 = n1->left;
-            node_pointer right_n1 = n1->right;
-            node_pointer parent2 = n2->parent;
-            node_pointer left_n2 = n2->left;
-            node_pointer right_n2 = n2->right;
-
-            if (parent1) {
-                if (parent1->left == n1)
-                    parent1->left = n2;
-                else
-                    parent1->right = n2;
-                n2->parent = parent1;
-            }
-            else {
-                _root = n2;
-                n2->parent = NULL;
-            }
-
-            n2->left = left_n1;
-            left_n1->parent = n2;
-            n1->left = left_n2;
-            n1->right = right_n2;
-
-            if (right_n2)
-                right_n2->parent = n1;
-            if (parent2 != n1) {
-                n2->right = right_n1;
-                right_n1->parent = n2;
-                parent2->left = n1;
-                n1->parent = parent2;
-            }
-            else {
-                n2->right = n1;
-                n1->parent = n2;
             }
         }
 
@@ -352,42 +400,6 @@ class avl_tree
                 node = node->right;
             return node;
         }
-
-        /* ROTATIONS */
-        node_pointer left_rotate (node_pointer node)
-        {
-            node_pointer tmp = node->right;
-            node->right = tmp->left;
-            node->right ? node->right->parent = node : 0;
-            tmp->left = node;
-            tmp->parent = node->parent;
-            if (!node->parent)
-                _root = tmp;
-            else if (node->parent->left == node)
-                node->parent->left = tmp;
-            else
-                node->parent->right = tmp;
-            node->parent = tmp;
-            return tmp;
-        }
-
-        node_pointer right_rotate (node_pointer node)
-        {
-            node_pointer tmp = node->left;
-            node->left = tmp->right;
-            node->left ? node->left->parent = node : 0;
-            tmp->right = node;
-            tmp->parent = node->parent;
-            if (!node->parent)
-                _root = tmp;
-            else if (node->parent->left == node)
-                node->parent->left = tmp;
-            else
-                node->parent->right = tmp;
-            node->parent = tmp;
-            return tmp;
-        }
-
 
         /* MEMORY MANAGEMENT */
         node_pointer new_node (const value_type& val = value_type())
