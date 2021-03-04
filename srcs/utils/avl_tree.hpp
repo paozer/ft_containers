@@ -154,21 +154,22 @@ class avl_tree
         compare _comp;
 
         /* ERASE */
-        void aux_erase_no_child_node (node_pointer child)
+        node_pointer aux_erase_no_child_node (node_pointer child)
         {
             node_pointer parent = child->parent;
             if (parent) {
                 if (parent->left == child)
                     parent->left = NULL;
-                else if (parent->right == child)
+                else
                     parent->right = NULL;
             }
             else
                 _root = NULL;
             delete_node(child);
+            return parent;
         }
 
-        void aux_erase_one_child_node (node_pointer child)
+        node_pointer aux_erase_one_child_node (node_pointer child)
         {
             node_pointer parent = child->parent;
             if (parent) {
@@ -184,60 +185,76 @@ class avl_tree
             else
                 child->right->parent = parent;
             delete_node(child);
+            return parent;
         }
 
-        void aux_erase_two_child_node (node_pointer child)
+        node_pointer aux_erase_two_child_node (node_pointer child)
         {
             node_pointer min = get_min(child->right);
             swap_nodes(child, min);
             if (!child->left && !child->right)
-                this->aux_erase_no_child_node(child);
+                aux_erase_no_child_node(child);
             else if ((!child->left && child->right) || (child->left && !child->right))
-                this->aux_erase_one_child_node(child);
+                aux_erase_one_child_node(child);
+            return min;
         }
 
         /* REBALANCING */
-        void fix_after_insert (node_pointer child)
+        void rebalance (node_pointer node)
         {
-            if (!child)
-                return ;
-            for (node_pointer parent = child->parent; parent; parent = parent->parent) {
-                if (parent->right == child) {
-                    if (parent->bf == 1) {
-                        if (child->bf == -1)
-                            parent = right_left_rotate(parent);
-                        else
-                            parent = left_rotate(parent);
+            for (; node; node = node->parent) {
+                int lheight = (node->left) ? node->left->height : -1;
+                int rheight = (node->right) ? node->right->height : -1;
+                int bf = rheight - lheight;
+                if (bf == 2) {
+                    if (!node->right->right) {
+                        node->right = right_rotate(node->right);
+                        update_height(node->right);
                     }
-                    else if (parent->bf == -1)
-                        parent->bf = 0;
-                    else {
-                        parent->bf = 1;
-                        child = parent;
-                        continue ;
-                    }
+                    node = left_rotate(node);
+                    update_height(node);
+                    break ;
                 }
-                else {
-                    if (parent->bf == -1) {
-                        if (child->bf == 1)
-                            parent = left_right_rotate(parent);
-                        else
-                            parent = right_rotate(parent);
+                else if (bf == -2) {
+                    if (!node->left->left) {
+                        node->left = left_rotate(node->left);
+                        update_height(node->left);
                     }
-                    else if (parent->bf == 1)
-                        parent->bf = 0;
-                    else {
-                        parent->bf = -1;
-                        child = parent;
-                        continue ;
-                    }
+                    node = right_rotate(node);
+                    update_height(node);
+                    break ;
                 }
-                break ;
+                else
+                    update_height(node);
             }
         }
 
+        int get_height (node_pointer node)
+        {
+            if (!node)
+                return 0;
+            int left_height = get_height(node->left);
+            int right_height = get_height(node->right);
+            return ft::max(left_height, right_height) + 1;
+        }
+
+        void update_height(node_pointer node)
+        {
+            int lheight = node->left ? node->left->height : -1;
+            int rheight = node->right ? node->right->height : -1;
+            node->height = ft::max(lheight, rheight) + 1;
+        }
+
+        void recompute_heights(node_pointer node)
+        {
+            if (!node)
+                return ;
+            update_height(node);
+            recompute_heights(node->parent);
+        }
+
         /* ROTATIONS */
-        node_pointer left_rotate (node_pointer node, bool preserve_bfs = false)
+        node_pointer left_rotate (node_pointer node)
         {
             node_pointer tmp = node->right;
             node->right = tmp->left;
@@ -251,14 +268,12 @@ class avl_tree
             else
                 node->parent->right = tmp;
             node->parent = tmp;
-            if (!preserve_bfs) {
-                node->bf = 0;
-                tmp->bf = 0;
-            }
+            update_height(tmp->left);
+            update_height(tmp);
             return tmp;
         }
 
-        node_pointer right_rotate (node_pointer node, bool preserve_bfs = false)
+        node_pointer right_rotate (node_pointer node)
         {
             node_pointer tmp = node->left;
             node->left = tmp->right;
@@ -272,39 +287,9 @@ class avl_tree
             else
                 node->parent->right = tmp;
             node->parent = tmp;
-            if (!preserve_bfs) {
-                node->bf = 0;
-                tmp->bf = 0;
-            }
+            update_height(tmp->right);
+            update_height(tmp);
             return tmp;
-        }
-
-        node_pointer right_left_rotate (node_pointer node)
-        {
-            node->right = right_rotate(node->right, true);
-            node = left_rotate(node, true);
-            node->left->bf = 0;
-            node->right->bf = 0;
-            if (node->bf > 0)
-                node->left->bf = -1;
-            else if (node->bf < 0)
-                node->right->bf = 1;
-            node->bf = 0;
-            return node;
-        }
-
-        node_pointer left_right_rotate (node_pointer node)
-        {
-            node->left = left_rotate(node->left, true);
-            node = right_rotate(node, true);
-            node->left->bf = 0;
-            node->right->bf = 0;
-            if (node->bf > 0)
-                node->left->bf = 1;
-            else if (node->bf < 0)
-                node->right->bf = -1;
-            node->bf = 0;
-            return node;
         }
 
         /* UTILITIES */
@@ -316,6 +301,8 @@ class avl_tree
             node_pointer parent_n2 = n2->parent;
             node_pointer left_n2 = n2->left;
             node_pointer right_n2 = n2->right;
+
+            ft::swap(n1->height, n2->height);
 
             if (parent_n1) {
                 if (parent_n1->left == n1)

@@ -39,4 +39,12 @@ void swap ( T& a, T& b )
     b = c;
 }
 
+template <class T>
+T max (const T& a, const T& b)
+{
+    if (a >= b)
+        return a;
+    return b;
+}
+
 } // NAMESPACE FT

@@ -108,7 +108,7 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 Base::unset_bounds();
                 Base::_root = aux_insert(Base::_root->parent, Base::_root, val);
                 if (Base::_added_node)
-                    Base::fix_after_insert(Base::_added_node_ptr);
+                    Base::rebalance(Base::_added_node_ptr);
             }
             else
                 Base::_root = aux_insert(NULL, NULL, val);
@@ -126,7 +126,7 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                     node_pointer position_ptr = position.get_node();
                     position_ptr = aux_insert(position_ptr->parent, position_ptr, val);
                     if (Base::_added_node)
-                        Base::fix_after_insert(Base::_added_node_ptr);
+                        Base::rebalance(Base::_added_node_ptr);
                     Base::set_bounds();
                     return iterator(Base::_added_node_ptr);
                 }
@@ -146,15 +146,17 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         {
             if (position == Base::end())
                 return ;
+            --Base::_size;
             Base::unset_bounds();
             node_pointer node = position.get_node();
+            node_pointer tmp;
             if (!node->left && !node->right)
-                Base::aux_erase_no_child_node(node);
+                tmp = Base::aux_erase_no_child_node(node);
             else if ((!node->left && node->right) || (node->left && !node->right))
-                Base::aux_erase_one_child_node(node);
+                tmp = Base::aux_erase_one_child_node(node);
             else
-                Base::aux_erase_two_child_node(node);
-            --Base::_size;
+                tmp = Base::aux_erase_two_child_node(node);
+            Base::rebalance(tmp);
             Base::set_bounds();
         }
 

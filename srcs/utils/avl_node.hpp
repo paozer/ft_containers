@@ -8,13 +8,13 @@ template <class T>
 struct avl_node
 {
     T content;
-    int bf;
+    int height;
     avl_node * left;
     avl_node * right;
     avl_node * parent;
 
     avl_node (T cont = T())
-        : content(cont), bf(0), left(NULL), right(NULL), parent(NULL)
+        : content(cont), height(0), left(NULL), right(NULL), parent(NULL)
     {
     }
 
