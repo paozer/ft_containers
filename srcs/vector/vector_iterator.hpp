@@ -248,7 +248,7 @@ class reverse_vector_iterator
         /* GETTERS */
         size_type get_index (void) const { return _index; }
         size_type get_size (void) const { return _size; }
-        pointer get_content (void) const { return _array; }
+        pointer get_array (void) const { return _array; }
 
     private:
         size_type _index;

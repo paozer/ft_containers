@@ -131,8 +131,8 @@ class vector
         void reserve (size_type n)
         {
             if (n > _capacity) {
-                value_type * new_array = realloc(n);
-                _alloc.deallocate(_array, _size);
+                value_type* new_array = realloc(n);
+                clear();
                 _array = new_array;
             }
         }
@@ -161,21 +161,18 @@ class vector
         const_reference operator[] (size_type n) const { return _array[n]; }
 
         /* MODIFIERS */
-        // use insert(begin(), first, last) ?
         template <class InputIterator>
         void assign (InputIterator first, InputIterator last,
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
             clear();
-            for (; first != last; ++first)
-                push_back(*first);
+            insert(begin(), first, last);
         }
 
-        // use insert(begin(), n, val) ?
         void assign(size_type n, const value_type& val)
         {
             clear();
-            push_back_n(n, val);
+            insert(begin(), n, val);
         }
 
         void push_back (const value_type& val)
@@ -264,7 +261,6 @@ class vector
             return erase(position, next);
         }
 
-        // first == begin ? valid return ?
         iterator erase (iterator first, iterator last)
         {
             if (first == last)
@@ -344,6 +340,9 @@ class vector
 }; // CLASS VECTOR
 
 template <class T, class Alloc>
-void swap (vector<T, Alloc>& x, vector<T, Alloc>& y) { x.swap(y); }
+void swap (vector<T, Alloc>& x, vector<T, Alloc>& y)
+{
+    x.swap(y);
+}
 
 } // NAMESPACE FT

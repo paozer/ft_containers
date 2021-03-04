@@ -209,8 +209,6 @@ class avl_tree
 
         void clear (void)
         {
-            if (_size == 0)
-                return ;
             unset_bounds();
             aux_clear(_root);
             _size = 0;

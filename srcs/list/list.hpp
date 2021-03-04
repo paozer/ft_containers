@@ -2,7 +2,7 @@
 
 #include "list_node.hpp"
 #include "list_iterator.hpp"
-#include "../utils/utils.hpp"
+#include "../utils/utils.hpp" // ft::enable_if
 
 #include <cstddef> // NULL, std::ptrdiff_t
 
@@ -231,18 +231,22 @@ class list
 
         iterator erase (iterator position)
         {
-            position.get_next()->prev = position.get_prev();
-            position.get_prev()->next = position.get_next();
-            iterator ret = iterator (position.get_next());
-            delete_node(position.get_node());
-            --_size;
-            return ret;
+            iterator next = position;
+            ++next;
+            return erase(position, next);
         }
 
         iterator erase (iterator first, iterator last)
         {
-            while (first != last)
-                first = erase(first);
+            difference_type i = std::distance(first, last);
+            _size -= i;
+
+            first.get_prev()->next = last.get_node();
+            last.get_node()->prev = first.get_prev();
+            for (iterator tmp = first; first != last; first = tmp) {
+                ++tmp;
+                delete_node(first.get_node());
+            }
             return last;
         }
 
@@ -268,8 +272,6 @@ class list
 
         void clear (void)
         {
-            if (_size == 0)
-                return ;
             erase(begin(), end());
             _head->next = _tail;
             _tail->prev = _head;
@@ -358,7 +360,7 @@ class list
         template <class Compare>
         void merge (list& x, Compare comp)
         {
-            if (this == &x || x._size == 0)
+            if (x._size == 0)
                 return ;
 
             list<value_type> result;

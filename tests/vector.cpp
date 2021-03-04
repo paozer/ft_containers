@@ -340,6 +340,8 @@ TEMPLATE_PRODUCT_TEST_CASE( "erase work correctly", "[vector][modifiers]", ft::v
         REQUIRE( *it == 1 );
         it = v.erase(--v.end());
         REQUIRE( it == v.end() );
+        it = v.erase(++v.begin());
+        REQUIRE( *it == 4 );
         it = v.erase(v.begin(), v.end());
         REQUIRE( it == v.end() );
     }
