@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include "avl_node.hpp"
 #include "avl_iterator.hpp"
 #include "utils.hpp"
@@ -70,7 +72,7 @@ class avl_tree
         /* OPERATORS */
         friend bool operator== (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs)
         {
-            if (lhs.size() != rhs.size())
+            if (lhs._size != rhs._size)
                 return false;
             const_iterator lit = lhs.begin();
             const_iterator rit = rhs.begin();
@@ -95,7 +97,7 @@ class avl_tree
                 ++lit;
                 ++rit;
             }
-            if (lhs.size() >= rhs.size())
+            if (lhs._size >= rhs._size)
                 return false;
             return true;
         }
@@ -104,6 +106,79 @@ class avl_tree
         friend bool operator<= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(rhs < lhs); }
         friend bool operator> (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return rhs < lhs; }
         friend bool operator>= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(lhs < rhs); }
+
+        /* MODIFIERS */
+        std::pair<iterator, bool> insert (const value_type& val)
+        {
+            if (_root) {
+                // check if val is greater than max or lesser than min
+                unset_bounds();
+                _root = aux_insert(_root->parent, _root, val);
+                if (_added_node)
+                    rebalance(_added_node_ptr);
+            }
+            else
+                _root = aux_insert(NULL, NULL, val);
+            set_bounds();
+            return std::make_pair(iterator(_added_node_ptr), _added_node);
+        }
+
+        iterator insert (iterator position, const value_type& val)
+        {
+            if (position != end() && _comp(*position, val)) {
+                iterator next = position;
+                ++next;
+                if (next == end() || _comp(val, *next)) {
+                    unset_bounds();
+                    node_pointer position_ptr = position.get_node();
+                    position_ptr = aux_insert(position_ptr->parent, position_ptr, val);
+                    set_bounds();
+                    return iterator(_added_node_ptr);
+                }
+            }
+            return insert(val).first;
+        }
+
+        template <class InputIterator>
+        void insert (InputIterator first, InputIterator last,
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
+        {
+            for (; first != last; ++first)
+                insert(*first);
+        }
+
+        void erase (iterator position)
+        {
+            if (position == end())
+                return ;
+            --_size;
+            unset_bounds();
+            node_pointer node = position.get_node();
+            node_pointer tmp;
+            if (!node->left && !node->right)
+                tmp = aux_erase_no_child_node(node);
+            else if ((!node->left && node->right) || (node->left && !node->right))
+                tmp = aux_erase_one_child_node(node);
+            else
+                tmp = aux_erase_two_child_node(node);
+            rebalance(tmp);
+            set_bounds();
+        }
+
+        size_type erase (const value_type& k)
+        {
+            size_type old_size = _size;
+            erase(find(k));
+            return  old_size - _size;
+        }
+
+        void erase (iterator first, iterator last)
+        {
+            for (iterator tmp = first; first != last; first = tmp) {
+                ++tmp;
+                erase(first);
+            }
+        }
 
         /* ELEMENT ACCESS */
         iterator begin() { return iterator(_begin->parent); }
@@ -143,6 +218,98 @@ class avl_tree
             set_bounds();
         }
 
+        /* OBSERVERS */
+        size_type count (const value_type& val) const
+        {
+            if (find(val) != end())
+                return 1;
+            return 0;
+        }
+
+        iterator find (const value_type& val)
+        {
+            node_pointer node = _root;
+            while (node && node != _begin && node != _end) {
+                if (_comp(node->content, val))
+                    node = node->right;
+                else if (_comp(val, node->content))
+                    node = node->left;
+                else
+                    return iterator(node);
+            }
+            return end();
+        }
+
+        const_iterator find (const value_type& val) const
+        {
+            node_pointer node = _root;
+            while (node && node != _begin && node != _end) {
+                if (_comp(node->content, val))
+                    node = node->right;
+                else if (_comp(val, node->content))
+                    node = node->left;
+                else
+                    return const_iterator(node);
+            }
+            return end();
+        }
+
+        std::pair<iterator, iterator> equal_range (const value_type& val)
+        {
+            iterator low = lower_bound(val);
+            iterator up = upper_bound(val);
+            return std::make_pair(low, up);
+        }
+
+        std::pair<const_iterator, const_iterator> equal_range (const value_type& val) const
+        {
+            const_iterator low = lower_bound(val);
+            const_iterator up = upper_bound(val);
+            return std::make_pair(low, up);
+        }
+
+        // lower_bound returns iterator to first element that is not less than k
+        // upper_bound returns iterator to first element that is greater than k
+        iterator lower_bound (const value_type& val)
+        {
+            iterator ite = end();
+            for (iterator it = begin(); it != ite; ++it) {
+                if (!_comp(*it, val))
+                    return it;
+            }
+            return ite;
+        }
+
+        const_iterator lower_bound (const value_type& val) const
+        {
+            const_iterator ite = end();
+            for (const_iterator it = begin(); it != ite; ++it) {
+                if (!_comp(*it, val))
+                    return it;
+            }
+            return ite;
+        }
+
+        iterator upper_bound (const value_type& val)
+        {
+            iterator ite = end();
+            for (iterator it = begin(); it != ite; ++it) {
+                if (_comp(val, *it))
+                    return it;
+            }
+            return ite;
+        }
+
+        const_iterator upper_bound (const value_type& val) const
+        {
+            const_iterator ite = end();
+            for (const_iterator it = begin(); it != ite; ++it) {
+                if (_comp(val, *it))
+                    return it;
+            }
+            return ite;
+        }
+
     protected:
         node_pointer _root;
         node_pointer _begin;
@@ -152,6 +319,32 @@ class avl_tree
         size_type _size;
         node_allocator _alloc;
         compare _comp;
+
+        /* INSERT */
+        node_pointer aux_insert (node_pointer parent, node_pointer node, const value_type& val)
+        {
+            // if we're at a leaf insert key/val pair
+            // else if key goes into the left subtree
+            // else if key goes into the right subtree
+            // else key is already in the tree
+            // remember the added/found node to create iterator after return from recursion
+            if (!node) {
+                node = new_node(val);
+                node->parent = parent;
+                _added_node = true;
+                _added_node_ptr = node;
+                ++_size;
+            }
+            else if (_comp(val, node->content))
+                node->left = aux_insert(node, node->left, val);
+            else if (_comp(node->content, val))
+                node->right = aux_insert(node, node->right, val);
+            else {
+                _added_node = false;
+                _added_node_ptr = node;
+            }
+            return node;
+        }
 
         /* ERASE */
         node_pointer aux_erase_no_child_node (node_pointer child)
