@@ -9,6 +9,7 @@
 #include <memory> // std::allocator
 #include <limits> // std::numeric_limits
 #include <functional> // std::equal_to
+#include <iterator> // std::distance
 
 namespace ft {
 
@@ -290,19 +291,20 @@ class list
 
         void splice (iterator position, list& x, iterator first, iterator last)
         {
+            if (first == last)
+                return ;
+
+            difference_type i = std::distance(first, last);
+            _size += i;
+            x._size -= i;
+
+            node_pointer tmp = last.get_prev();
             first.get_prev()->next = last.get_node();
             last.get_node()->prev = first.get_prev();
-
-            while (first != last) {
-                iterator tmp (first.get_next());
-                first.get_node()->next = position.get_node();
-                first.get_node()->prev = position.get_prev();
-                position.get_prev()->next = first.get_node();
-                position.get_node()->prev = first.get_node();
-                first = tmp;
-                ++_size;
-                --x._size;
-            }
+            position.get_prev()->next = first.get_node();
+            first.get_node()->prev = position.get_prev();
+            tmp->next = position.get_node();
+            position.get_node()->prev = tmp;
         }
 
         void remove (const value_type& val)
@@ -356,7 +358,7 @@ class list
         template <class Compare>
         void merge (list& x, Compare comp)
         {
-            if (x._size == 0)
+            if (this == &x || x._size == 0)
                 return ;
 
             list<value_type> result;
@@ -366,10 +368,10 @@ class list
                 else
                     result.splice(result.end(), x, x.begin());
             }
-            while (_size != 0)
-                result.splice(result.end(), *this, begin());
-            while (x._size != 0)
-                result.splice(result.end(), x, x.begin());
+            if (_size != 0)
+                result.splice(result.end(), *this);
+            if (x._size != 0)
+                result.splice(result.end(), x);
             _size = result._size;
 
             _head->next = result._head->next;
@@ -392,16 +394,14 @@ class list
             if (_size < 2)
                 return ;
 
+            iterator it = begin();
+            std::advance(it, _size / 2);
+
             list<value_type> left;
             list<value_type> right;
-            size_type i = 0;
-            for (iterator it = begin(); it != end(); it = begin()) {
-                if (i < _size / 2)
-                    left.splice(left.begin(), *this, it);
-                else
-                    right.splice(right.begin(), *this, it);
-                ++i;
-            }
+            left.splice(left.begin(), *this, begin(), it);
+            right.splice(right.begin(), *this, begin(), end());
+
             left.sort(comp);
             right.sort(comp);
             left.merge(right, comp);
@@ -429,19 +429,20 @@ class list
             node_pointer p = _alloc.allocate(1);
             _alloc.construct(p, val);
             return p;
-            //return new node(val);
         }
 
         void delete_node (node_pointer p)
         {
             _alloc.destroy(p);
             _alloc.deallocate(p, 1);
-            //delete p;
         }
 
 }; // CLASS LIST
 
 template <class T, class Alloc>
-void swap (list<T, Alloc>& x, list<T, Alloc>& y) { x.swap(y); }
+void swap (list<T, Alloc>& x, list<T, Alloc>& y)
+{
+    x.swap(y);
+}
 
 } // NAMESPACE FT
