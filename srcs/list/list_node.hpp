@@ -11,8 +11,8 @@ struct list_node
         list_node* prev;
         list_node* next;
 
-        list_node (T c = T(), list_node* p = NULL, list_node* n = NULL)
-            : content(c), prev(p), next(n)
+        list_node (const T& cont = T())
+            : content(cont), prev(NULL), next(NULL)
         {
         }
 

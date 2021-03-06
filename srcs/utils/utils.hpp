@@ -18,7 +18,7 @@ struct choose<false, is_true, is_false>
     typedef is_false type;
 };
 
-/* ENABLE */
+/* ENABLE_IF */
 template<bool Cond, class T = void>
 struct enable_if
 {
@@ -39,6 +39,7 @@ void swap ( T& a, T& b )
     b = c;
 }
 
+/* SWAP */
 template <class T>
 T max (const T& a, const T& b)
 {

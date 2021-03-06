@@ -108,6 +108,7 @@ class avl_tree
         friend bool operator>= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(lhs < rhs); }
 
         /* MODIFIERS */
+        // maybe add check if val is greater than max or lesser than min and use as hint
         std::pair<iterator, bool> insert (const value_type& val)
         {
             if (_root) {
@@ -116,9 +117,9 @@ class avl_tree
                 _root = aux_insert(_root->parent, _root, val);
                 if (_added_node)
                     rebalance(_added_node_ptr);
-            }
-            else
+            } else {
                 _root = aux_insert(NULL, NULL, val);
+            }
             set_bounds();
             return std::make_pair(iterator(_added_node_ptr), _added_node);
         }
@@ -169,7 +170,7 @@ class avl_tree
         {
             size_type old_size = _size;
             erase(find(k));
-            return  old_size - _size;
+            return old_size - _size;
         }
 
         void erase (iterator first, iterator last)
@@ -321,23 +322,17 @@ class avl_tree
         /* INSERT */
         node_pointer aux_insert (node_pointer parent, node_pointer node, const value_type& val)
         {
-            // if we're at a leaf insert key/val pair
-            // else if key goes into the left subtree
-            // else if key goes into the right subtree
-            // else key is already in the tree
-            // remember the added/found node to create iterator after return from recursion
             if (!node) {
                 node = new_node(val);
                 node->parent = parent;
                 _added_node = true;
                 _added_node_ptr = node;
                 ++_size;
-            }
-            else if (_comp(val, node->content))
+            } else if (_comp(val, node->content)) {
                 node->left = aux_insert(node, node->left, val);
-            else if (_comp(node->content, val))
+            } else if (_comp(node->content, val)) {
                 node->right = aux_insert(node, node->right, val);
-            else {
+            } else {
                 _added_node = false;
                 _added_node_ptr = node;
             }
@@ -353,9 +348,9 @@ class avl_tree
                     parent->left = NULL;
                 else
                     parent->right = NULL;
-            }
-            else
+            } else {
                 _root = NULL;
+            }
             delete_node(child);
             return parent;
         }
@@ -368,9 +363,9 @@ class avl_tree
                     parent->left = (child->left ? child->left : child->right);
                 else if (parent->right == child)
                     parent->right = (child->left ? child->left : child->right);
-            }
-            else
+            } else {
                 _root = (child->left ? child->left : child->right);
+            }
             if (child->left)
                 child->left->parent = parent;
             else
@@ -391,6 +386,9 @@ class avl_tree
         }
 
         /* REBALANCING */
+        // could use bf instead of height and break
+        // out of retracing when deletion/insertion
+        // has been balanced out at a node
         void rebalance (node_pointer node)
         {
             for (; node; node = node->parent) {
@@ -405,8 +403,7 @@ class avl_tree
                     node = left_rotate(node);
                     update_height(node);
                     break ;
-                }
-                else if (bf == -2) {
+                } else if (bf == -2) {
                     if (!node->left->left) {
                         node->left = left_rotate(node->left);
                         update_height(node->left);
@@ -414,9 +411,9 @@ class avl_tree
                     node = right_rotate(node);
                     update_height(node);
                     break ;
-                }
-                else
+                } else {
                     update_height(node);
+                }
             }
         }
 
@@ -501,8 +498,7 @@ class avl_tree
                 else
                     parent_n1->right = n2;
                 n2->parent = parent_n1;
-            }
-            else {
+            } else {
                 _root = n2;
                 n2->parent = NULL;
             }
@@ -519,8 +515,7 @@ class avl_tree
                 right_n1->parent = n2;
                 parent_n2->left = n1;
                 n1->parent = parent_n2;
-            }
-            else {
+            } else {
                 n2->right = n1;
                 n1->parent = n2;
             }
@@ -543,8 +538,7 @@ class avl_tree
                 min->left = _begin;
                 _end->parent = max;
                 max->right = _end;
-            }
-            else {
+            } else {
                 _begin->parent = _end;
                 _end->parent = _begin;
             }
@@ -559,7 +553,6 @@ class avl_tree
             delete_node(node);
         }
 
-        // add begin/end check
         node_pointer get_min (node_pointer node)
         {
             if (!node)
@@ -569,7 +562,6 @@ class avl_tree
             return node;
         }
 
-        // add begin/end check
         node_pointer get_max (node_pointer node)
         {
             if (!node)
@@ -583,7 +575,7 @@ class avl_tree
         node_pointer new_node (const value_type& val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
-            _alloc.construct(p, val);
+            _alloc.construct(p, val); // implicitly calls avl_node constructor to create tmp node
             return p;
         }
 

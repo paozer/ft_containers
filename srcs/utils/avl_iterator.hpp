@@ -61,10 +61,9 @@ class avl_iterator
                 _node = _node->right;
                 while (_node->left)
                     _node = _node->left;
-            }
-            else if (_node == parent->left)
+            } else if (_node == parent->left) {
                 _node = parent;
-            else {
+            } else {
                 while (_node == parent->right) {
                     _node = parent;
                     parent = _node->parent;
@@ -88,10 +87,9 @@ class avl_iterator
                 _node = _node->left;
                 while (_node->right)
                     _node = _node->right;
-            }
-            else if (_node == parent->right)
+            } else if (_node == parent->right) {
                 _node = parent;
-            else {
+            } else {
                 while (_node == parent->left) {
                     _node = parent;
                     parent = _node->parent;
@@ -167,10 +165,9 @@ class reverse_avl_iterator
                 _node = _node->left;
                 while (_node->right)
                     _node = _node->right;
-            }
-            else if (_node == parent->right)
+            } else if (_node == parent->right) {
                 _node = parent;
-            else {
+            } else {
                 while (_node == parent->left) {
                     _node = parent;
                     parent = _node->parent;
@@ -194,10 +191,9 @@ class reverse_avl_iterator
                 _node = _node->right;
                 while (_node->left)
                     _node = _node->left;
-            }
-            else if (_node == parent->left)
+            } else if (_node == parent->left) {
                 _node = parent;
-            else {
+            } else {
                 while (_node == parent->right) {
                     _node = parent;
                     parent = _node->parent;

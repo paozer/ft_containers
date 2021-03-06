@@ -51,9 +51,8 @@ class vector
             : _size(0), _capacity(0), _array(NULL), _alloc(alloc)
         {
             reserve(std::distance(first, last));
-            for (; first != last; ++first) {
+            for (; first != last; ++first)
                 push_back(*first);
-            }
         }
 
         vector (const vector& x)
@@ -65,21 +64,18 @@ class vector
         /* OPERATORS */
         vector& operator= (const vector& x)
         {
-            if (this != &x) {
+            if (this != &x)
                 assign(x.begin(), x.end());
-            }
             return *this;
         }
 
         friend bool operator== (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
         {
-            if (lhs._size != rhs._size) {
+            if (lhs._size != rhs._size)
                 return false;
-            }
             for (size_type i = 0; i < lhs._size; ++i) {
-                if (lhs[i] != rhs[i]) {
+                if (lhs[i] != rhs[i])
                     return false;
-                }
             }
             return true;
         }
@@ -87,16 +83,13 @@ class vector
         friend bool operator< (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
         {
             for (size_type i = 0; i < lhs._size && i < rhs._size; ++i) {
-                if (lhs[i] < rhs[i]) {
+                if (lhs[i] < rhs[i])
                     return true;
-                }
-                if (lhs[i] > rhs[i]) {
+                if (lhs[i] > rhs[i])
                     return false;
-                }
             }
-            if (lhs._size >= rhs._size) {
+            if (lhs._size >= rhs._size)
                 return false;
-            }
             return true;
         }
 
@@ -131,9 +124,8 @@ class vector
             if (n > _size) {
                 push_back_n(n - _size, val);
             } else {
-                while (n < _size) {
+                while (n < _size)
                     pop_back();
-                }
             }
         }
 
@@ -142,9 +134,8 @@ class vector
 
         void reserve (size_type n)
         {
-            if (n > _capacity) {
+            if (n > _capacity)
                 realloc(n);
-            }
         }
 
         /* ELEMENT ACCESS */
@@ -210,9 +201,8 @@ class vector
             erase(position, end());
             reserve(_size + n + tmp._size);
             push_back_n(n, val);
-            for (iterator it = tmp.begin(); it != tmp.end(); ++it) {
+            for (iterator it = tmp.begin(); it != tmp.end(); ++it)
                 push_back(*it);
-            }
         }
 
         template <class InputIterator>
@@ -222,12 +212,10 @@ class vector
             self_type tmp (position, end());
             erase(position, end());
             reserve(_size + std::distance(first, last) + tmp._size);
-            for (; first != last; ++first) {
+            for (; first != last; ++first)
                 push_back(*first);
-            }
-            for (iterator it = tmp.begin(); it != tmp.end(); ++it) {
+            for (iterator it = tmp.begin(); it != tmp.end(); ++it)
                 push_back(*it);
-            }
         }
 
 
@@ -240,17 +228,14 @@ class vector
 
         iterator erase (iterator first, iterator last)
         {
-            if (first == last) {
+            if (first == last)
                 return first;
-            }
             vector tmp (last, end());
             size_type new_size = first - begin();
-            while (_size > new_size) {
+            while (_size > new_size)
                 pop_back();
-            }
-            for (iterator it = tmp.begin(); it != tmp.end(); ++it) {
+            for (iterator it = tmp.begin(); it != tmp.end(); ++it)
                 push_back(*it);
-            }
             return iterator(first.get_index(), _array);
         }
 
@@ -264,9 +249,8 @@ class vector
 
         void clear(void)
         {
-            for (size_type i = 0; i < _size; ++i) {
+            for (size_type i = 0; i < _size; ++i)
                 _alloc.destroy(_array + i);
-            }
             _size = 0;
         }
 
@@ -279,18 +263,16 @@ class vector
         void push_back_n (size_type n, const value_type & val = value_type())
         {
             reserve(_size + n);
-            for (size_type i = 0; i < n; ++i) {
+            for (size_type i = 0; i < n; ++i)
                 _alloc.construct(_array + _size + i, val);
-            }
             _size += n;
         }
 
         void realloc(size_type new_size)
         {
             size_type new_capacity = (_capacity == 0 ? 1 : _capacity);
-            while (new_size > new_capacity) {
+            while (new_size > new_capacity)
                 new_capacity = ceil(new_capacity * 1.5);
-            }
             value_type * new_array = _alloc.allocate(new_capacity);
             for (size_type i = 0; i < _size; ++i) {
                 _alloc.construct(new_array + i, _array[i]);

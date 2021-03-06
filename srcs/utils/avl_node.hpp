@@ -13,7 +13,7 @@ struct avl_node
     avl_node * right;
     avl_node * parent;
 
-    avl_node (T cont = T())
+    avl_node (const T& cont = T())
         : content(cont), height(0), left(NULL), right(NULL), parent(NULL)
     {
     }

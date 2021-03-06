@@ -36,9 +36,10 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
+        // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
         class value_compare : std::binary_function<value_type, value_type, bool>
-        {   // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
-            //friend class map;
+        {
+            friend class map;
             protected:
                 key_compare comp;
                 value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
@@ -109,9 +110,9 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 Base::_root = aux_insert(Base::_root->parent, Base::_root, val);
                 if (Base::_added_node)
                     Base::rebalance(Base::_added_node_ptr);
-            }
-            else
+            } else {
                 Base::_root = aux_insert(NULL, NULL, val);
+            }
             Base::set_bounds();
             return std::make_pair(iterator(Base::_added_node_ptr), Base::_added_node);
         }
@@ -164,7 +165,7 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         {
             size_type old_size = Base::_size;
             erase(find(k));
-            return  old_size - Base::_size;
+            return old_size - Base::_size;
         }
 
         void erase (iterator first, iterator last)
@@ -288,12 +289,11 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 Base::_added_node = true;
                 Base::_added_node_ptr = node;
                 ++Base::_size;
-            }
-            else if (_comp(val.first, node->content.first))
+            } else if (_comp(val.first, node->content.first)) {
                 node->left = aux_insert(node, node->left, val);
-            else if (_comp(node->content.first, val.first))
+            } else if (_comp(node->content.first, val.first)) {
                 node->right = aux_insert(node, node->right, val);
-            else {
+            } else {
                 Base::_added_node = false;
                 Base::_added_node_ptr = node;
             }

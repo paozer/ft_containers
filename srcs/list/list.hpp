@@ -346,9 +346,9 @@ class list
                 if (binary_pred(*it, *prev)) {
                     erase(it);
                     it = prev;
-                }
-                else
+                } else {
                     prev = it;
+                }
             }
         }
 
@@ -370,10 +370,12 @@ class list
                 else
                     result.splice(result.end(), x, x.begin());
             }
-            if (_size != 0)
+            if (_size != 0) {
+                assert(x._size == 0);
                 result.splice(result.end(), *this);
-            if (x._size != 0)
+            } else if (x._size != 0) {
                 result.splice(result.end(), x);
+            }
             _size = result._size;
 
             _head->next = result._head->next;
@@ -429,7 +431,7 @@ class list
         node_pointer new_node (const value_type& val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
-            _alloc.construct(p, val);
+            _alloc.construct(p, val); // implictly calls list_node constructor to create tmp node
             return p;
         }
 
