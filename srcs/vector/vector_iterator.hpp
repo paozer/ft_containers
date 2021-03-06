@@ -21,13 +21,13 @@ class vector_iterator
         typedef size_t size_type;
 
     public:
-        vector_iterator (size_type index = 0, size_type size = 0, pointer array = NULL)
-            : _index(index), _size(size), _array(array)
+        vector_iterator (size_type index = 0, pointer array = NULL)
+            : _index(index), _array(array)
         {
         }
 
         vector_iterator (const vector_iterator<value_type, false>& other)
-            : _index(other.get_index()), _size(other.get_size()), _array(other.get_array())
+            : _index(other.get_index()), _array(other.get_array())
         {
         }
 
@@ -36,7 +36,6 @@ class vector_iterator
         {
             if (this != &other) {
                 _index = other._index;
-                _size = other._size;
                 _array = other._array;
             }
             return *this;
@@ -121,12 +120,10 @@ class vector_iterator
 
         /* GETTERS */
         size_type get_index (void) const { return _index; }
-        size_type get_size (void) const { return _size; }
         pointer get_array (void) const { return _array; }
 
     private:
         size_type _index;
-        size_type _size;
         pointer _array;
 
 }; // CLASS VECTOR_ITERATOR
@@ -147,13 +144,13 @@ class reverse_vector_iterator
 
     public:
         /* CONSTRUCTORS */
-        reverse_vector_iterator (size_type index = 0, size_type size = 0, pointer array = NULL)
-            : _index(index), _size(size), _array(array)
+        reverse_vector_iterator (size_type index = 0, pointer array = NULL)
+            : _index(index), _array(array)
         {
         }
 
         reverse_vector_iterator (const reverse_vector_iterator<value_type, false>& other)
-            : _index(other.get_index()), _size(other.get_size()), _array(other.get_array())
+            : _index(other.get_index()), _array(other.get_array())
         {
         }
 
@@ -162,7 +159,6 @@ class reverse_vector_iterator
         {
             if (this != &other) {
                 _index = other._index;
-                _size = other._size;
                 _array = other._array;
             }
             return *this;
@@ -247,12 +243,10 @@ class reverse_vector_iterator
 
         /* GETTERS */
         size_type get_index (void) const { return _index; }
-        size_type get_size (void) const { return _size; }
         pointer get_array (void) const { return _array; }
 
     private:
         size_type _index;
-        size_type _size;
         pointer _array;
 
 }; // CLASS REVERSE_VECTOR_ITERATOR

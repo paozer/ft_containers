@@ -208,8 +208,7 @@ TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int
         REQUIRE( cnt1.begin() == cnt1.end() );
 
         TestType cnt2 (1, 9);
-        typename TestType::const_iterator it = --cnt2.end();
-        REQUIRE( *it == 9 );
+        REQUIRE( *--cnt2.end() == 9 );
     }
 }
 
@@ -223,10 +222,8 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[vector][modifiers]", ft::
         size_t j = 7;
 
         std::vector<VALUE_TYPE> v (size);
-        auto first = v.begin();
-        auto last = v.begin();
-        std::advance(first, i);
-        std::advance(last, j);
+        auto first = v.begin() + i;
+        auto last = v.begin() + j;
 
         TestType my_vector;
         my_vector.assign(first, last);
@@ -272,78 +269,111 @@ TEMPLATE_TEST_CASE( "pop_back works correctly", "[vector][modifiers]", ft::vecto
     }
 }
 
-TEMPLATE_TEST_CASE( "insert work correctly", "[vector][modifiers]", ft::vector<int> )
+TEST_CASE("vector insert work correctly", "[vector][modifiers]")
 {
-    TestType cnt;
+    ft::vector<int> v;
 
     SECTION( "single element insert works correctly" ) {
-        cnt.insert(cnt.begin(), 5);           // { 5 }
-        REQUIRE( cnt.size() == 1 );
-        REQUIRE( *cnt.begin() == 5 );
-        cnt.insert(cnt.end(), 10);            // { 5, 10 }
-        REQUIRE( cnt.size() == 2 );
-        REQUIRE( *--cnt.end() == 10 );
+        ft::vector<int>::iterator ret;
+        ret = v.insert(v.begin(), 5);               // { 5 }
+        REQUIRE( *ret == 5 );
+        ret = v.insert(v.end(), 10);                // { 5, 10 }
+        REQUIRE( *ret == 10 );
+        ret = v.insert(++v.begin(), 7);             // { 5, 7, 10 }
+        REQUIRE( *ret == 7 );
+        ret = v.insert(----v.end(), 6);             // { 5, 6, 7, 10 }
+        REQUIRE( *ret == 6 );
+        ret = v.insert(++++v.begin(), 0);           // { 5, 6, 0, 7, 10 }
+        REQUIRE( *ret == 0 );
+
+        REQUIRE( v.size() == 5 );
+        REQUIRE( v[0] == 5 );
+        REQUIRE( v[1] == 6 );
+        REQUIRE( v[2] == 0 );
+        REQUIRE( v[3] == 7 );
+        REQUIRE( v[4] == 10 );
     }
     SECTION( "fill insert works correctly" ) {
-        cnt.insert(cnt.begin(), 5, 10);
-        REQUIRE( cnt.size() == 5 );
-        for (auto it = cnt.begin(); it != cnt.end(); ++it)
-            REQUIRE( *it == 10 );
-        cnt.insert(cnt.end(), 1, 100);
-        REQUIRE( cnt.size() == 6 );
-        REQUIRE( *--cnt.end() == 100 );
+        v.insert(v.begin(), 5, 10);                 // { 10, 10, 10, 10, 10 }
+        v.insert(v.end(), 1, 100);                  // { 10, 10, 10, 10, 10, 100 }
+        v.insert(++v.begin(), 2, 0);                // { 10, 0, 0, 10, 10, 10, 10, 100 }
+        v.insert(++++v.begin(), 1, 42);             // { 10, 0, 42, 0, 10, 10, 10, 10, 100 }
+        v.insert(--v.end(), 3, 21);                 // { 10, 0, 42, 0, 10, 10, 10, 10, 21, 21, 21, 100 }
+
+        REQUIRE( v.size() == 12 );
+        REQUIRE( v[0] == 10 );
+        REQUIRE( v[1] == 0 );
+        REQUIRE( v[2] == 42 );
+        REQUIRE( v[3] == 0 );
+        for (size_t i = 4; i < 8; ++i)
+            REQUIRE( v[i] == 10 );
+        REQUIRE( v[8] == 21 );
+        REQUIRE( v[9] == 21 );
+        REQUIRE( v[10] == 21 );
+        REQUIRE( v[11] == 100 );
     }
     SECTION( "range insert works correctly" ) {
         int arr[] = {12, 1, 4, 5, 6, 7};
-        cnt.push_back(0);
-        cnt.insert(cnt.end(), arr + 1, arr + 5);
-        cnt.push_back(-32);
-        REQUIRE( cnt.size() == 6 );
-        auto it = cnt.begin();
-        REQUIRE( *it == 0 );
-        REQUIRE( *++it == 1 );
-        REQUIRE( *++it == 4 );
-        REQUIRE( *++it == 5 );
-        REQUIRE( *++it == 6 );
-        REQUIRE( *++it == -32 );
+        int arr1[] = { 0 , -32 };
+        v.insert(v.begin(), arr1, arr1 + 1);        // { 0 }
+        v.insert(v.end(), arr + 1, arr + 5);        // { 0, 1, 4, 5, 6 }
+        v.insert(++v.begin(), arr + 3, arr + 5);    // { 0, 5, 6, 1, 4, 5, 6 }
+        v.insert(----v.end(), arr1 + 1, arr1 + 2);  // { 0, 5, 6, 1, 4, -32, 5, 6 }
+
+        REQUIRE( v.size() == 8 );
+        REQUIRE( v[0] == 0 );
+        REQUIRE( v[1] == 5 );
+        REQUIRE( v[2] == 6 );
+        REQUIRE( v[3] == 1 );
+        REQUIRE( v[4] == 4 );
+        REQUIRE( v[5] == -32 );
+        REQUIRE( v[6] == 5 );
+        REQUIRE( v[7] == 6 );
     }
 }
 
-// add test of return value
-// add test of consistency of values after erase
-TEMPLATE_PRODUCT_TEST_CASE( "erase work correctly", "[vector][modifiers]", ft::vector, TYPE_LIST )
+TEST_CASE("erase work correctly", "[vector][modifiers]")
 {
-    size_t n = 5;
-    TestType cnt (n);
+    int arr[] = {23, 1, 233, 4, 55, 3};
+    ft::vector<int> v (arr, arr + 6);             // { 23, 1, 233, 4, 55, 3 }
+    ft::vector<int>::iterator ret;
 
     SECTION("single element erase works correctly") {
-        cnt.erase(cnt.begin());
-        REQUIRE( cnt.size() == --n );
+        ret = v.erase(v.begin());                // { 1, 233, 4, 55, 3 }
+        REQUIRE( v.size() == 5 );
+        REQUIRE( *ret == 1 );
+        REQUIRE( *(ret + 1) == 233 );
 
-        cnt.erase(--cnt.end());
-        REQUIRE( cnt.size() == --n );
+        ret = v.erase(v.end() - 1);              // { 1, 233, 4, 55 }
+        REQUIRE( v.size() == 4 );
+        REQUIRE( ret == v.end() );
+        REQUIRE( *(ret - 1) == 55 );
 
-        auto it = cnt.begin() + 2;
-        cnt.erase(it);
-        REQUIRE( cnt.size() == --n );
+        ret = v.erase(v.begin() + 2);            // { 1, 233, 55 }
+        REQUIRE( v.size() == 3 );
+        REQUIRE( *(ret - 2) == 1 );
+        REQUIRE( *(ret - 1) == 233 );
+        REQUIRE( *ret == 55 );
     }
-    SECTION("multiple elements erase works correctly") {
-        auto first = cnt.begin() + 2;
-        auto last = first + 2;
-        cnt.erase(first, last);
-        REQUIRE( cnt.size() == (n - 2) );
-    }
-    SECTION("erase return value is correct") {
-        int arr[] = {23, 1, 233, 4, 55, 3};
-        ft::vector<int> v (arr, arr + 6);
-        auto it = v.erase(v.begin());
-        REQUIRE( *it == 1 );
-        it = v.erase(--v.end());
-        REQUIRE( it == v.end() );
-        it = v.erase(++v.begin());
-        REQUIRE( *it == 4 );
-        it = v.erase(v.begin(), v.end());
-        REQUIRE( it == v.end() );
+    SECTION("multilple element erase works correctly") {
+        ret = v.erase(v.end() - 1, v.end());           // { 23, 1, 233, 4, 55 }
+        REQUIRE( v.size() == 5 );
+        REQUIRE( ret == v.end() );
+        REQUIRE( *(ret - 1) == 55 );
+
+        ret = v.erase(v.begin() + 1, v.begin() + 2);  // { 23, 233, 4, 55 }
+        REQUIRE( v.size() == 4 );
+        REQUIRE( *(ret - 1) == 23 );
+        REQUIRE( *ret == 233 );
+        REQUIRE( *(ret + 1) == 4 );
+
+        ret = v.erase(v.begin() + 1, v.end() - 1); // { 23, 55 }
+        REQUIRE( *(ret - 1) == 23 );
+        REQUIRE( *ret == 55 );
+
+        ret = v.erase(v.begin(), v.end());         // { }
+        REQUIRE( ret == v.end() );
+        REQUIRE( ret == v.begin() );
     }
 }
 

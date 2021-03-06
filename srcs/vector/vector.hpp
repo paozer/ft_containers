@@ -29,6 +29,9 @@ class vector
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
+    private:
+        typedef vector<value_type, allocator_type> self_type;
+
     public:
         /* CONSTRUCTORS */
         explicit vector (const allocator_type& alloc = allocator_type())
@@ -47,8 +50,10 @@ class vector
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _size(0), _capacity(0), _array(NULL), _alloc(alloc)
         {
-            for (; first != last; ++first)
+            reserve(std::distance(first, last));
+            for (; first != last; ++first) {
                 push_back(*first);
+            }
         }
 
         vector (const vector& x)
@@ -60,18 +65,21 @@ class vector
         /* OPERATORS */
         vector& operator= (const vector& x)
         {
-            if (this != &x)
+            if (this != &x) {
                 assign(x.begin(), x.end());
+            }
             return *this;
         }
 
         friend bool operator== (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
         {
-            if (lhs._size != rhs._size)
+            if (lhs._size != rhs._size) {
                 return false;
+            }
             for (size_type i = 0; i < lhs._size; ++i) {
-                if (lhs[i] != rhs[i])
+                if (lhs[i] != rhs[i]) {
                     return false;
+                }
             }
             return true;
         }
@@ -79,13 +87,16 @@ class vector
         friend bool operator< (const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs)
         {
             for (size_type i = 0; i < lhs._size && i < rhs._size; ++i) {
-                if (lhs[i] < rhs[i])
+                if (lhs[i] < rhs[i]) {
                     return true;
-                if (lhs[i] > rhs[i])
+                }
+                if (lhs[i] > rhs[i]) {
                     return false;
+                }
             }
-            if (lhs._size >= rhs._size)
+            if (lhs._size >= rhs._size) {
                 return false;
+            }
             return true;
         }
 
@@ -102,14 +113,14 @@ class vector
         }
 
         /* ITERATORS */
-        iterator begin() { return iterator(0, _size, _array); }
-        const_iterator begin() const { return const_iterator(0, _size, _array); }
-        iterator end() { return iterator(_size, _size, _array); }
-        const_iterator end() const { return const_iterator(_size, _size, _array); }
-        reverse_iterator rbegin() { return reverse_iterator(_size, _size, _array); }
-        const_reverse_iterator rbegin() const { return const_reverse_iterator(_size, _size, _array); }
-        reverse_iterator rend() { return reverse_iterator(0, _size, _array); }
-        const_reverse_iterator rend() const { return const_reverse_iterator(0, _size, _array); }
+        iterator begin() { return iterator(0, _array); }
+        const_iterator begin() const { return const_iterator(0, _array); }
+        iterator end() { return iterator(_size, _array); }
+        const_iterator end() const { return const_iterator(_size, _array); }
+        reverse_iterator rbegin() { return reverse_iterator(_size - 1, _array); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(_size - 1, _array); }
+        reverse_iterator rend() { return reverse_iterator(-1, _array); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(-1, _array); }
 
         /* CAPACITY */
         size_type size() const { return _size; }
@@ -117,11 +128,12 @@ class vector
 
         void resize (size_type n, value_type val = value_type())
         {
-            if (n > _size)
+            if (n > _size) {
                 push_back_n(n - _size, val);
-            else {
-                while (n < _size)
+            } else {
+                while (n < _size) {
                     pop_back();
+                }
             }
         }
 
@@ -131,9 +143,7 @@ class vector
         void reserve (size_type n)
         {
             if (n > _capacity) {
-                value_type* new_array = realloc(n);
-                clear();
-                _array = new_array;
+                realloc(n);
             }
         }
 
@@ -191,31 +201,17 @@ class vector
         iterator insert (iterator position, const value_type& val)
         {
             insert(position, 1, val);
-            return iterator(position.get_index() - 1, _size, _array);
+            return iterator(position.get_index(), _array);
         }
 
         void insert (iterator position, size_type n, const value_type& val)
         {
-            if (position == end())
-                push_back_n(n, val);
-            else {
-                size_type new_size = _size + n;
-                bool needs_realloc = new_size > _capacity;
-                value_type * tmp = _array;
-
-                if (needs_realloc)
-                    tmp = realloc(new_size);
-                for (size_type i = _size - 1; position.get_index() + n < i; --i) {
-                    _alloc.construct(tmp + n + i, _array[i]);
-                    _alloc.destroy(_array + i);
-                }
-                for (size_type i = 0; i < n; ++i)
-                    _alloc.construct(tmp + position.get_index() + i, val);
-                if (needs_realloc) {
-                    _alloc.deallocate(_array, _size);
-                    _array = tmp;
-                }
-                _size = new_size;
+            self_type tmp (position, end());
+            erase(position, end());
+            reserve(_size + n + tmp._size);
+            push_back_n(n, val);
+            for (iterator it = tmp.begin(); it != tmp.end(); ++it) {
+                push_back(*it);
             }
         }
 
@@ -223,33 +219,14 @@ class vector
         void insert (iterator position, InputIterator first, InputIterator last,
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
-            if (position == end()) {
-                for (; first != last; ++first)
-                    push_back(*first);
+            self_type tmp (position, end());
+            erase(position, end());
+            reserve(_size + std::distance(first, last) + tmp._size);
+            for (; first != last; ++first) {
+                push_back(*first);
             }
-            else {
-                size_type n = std::distance(first, last);
-                size_type new_size = _size + n;
-                bool needs_realloc = new_size > _capacity;
-                value_type * tmp = _array;
-
-                if (needs_realloc)
-                    tmp = realloc(new_size);
-                size_type i = 0;
-                for (iterator it = --end(); position + n < it; --it) {
-                    _alloc.construct(tmp + n + i, *it);
-                    _alloc.destroy(_array + it.get_index());
-                    ++i;
-                }
-                for (size_type i = 0; first != last; ++i) {
-                    _alloc.construct(tmp + position.get_index() + i, *first);
-                    ++first;
-                }
-                if (needs_realloc) {
-                    _alloc.deallocate(_array, _size);
-                    _array = tmp;
-                }
-                _size = new_size;
+            for (iterator it = tmp.begin(); it != tmp.end(); ++it) {
+                push_back(*it);
             }
         }
 
@@ -263,28 +240,18 @@ class vector
 
         iterator erase (iterator first, iterator last)
         {
-            if (first == last)
+            if (first == last) {
                 return first;
-            if (last == end()) {
-                while (first != last) {
-                    pop_back();
-                    ++first;
-                }
-                return end();
             }
-            else {
-                size_type count_deleted = 0;
-                for (size_type i = first.get_index(); i < last.get_index(); ++i) {
-                    _alloc.destroy(_array + i);
-                    ++count_deleted;
-                }
-                for (size_type i = last.get_index(); i < _size; ++i) {
-                    _alloc.construct(_array + first.get_index() + i - last.get_index(), _array [i]);
-                    _alloc.destroy(_array + i);
-                }
-                _size -= count_deleted;
+            vector tmp (last, end());
+            size_type new_size = first - begin();
+            while (_size > new_size) {
+                pop_back();
             }
-            return iterator(first.get_index(), _size, _array);
+            for (iterator it = tmp.begin(); it != tmp.end(); ++it) {
+                push_back(*it);
+            }
+            return iterator(first.get_index(), _array);
         }
 
         void swap (vector& x)
@@ -297,8 +264,9 @@ class vector
 
         void clear(void)
         {
-            for (size_type i = 0; i < _size; ++i)
+            for (size_type i = 0; i < _size; ++i) {
                 _alloc.destroy(_array + i);
+            }
             _size = 0;
         }
 
@@ -308,33 +276,29 @@ class vector
         value_type * _array;
         allocator_type _alloc;
 
-        // uses tmp to retain container validity if allocation throws
         void push_back_n (size_type n, const value_type & val = value_type())
         {
-            size_type new_size = _size + n;
-            if (new_size > _capacity) {
-                value_type * new_array = realloc(new_size);
-                _alloc.deallocate(_array, _size);
-                _array = new_array;
+            reserve(_size + n);
+            for (size_type i = 0; i < n; ++i) {
+                _alloc.construct(_array + _size + i, val);
             }
-            for (size_type i = _size; i < new_size; ++i)
-                _alloc.construct(_array + i, val);
-            _size = new_size;
+            _size += n;
         }
 
-        // uses tmp to retain container validity if allocation throws
-        value_type * realloc(size_type new_size)
+        void realloc(size_type new_size)
         {
             size_type new_capacity = (_capacity == 0 ? 1 : _capacity);
-            while (new_size > new_capacity)
+            while (new_size > new_capacity) {
                 new_capacity = ceil(new_capacity * 1.5);
+            }
             value_type * new_array = _alloc.allocate(new_capacity);
             for (size_type i = 0; i < _size; ++i) {
                 _alloc.construct(new_array + i, _array[i]);
                 _alloc.destroy(_array + i);
             }
+            _alloc.deallocate(_array, _capacity);
             _capacity = new_capacity;
-            return new_array;
+            _array = new_array;
         }
 
 }; // CLASS VECTOR
