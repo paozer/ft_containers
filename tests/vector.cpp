@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <list>
+#include <iostream>
 
 #ifndef __linux__
 #define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
@@ -16,70 +17,60 @@
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
-TEMPLATE_PRODUCT_TEST_CASE( "default constructor works correctly", "[vector][basics]", ft::vector, TYPE_LIST )
+TEST_CASE("vector construction works correctly", "[vector][basics]")
 {
-    TestType cnt;
-    REQUIRE( cnt.empty() );
-    REQUIRE( cnt.size() == 0 );
-}
-
-TEMPLATE_TEST_CASE( "fill constructor works correctly", "[vector][basics]", ft::vector<int> )
-{
-    SECTION( "cnt(0, 5) returns cnt w/ size 0" ) {
-        TestType cnt (0, 5);
+    SECTION("vector declaration creates empty vector") {
+        ft::vector<int> cnt;
+        REQUIRE( cnt.empty() );
         REQUIRE( cnt.size() == 0 );
     }
-    SECTION( "cnt(1, 5) returns cnt w/ size 1 and 5 at the front" ) {
-        TestType cnt (1, 5);
-        REQUIRE( cnt.size() == 1 );
-        REQUIRE( cnt.front() == 5 );
+    SECTION("fill constructor returns correct vector") {
+        unsigned int size = GENERATE(0, 1, 5);
+        int fill = GENERATE(0, -41);
+        ft::vector<int> cnt (size, fill);
+        REQUIRE( cnt.size() == size );
+        for (unsigned int i = 0; i < size; ++i)
+            REQUIRE( cnt[i] == fill );
     }
-    SECTION( "cnt(1000, 5) returns cnt w/ size 1000 and filled w/ 5" ) {
-        TestType cnt (1000, 5);
-        REQUIRE( cnt.size() == 1000 );
-        for (auto it = cnt.begin(); it != cnt.end(); ++it)
-            REQUIRE( *it == 5 );
-    }
-}
-
-TEMPLATE_TEST_CASE( "range constructor works correctly", "[vector][basics]", ft::vector<int> )
-{
-    int v[] = {2, 4, 12, 5, 60, 99, -12};
-    TestType cnt (v, v + 7);
-
-    REQUIRE( cnt.size() == 7 );
-    for (size_t i = 0; i < 7; ++i)
-        REQUIRE( cnt[i] == v[i] );
-}
-
-TEMPLATE_TEST_CASE( "copy constructor works correctly", "[vector][basics]", ft::vector<int> )
-{
-    SECTION ( "works on construction from non-empty list" ) {
-        TestType cnt1;
-        for (int i = 0; i < 10; ++i)
-            cnt1.push_back(i);
-        TestType cnt2 (cnt1);
-        REQUIRE( cnt1.size() == cnt2.size() );
-
-        auto it1 = cnt1.begin();
-        auto it2 = cnt2.begin();
-        while (it1 != cnt1.end() || it2 != cnt2.end()) {
-            REQUIRE( *it1 == *it2 );
-            ++it1;
-            ++it2;
+    SECTION("range constructor returns correct vector") {
+        unsigned int first = GENERATE(0, 1, 3);
+        unsigned int last = GENERATE(0, 3, 6);
+        int v[] = {2, 4, 12, 5, 60, 99, -12};
+        if (last >= first) {
+            ft::vector<int> cnt (v + first, v + last);
+            REQUIRE( cnt.size() == last - first );
+            for (size_t i = 0; i < last - first; ++i)
+                REQUIRE( cnt[i] == v[i + first] );
         }
     }
-    SECTION ( "works on construction from empty list" ) {
-        TestType cnt1;
-        TestType cnt2 (cnt1);
+    SECTION ("copy constructor returns correct vector") {
+        int arr[] = {2, 4, 12, 5, 60, 99, -12};
+        ft::vector<int> v1;
+        ft::vector<int> v2 (v1);
+        ft::vector<int> v3 (arr + 2, arr + 6); // { 12, 5, 60, 99 }
 
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt1.size() == cnt2.size() );
+        REQUIRE( v1.size() == 0 );
+        REQUIRE( v2.size() == 0 );
+        REQUIRE( v3.size() == 4 );
+        REQUIRE( v3[0] == 12 );
+        REQUIRE( v3[1] == 5 );
+        REQUIRE( v3[2] == 60 );
+        REQUIRE( v3[3] == 99 );
     }
+}
+
+TEMPLATE_PRODUCT_TEST_CASE("vector correctly copies value upon construction", "[vector][basics]", ft::vector, TYPE_LIST)
+{
+    // this test may produces double free  there is a problem with
+    // your allocation/copying with non builtin types
+    TestType v1 (10, VALUE_TYPE());
+    TestType v2 (v1);
+    v1.clear();
+    v2.clear();
 }
 
 /* ASSIGNATION OPERATOR */
-TEST_CASE("vector assignation operator works correctly", "[vector][assignation operators]")
+TEST_CASE("vector assignation works correctly", "[vector][assignation operators]")
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
@@ -98,7 +89,6 @@ TEST_CASE("vector assignation operator works correctly", "[vector][assignation o
         ++lit;
         ++rit;
     }
-
     myvector2 = myvector3;
     REQUIRE( myvector2.size() == myvector3.size() );
     REQUIRE( myvector2.begin() == myvector2.end() );
@@ -157,116 +147,147 @@ TEST_CASE("vector relational operators work correctly", "[vector][relational ope
 }
 
 /* ITERATORS */
-TEMPLATE_TEST_CASE( "begin works correctly", "[vector][iterators]", ft::vector<int> )
+TEST_CASE("begin returns first element and can be incremented", "[vector][iterators]")
 {
     SECTION("non-const iterator behaviour") {
-        TestType cnt (1, 10);               // { 10 }
-        REQUIRE( *cnt.begin() == 10 );
-        cnt.push_back(5);                   // { 10, 5 }
-        REQUIRE( *cnt.begin() == 10 );
-        cnt.push_back(20);
-        cnt[0] = 2;                         // { 2, 14, 20 }
-        REQUIRE( *cnt.begin() == 2 );
-        cnt.pop_back();                     // { 2, 14 }
-        REQUIRE( *cnt.begin() == 2 );
-        *cnt.begin() = 5;                   // { 5, 14 }
-        REQUIRE( *cnt.begin() == 5 );
+        ft::vector<int> v (5, 10);              // { 10, 10, 10, 10, 10 }
+        REQUIRE( *v.begin() == 10 );
+        *v.begin() = 5;                         // { 5, 10, 10, 10, 10 }
+        *++v.begin() = 6;                       // { 5, 6, 10, 10, 10 }
+        REQUIRE( *v.begin() == 5 );
+        REQUIRE( *(v.begin() + 1) == 6 );
+        REQUIRE( *(v.begin() + 2) == 10 );
+        *v.begin() = 2;                         // { 2, 6, 10, 10, 10 }
+        REQUIRE( *v.begin() == 2 );
+        REQUIRE( *(v.begin() + 1) == 6 );
+        REQUIRE( *(v.begin() + 2) == 10 );
     }
     SECTION("const iterator behaviour") {
-        const TestType cnt (1, 10);
-        REQUIRE( *cnt.begin() == 10 );
+        int arr[] = {1, 4, -1, 2, 33};
+        ft::vector<int> v2 (arr, arr + 5);
+        const ft::vector<int> v (v2);
+        const ft::vector<int> v1;
 
-        const TestType cnt1;
-        REQUIRE( cnt1.begin() == cnt1.end() );
+        REQUIRE( *v.begin() == 1 );
+        REQUIRE( *(v.begin() + 1) == 4 );
+        REQUIRE( *(v.begin() + 2) == -1 );
+        REQUIRE( *(v.begin() + 3) == 2 );
+        REQUIRE( *(v.begin() + 4) == 33 );
+        REQUIRE( (v.begin() + 5) == v.end() );
+        REQUIRE( v1.begin() == v1.end() );
 
-        TestType cnt2 (1, 9);
-        ft::vector<int>::const_iterator it = cnt2.begin();
-        REQUIRE( *it == 9 );
+        ft::vector<int>::const_iterator it = v2.begin();
+        REQUIRE( *it == 1 );
+        REQUIRE( *(it + 1) == 4 );
+        REQUIRE( *(it + 2) == -1 );
+        REQUIRE( *(it + 3) == 2 );
+        REQUIRE( *(it + 4) == 33 );
+        REQUIRE( (it + 5) == v2.end() );
     }
 }
 
 TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int> )
 {
     SECTION("non-const iterator behaviour") {
-        TestType cnt (1, 10);               // { 10 }
-        REQUIRE( *--cnt.end() == 10 );
-        cnt.push_back(5);                   // { 10, 5 }
-        REQUIRE( *--cnt.end() == 5 );
-        cnt.push_back(20);
-        cnt[0] = 2;                         // { 2, 5, 20 }
-        REQUIRE( *--cnt.end() == 20 );
-        cnt.pop_back();                     // { 2, 5 }
-        REQUIRE( *--cnt.end() == 5 );
-        *--cnt.end() = 1;                     // { 2, 1 }
-        REQUIRE( *--cnt.end() == 1 );
+        ft::vector<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
+        REQUIRE( *(v.end() - 1) == 10 );
+        *(v.end() - 1) = 5;                         // { 10, 10, 10, 10, 5 }
+        *(v.end() - 2) = 6;                         // { 10, 10, 10, 6, 5 }
+        REQUIRE( *(v.end() - 1) == 5 );
+        REQUIRE( *(v.end() - 2) == 6 );
+        *(v.end() - 1) = 2;                         // { 10, 10, 10, 6, 2 }
+        *(v.end() - 4) = 1;                         // { 10, 1, 10, 6, 2 }
+        REQUIRE( *(v.end() - 1) == 2 );
+        REQUIRE( *(v.end() - 2) == 6 );
+        REQUIRE( *(v.begin() + 1) == 1 );
     }
     SECTION("const iterator behaviour") {
-        const TestType cnt (1, 10);
-        REQUIRE( *(--cnt.end()) == 10 );
+        int arr[] = {1, 4, -1, 2, 33};
+        ft::vector<int> v2 (arr, arr + 5);
+        const ft::vector<int> v (v2);
+        const ft::vector<int> v1;
 
-        const TestType cnt1;
-        REQUIRE( cnt1.begin() == cnt1.end() );
+        REQUIRE( *(v.end() - 1) == 33 );
+        REQUIRE( *(v.end() - 2) == 2 );
+        REQUIRE( *(v.end() - 3) == -1 );
+        REQUIRE( *(v.end() - 4) == 4 );
+        REQUIRE( *(v.end() - 5) == 1 );
+        REQUIRE( v.begin() == (v.end() - 5) );
+        REQUIRE( v1.begin() == v1.end() );
 
-        TestType cnt2 (1, 9);
-        REQUIRE( *--cnt2.end() == 9 );
+        ft::vector<int>::const_iterator it = v2.end();
+        REQUIRE( *(it - 1) == 33 );
+        REQUIRE( *(it - 2) == 2 );
+        REQUIRE( *(it - 3) == -1 );
+        REQUIRE( *(it - 4) == 4 );
+        REQUIRE( *(it - 5) == 1 );
+        REQUIRE( (it - 5) == v2.begin() );
     }
 }
 
 /* MODIFIERS */
-
-TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[vector][modifiers]", ft::vector, TYPE_LIST )
+TEST_CASE("vector assign methods work correctly", "[vector][modifiers]")
 {
-    SECTION( "range assign works correctly" ) {
-        size_t size = 10;
-        size_t i = 2;
-        size_t j = 7;
+    int arr[] = {1, 4, -1, 2, 33};
+    ft::vector<int> v;
+    ft::vector<int> v1 (10, 1);
 
-        std::vector<VALUE_TYPE> v (size);
-        auto first = v.begin() + i;
-        auto last = v.begin() + j;
+    SECTION("range assign creates vector with correct values") {
+        unsigned int i = GENERATE(0, 1, 3);
+        unsigned int j = GENERATE(0, 4, 5);
 
-        TestType my_vector;
-        my_vector.assign(first, last);
-        REQUIRE( (my_vector.size() == j - i) );
-    }
-
-    SECTION( "fill assign works correctly" ) {
-        size_t n = GENERATE(0, 100);
-        TestType cnt;
-        cnt.assign(n, VALUE_TYPE());
-
-        REQUIRE( cnt.size() == n );
-        for (auto it = cnt.begin(); it != cnt.end(); ++it)
-            REQUIRE( *it == VALUE_TYPE());
-    }
-}
-
-
-TEMPLATE_TEST_CASE( "push_back works correctly", "[vector][modifiers]", ft::vector<int> )
-{
-    SECTION( "containers size is incremented & the element is added at the back" ) {
-        TestType cnt;
-        int size = 100;
-        for (int i = 0; i < size; ++i) {
-            cnt.push_back(i);
-            REQUIRE( *--cnt.end() == i );
+        if (j >= i) {
+            v.assign(arr + i, arr + j);
+            REQUIRE( v.size() == j - i );
+            for (size_t y = 0; y < v.size(); ++y)
+                REQUIRE( v[y] == arr[y + i] );
+            SECTION("range assign clears values before assigning") {
+                v1.assign(arr + i, arr + j);
+                REQUIRE( v1.size() == j - i );
+                for (size_t y = 0; y < v1.size(); ++y)
+                    REQUIRE( v1[y] == arr[y + i] );
+            }
         }
-        REQUIRE( (int)cnt.size() == size );
+    }
+    SECTION("fill assign fills vector with correct values") {
+        unsigned int i = GENERATE(0, 1, 25);
+        int j = GENERATE(0, 42, -12);
+
+        v.assign(i, j);
+        REQUIRE( v.size() == i );
+        for (size_t y = 0; y < v.size(); ++y)
+            REQUIRE( v[y] == j );
+        SECTION("fill assign clears values before assigning") {
+            v1.assign(i, j);
+            REQUIRE( v1.size() == i );
+            for (size_t y = 0; y < v1.size(); ++y)
+                REQUIRE( v1[y] == j );
+        }
     }
 }
 
 
-TEMPLATE_TEST_CASE( "pop_back works correctly", "[vector][modifiers]", ft::vector<int> )
+TEST_CASE("push/pop_back add/remove elements at back of the vector", "[vector][modifiers]")
 {
-    TestType cnt (10, 100);
-    size_t i = cnt.size();
-    while (!cnt.empty()) {
-        REQUIRE( cnt.size() == i);
-        REQUIRE( *cnt.begin() == 100);
-        REQUIRE( *--cnt.end() == 100);
-        cnt.pop_back();
-        --i;
+    ft::vector<int> v;
+    std::vector<int> stl;
+    for (unsigned int i = 0; i < 100; ++i) {
+        int rand = std::rand() % 200000 - 100000;
+        v.push_back(rand);
+        stl.push_back(rand);
+        REQUIRE( *(v.end() - 1) == *(stl.end() - 1) );
     }
+    REQUIRE( v.size() == stl.size() );
+    ft::vector<int>::iterator it = v.begin();
+    std::vector<int>::iterator stlit = stl.begin();
+    for (; it != v.end() && stlit != stl.end(); ++it, ++stlit)
+        REQUIRE( *it == *stlit );
+    while (v.size() != 0 ) {
+        REQUIRE( *(v.end() - 1) == *(stl.end() - 1) );
+        v.pop_back();
+        stl.pop_back();
+    }
+    REQUIRE( v.size() == stl.size() );
 }
 
 TEST_CASE("vector insert work correctly", "[vector][modifiers]")
@@ -356,100 +377,113 @@ TEST_CASE("erase work correctly", "[vector][modifiers]")
         REQUIRE( *ret == 55 );
     }
     SECTION("multilple element erase works correctly") {
-        ret = v.erase(v.end() - 1, v.end());           // { 23, 1, 233, 4, 55 }
+        ret = v.erase(v.end() - 1, v.end());              // { 23, 1, 233, 4, 55 }
         REQUIRE( v.size() == 5 );
         REQUIRE( ret == v.end() );
         REQUIRE( *(ret - 1) == 55 );
 
-        ret = v.erase(v.begin() + 1, v.begin() + 2);  // { 23, 233, 4, 55 }
+        ret = v.erase(v.begin() + 1, v.begin() + 2);     // { 23, 233, 4, 55 }
         REQUIRE( v.size() == 4 );
         REQUIRE( *(ret - 1) == 23 );
         REQUIRE( *ret == 233 );
         REQUIRE( *(ret + 1) == 4 );
 
-        ret = v.erase(v.begin() + 1, v.end() - 1); // { 23, 55 }
+        ret = v.erase(v.begin() + 1, v.end() - 1);      // { 23, 55 }
         REQUIRE( *(ret - 1) == 23 );
         REQUIRE( *ret == 55 );
 
-        ret = v.erase(v.begin(), v.end());         // { }
+        ret = v.erase(v.begin(), v.end());              // { }
         REQUIRE( ret == v.end() );
         REQUIRE( ret == v.begin() );
     }
 }
 
-TEMPLATE_TEST_CASE( "swap works correctly", "[vector][modifiers]", ft::vector<int> )
+TEST_CASE("swap swaps vector sizes, capacities and content", "[vector][modifiers]")
 {
-    SECTION("non-empty lists swap swaps sizes and elements") {
-        TestType cnt1 (10, 100);
-        TestType cnt2 (2, -12);
+    SECTION("works for non empty vectors") {
+        ft::vector<int> v1 (10, 100);
+        ft::vector<int> v2 (2, -12);
+        auto v1_cap = v1.capacity();
+        auto v2_cap = v2.capacity();
 
-        cnt1.swap(cnt2);
-        REQUIRE( cnt1.size() == 2 );
-        REQUIRE( cnt2.size() == 10 );
-        for (auto it = cnt1.begin(); it != cnt1.end(); ++it)
+        v1.swap(v2);
+        REQUIRE( v1.size() == 2 );
+        REQUIRE( v2.size() == 10 );
+        REQUIRE( v1.capacity() == v2_cap );
+        REQUIRE( v2.capacity() == v1_cap );
+        for (auto it = v1.begin(); it != v1.end(); ++it)
             REQUIRE( *it == -12 );
-        for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
+        for (auto it = v2.begin(); it != v2.end(); ++it)
             REQUIRE( *it == 100 );
     }
-    SECTION("empty w/ non-empty lists swap swaps sizes and elements") {
-        TestType cnt1 (10, 100);
-        TestType cnt2;
+    SECTION("works for swapping non-empty and empty vectors") {
+        ft::vector<int> v1 (10, 100);
+        ft::vector<int> v2;
+        auto v1_cap = v1.capacity();
+        auto v2_cap = v2.capacity();
 
-        cnt1.swap(cnt2);
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt2.size() == 10 );
-        REQUIRE( (cnt1.begin() == cnt1.end()) );
-        for (auto it = cnt2.begin(); it != cnt2.end(); ++it)
+        v1.swap(v2);
+        REQUIRE( v1.size() == 0 );
+        REQUIRE( v2.size() == 10 );
+        REQUIRE( v1.capacity() == v2_cap );
+        REQUIRE( v2.capacity() == v1_cap );
+        REQUIRE(( v1.begin() == v1.end() ));
+        for (auto it = v2.begin(); it != v2.end(); ++it)
             REQUIRE( *it == 100 );
     }
-    SECTION("empty w/ empty lists swap swaps sizes and elements") {
-        TestType cnt1;
-        TestType cnt2;
+    SECTION("works for empty vectors") {
+        ft::vector<int> v1;
+        ft::vector<int> v2;
+        auto v1_cap = v1.capacity();
+        auto v2_cap = v2.capacity();
 
-        cnt1.swap(cnt2);
-        REQUIRE( cnt1.size() == 0 );
-        REQUIRE( cnt2.size() == 0 );
-        REQUIRE( (cnt1.begin() == cnt1.end()) );
-        REQUIRE( (cnt2.begin() == cnt2.end()) );
+        v1.swap(v2);
+        REQUIRE( v1.size() == 0 );
+        REQUIRE( v2.size() == 0 );
+        REQUIRE( v1.capacity() == v2_cap );
+        REQUIRE( v2.capacity() == v1_cap );
+        REQUIRE(( v1.begin() == v1.end() ));
+        REQUIRE(( v2.begin() == v2.end() ));
     }
 }
 
-// add test to check if resize adds elements @ the end if needed
-TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[vector][modifiers]", ft::vector, TYPE_LIST )
+TEST_CASE("resize works correctly", "[vector][modifiers]")
 {
-    TestType cnt;
+    int arr[] = { 1, 32, 0, -23 };
+    ft::vector<int> v (arr, arr + 4);
 
-    SECTION( "container size is reduced when n is smaller than current size" ) {
-        cnt.resize(0);
-        REQUIRE( cnt.size() == 0 );
-        cnt.push_back(VALUE_TYPE());
-        cnt.push_back(VALUE_TYPE());
-        cnt.push_back(VALUE_TYPE());
-        cnt.push_back(VALUE_TYPE());
-        cnt.resize(2);
-        REQUIRE( cnt.size() == 2 );
-        cnt.resize(1);
-        REQUIRE( cnt.size() == 1 );
-        cnt.resize(0);
-        REQUIRE( cnt.size() == 0 );
+    SECTION("vector elements are removed when arg is smaller than current size") {
+        REQUIRE( v.size() == 4 );
+        v.resize(2);
+        REQUIRE( v.size() == 2 );
+        REQUIRE( v[0] == 1 );
+        REQUIRE( v[1] == 32 );
+        REQUIRE(( v.begin() + 2 == v.end() ));
+        v.resize(1);
+        REQUIRE( v.size() == 1 );
+        REQUIRE( v[0] == 1 );
+        REQUIRE(( v.begin() + 1 == v.end() ));
+        v.resize(0);
+        REQUIRE( v.size() == 0 );
+        REQUIRE(( v.begin() == v.end() ));
     }
-    SECTION( "container is expanded at it's end when n is greater than current size" ) {
-        SECTION( "empty list" ) {
-            cnt.resize(5);
-            REQUIRE( cnt.size() == 5 );
-        }
-        SECTION( "non-empty list" ) {
-            cnt.push_back(VALUE_TYPE());
-            cnt.resize(5);
-            REQUIRE( cnt.size() == 5 );
-            cnt.push_back(VALUE_TYPE());
-            cnt.resize(20);
-            REQUIRE( cnt.size() == 20 );
-        }
+    SECTION("vector is expanded when arg is greater than current size") {
+        v.resize(6);
+        REQUIRE( v.size() == 6 );
+        for (int i = 0; i < 4; ++i)
+            REQUIRE( v[i] == arr[i] );
+        REQUIRE( v[4] == 0 );
+        REQUIRE( v[5] == 0 );
+    }
+    SECTION("vector does not change if arg is equal to current size") {
+        v.resize(4);
+        REQUIRE( v.size() == 4 );
+        for (unsigned int i = 0; i < v.size(); ++i)
+            REQUIRE( v[i] == arr[i] );
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "clear works correctly", "[vector][modifiers]", ft::vector, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[vector][modifiers]", ft::vector, TYPE_LIST)
 {
     TestType cnt;
     cnt.clear();
@@ -461,44 +495,52 @@ TEMPLATE_PRODUCT_TEST_CASE( "clear works correctly", "[vector][modifiers]", ft::
 }
 
 /* ELEMENT ACCESS */
-
-TEMPLATE_TEST_CASE( "front works correctly", "[vector][element access]", ft::vector<int> )
+TEST_CASE("front and back return vectors first element", "[vector][element access]")
 {
-    SECTION( "first element is changed when assigning to reference" ) {
-        TestType cnt (1, 77);
-        cnt.front() -= 22;
-        REQUIRE( cnt.front() == 55 );
-    }
+    int arr[] = { 1, 32, 0, -23 };
+    ft::vector<int> v (arr, arr + 4);
+    ft::vector<int> cv (arr, arr + 4);
+    ft::vector<int>::const_reference front_ref = v.front();
+    ft::vector<int>::const_reference back_ref = v.back();
+
+    // front
+    REQUIRE( v.front() == 1 );
+    REQUIRE( front_ref == 1 );
+    v.front() -= 22;
+    REQUIRE( v.front() == -21 );
+    REQUIRE( front_ref == -21 );
+    v.front() += 21;
+    REQUIRE( v.front() == 0 );
+    REQUIRE( front_ref == 0 );
+
+    // back
+    REQUIRE( v.back() == -23 );
+    REQUIRE( back_ref == -23 );
+    v.back() -= 22;
+    REQUIRE( v.back() == -45 );
+    REQUIRE( back_ref == -45 );
+    v.back() += 45;
+    REQUIRE( v.back() == 0 );
+    REQUIRE( back_ref == 0 );
 }
 
-TEMPLATE_TEST_CASE( "back works correctly", "[vector][element access]", ft::vector<int> )
+TEMPLATE_PRODUCT_TEST_CASE( "at throws only when index is out of range", "[vector][element access]", ft::vector, TYPE_LIST )
 {
-    SECTION( "last element is changed when assigning to reference" ) {
-        TestType cnt (1, 77);
-        cnt.back() -= 22;
-        REQUIRE( cnt.back() == 55 );
-    }
-}
-
-TEMPLATE_PRODUCT_TEST_CASE( "at works correctly", "[vector][element access]", ft::vector, TYPE_LIST )
-{
-    SECTION("throws out_of_range exception if n is greater than the vector size") {
         TestType cnt1;
         TestType cnt2 (50);
         const TestType const_cnt1;
         const TestType const_cnt2 (50);
 
+        REQUIRE_NOTHROW( cnt2.at(13) );
+        REQUIRE_NOTHROW( cnt2.at(0) );
         REQUIRE_THROWS_AS( cnt1.at(100), std::out_of_range);
         REQUIRE_THROWS_AS( cnt2.at(100), std::out_of_range);
         REQUIRE_THROWS_AS( const_cnt1.at(100), std::out_of_range);
         REQUIRE_THROWS_AS( const_cnt2.at(100), std::out_of_range);
-    }
 }
-// vector test operator[]
 
 /* CAPACITY */
-
-TEMPLATE_PRODUCT_TEST_CASE( "empty reflects list state", "[vector][capacity]", ft::vector, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects vector state", "[vector][capacity]", ft::vector, TYPE_LIST)
 {
     TestType cnt;
     REQUIRE( cnt.empty() );
@@ -508,22 +550,15 @@ TEMPLATE_PRODUCT_TEST_CASE( "empty reflects list state", "[vector][capacity]", f
     REQUIRE( cnt.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "size works correctly", "[vector][capacity]", ft::vector, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("size returns updated vector size", "[vector][capacity]", ft::vector, TYPE_LIST)
 {
-    TestType cnt;
+    TestType v;
 
-    SECTION( "uninitialized list has size 0" ) {
-        REQUIRE( cnt.size() == 0 );
-    }
-    SECTION( "size() returns updated size when elements are added" ) {
-        for (int i = 0; i < 5; ++i)
-            cnt.push_back(VALUE_TYPE());
-        REQUIRE( cnt.size() == 5 );
-        SECTION( "size() returns updated size after clearing the list" ) {
-            cnt.clear();
-            REQUIRE( cnt.size() == 0 );
-        }
-    }
+    REQUIRE( v.size() == 0 );
+    v.insert(v.begin(), 5, VALUE_TYPE());
+    REQUIRE( v.size() == 5 );
+    v.clear();
+    REQUIRE( v.size() == 0 );
 }
 
 TEMPLATE_PRODUCT_TEST_CASE( "ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector,

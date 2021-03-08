@@ -104,7 +104,6 @@ TEMPLATE_PRODUCT_TEST_CASE("relational operators work as expected", "[container_
 }
 
 /* STACK TESTS */
-
 TEMPLATE_PRODUCT_TEST_CASE("stack specific methods work as expected", "[container_adaptors][stack]", ft::stack, int)
 {
     TestType my_cnt;
@@ -125,7 +124,6 @@ TEMPLATE_PRODUCT_TEST_CASE("stack specific methods work as expected", "[containe
 }
 
 /* QUEUE TESTS */
-
 TEMPLATE_PRODUCT_TEST_CASE("stack specific methods work as expected", "[container_adaptors][queue]", ft::queue, int)
 {
     TestType my_cnt;

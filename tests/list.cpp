@@ -17,56 +17,48 @@
 /* CONSTRUCTION */
 TEST_CASE("list construction works correctly", "[list][basics]")
 {
-    SECTION("default constructor creates empty list") {
+    SECTION("vector declaration creates empty list") {
         ft::list<int> c;
         REQUIRE( c.empty() );
         REQUIRE( c.size() == 0 );
     }
     SECTION("fill constructor creates list of specified size & filled with elements") {
         size_t i = GENERATE(0, 1, 100);
-        size_t j = GENERATE(-100, 914);
+        int j = GENERATE(-100, 914);
         ft::list<int> c (i, j);
         REQUIRE( c.size() == i );
         for (auto it = c.begin(); it != c.end(); ++it)
-            REQUIRE( *it == (int)j );
+            REQUIRE( *it == j );
     }
     SECTION("range constructor creates list with correct elements from range") {
-        size_t s = GENERATE(0, 4, 7);
-        int v[] = {2, 4, 12, 5, 60, 99, -12};
-        ft::list<int> c1 (v, v + s);
-        REQUIRE( c1.size() == s );
-
-        size_t i = 0;
-        for (auto it = c1.begin(); it != c1.end(); ++it)
-            REQUIRE( *it == v[i++] );
-        REQUIRE_FALSE( i != s);
-
-        ft::list<int> c2 (v, v);
-        REQUIRE( c2.size() == 0 );
-        ft::list<int> c3 (v + 2, v + 4);
-        REQUIRE( c3.size() == 2 );
+        unsigned int first = GENERATE(0, 1, 3);
+        unsigned int last = GENERATE(0, 3, 6);
+        int arr[] = {2, 4, 12, 5, 60, 99, -12};
+        if (last >= first) {
+            ft::list<int> l (arr + first, arr + last);
+            REQUIRE( l.size() == last - first );
+            int i = 0;
+            for (auto it = l.begin(); it != l.end(); ++it, ++i)
+                REQUIRE( *it == arr[first + i] );
+        }
+        ft::list<int> l2 (arr, arr);
+        REQUIRE( l2.size() == 0 );
     }
     SECTION("copy constructor constructs an exact copy of a given list") {
-        SECTION ( "works on construction from non-empty list" ) {
-            size_t s = GENERATE(0, 4, 7);
-            int v[] = {2, 4, 12, 5, 60, 99, -12};
-            ft::list<int> c1 (v, v + s);
-            ft::list<int> c2 (c1);
+        unsigned int first = GENERATE(0, 1, 3);
+        unsigned int last = GENERATE(0, 3, 6);
+        int arr[] = {2, 4, 12, 5, 60, 99, -12};
+        ft::list<int> l1;
+        ft::list<int> l2 (l1);
 
-            REQUIRE( c1.size() == c2.size() );
-
-            auto it1 = c1.begin();
-            auto it2 = c2.begin();
-            while (it1 != c1.end() || it2 != c2.end()) {
-                REQUIRE( *it1 == *it2 );
-                ++it1;
-                ++it2;
-            }
-        }
-        SECTION ( "works on construction from empty list" ) {
-            ft::list<int> c1;
-            ft::list<int> c2 (c1);
-            REQUIRE( c1.empty() );
+        REQUIRE( l1.size() == 0 );
+        REQUIRE( l2.size() == 0 );
+        if (last >= first) {
+            ft::list<int> l3 (arr + first, arr + last);
+            REQUIRE( l3.size() == last - first );
+            int i = 0;
+            for (auto it = l3.begin(); it != l3.end(); ++it, ++i)
+                REQUIRE( *it == arr[first + i] );
         }
     }
 }
@@ -74,16 +66,23 @@ TEST_CASE("list construction works correctly", "[list][basics]")
 /* ASSIGNATION OPERATOR */
 TEST_CASE("assignation operator works correctly", "[list][basics]")
 {
-    size_t s = GENERATE(0, 4, 7);
-    int v[] = {2, 4, 12, 5, 60, 99, -12};
-    ft::list<int> mylist1 (v, v + s);
-    ft::list<int> mylist2 = mylist1;
-
-    REQUIRE( mylist2.size() == s );
-    size_t i = 0;
-    for (auto it = mylist2.begin(); it != mylist2.end(); ++it) {
-        REQUIRE( *it == v[i] );
-        ++i;
+    SECTION("different size of ranges are handled correctly") {
+        unsigned int first = GENERATE(0, 1, 3);
+        unsigned int last = GENERATE(0, 3, 6);
+        int v[] = {2, 4, 12, 5, 60, 99, -12};
+        if (last >= first) {
+            ft::list<int> mylist1 (v + first, v + last);
+            ft::list<int> mylist2 = mylist1;
+            REQUIRE( mylist2.size() == last - first );
+            size_t i = 0;
+            for (auto it = mylist2.begin(); it != mylist2.end(); ++it, ++i)
+                REQUIRE( *it == v[first + i] );
+        }
+    }
+    SECTION("assignation from empty list works") {
+        ft::list<int> mylist3;
+        ft::list<int> mylist4 = mylist3;
+        REQUIRE( mylist4.size() == mylist3.size() );
     }
 }
 
@@ -207,7 +206,6 @@ TEST_CASE("list end works correctly", "[list][basics]")
 }
 
 /* MODIFIERS */
-
 TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", ft::list, TYPE_LIST )
 {
     SECTION("range assign works correctly") {

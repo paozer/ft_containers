@@ -5,6 +5,7 @@
 
 #include <map>
 #include <array>
+#include <list>
 #include <string>
 
 /* CONSTRUCTION */
@@ -71,10 +72,27 @@ TEST_CASE("Assignment operator copies elements", "[map][operators]")
         ++it1;
         ++it2;
     }
+
     my_map1.begin()->second -= 1;
     (--my_map1.end())->second += 1;
-    REQUIRE( (my_map1.begin()->second != my_map2.begin()->second) );
-    REQUIRE( ((--my_map1.end())->second != (--my_map2.end())->second) );
+    REQUIRE(( my_map1.begin()->second != my_map2.begin()->second ));
+    REQUIRE(( (--my_map1.end())->second != (--my_map2.end())->second ));
+}
+
+TEST_CASE("there are no duplicates in a map", "[map][basics]")
+{
+    ft::map<int, int> map;
+    std::list<int> list;
+
+    for (int i = 0; i < 10000; ++i) {
+        int rand = std::rand() % 5000;
+        list.push_back(rand);
+        map.insert(std::make_pair(rand, i));
+    }
+    list.sort();
+    list.unique();
+    REQUIRE( map.size() == list.size() );
+    REQUIRE( (unsigned long)std::distance(map.begin(), map.end()) == map.size() );
 }
 
 /* RELATIONAL OPERATORS */
@@ -131,19 +149,38 @@ TEST_CASE("map relational operators work correctly", "[map][operators]")
 /* ITERATORS */
 TEST_CASE("Iterators works correctly", "[map][iterators]")
 {
-    ft::map<char, int> my_map;
+    SECTION("iterators can be created as expected") {
+        ft::map<char, int> my_map;
 
-    ft::map<char, int>::iterator it = my_map.begin();
-    ft::map<char, int>::const_iterator cit = it;
-    ft::map<char, int>::const_iterator cit2 = my_map.begin();
-    REQUIRE(( cit == my_map.begin() ));
-    REQUIRE(( cit2 == my_map.begin() ));
+        ft::map<char, int>::iterator it = my_map.begin();
+        ft::map<char, int>::const_iterator cit = it;
+        ft::map<char, int>::const_iterator cit2 = my_map.begin();
+        REQUIRE(( cit == my_map.begin() ));
+        REQUIRE(( cit2 == my_map.begin() ));
 
-    ft::map<char, int>::reverse_iterator rit = my_map.rbegin();
-    ft::map<char, int>::const_reverse_iterator rcit = rit;
-    ft::map<char, int>::const_reverse_iterator rcit2 = my_map.rbegin();
-    REQUIRE(( rcit == my_map.rbegin() ));
-    REQUIRE(( rcit2 == my_map.rbegin() ));
+        ft::map<char, int>::reverse_iterator rit = my_map.rbegin();
+        ft::map<char, int>::const_reverse_iterator rcit = rit;
+        ft::map<char, int>::const_reverse_iterator rcit2 = my_map.rbegin();
+        REQUIRE(( rcit == my_map.rbegin() ));
+        REQUIRE(( rcit2 == my_map.rbegin() ));
+    }
+    SECTION("iterators allow in-order access to the map elements") {
+        ft::map<int, char> map;
+        std::list<int> list;
+
+        for (int i = 0; i < 100; ++i) {
+            int rand = std::rand() % 1000;
+            list.push_back(rand);
+            map.insert(std::make_pair(rand, std::rand()));
+        }
+        list.sort();
+        list.unique();
+        REQUIRE( std::distance(map.begin(), map.end()) == std::distance(list.begin(), list.end()) );
+        auto it = map.begin();
+        auto lit = list.begin();
+        for (; it != map.end(); ++it, ++lit)
+            REQUIRE( it->first == *lit );
+    }
 }
 
 /* CAPACITY */
@@ -162,7 +199,7 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
     ft::map<char, int>::iterator it_ret;
 
     SECTION("single element insert add the pair to the map if its not present") {
-        REQUIRE( my_map.size() == 0);
+        REQUIRE( my_map.empty() );
 
         ret = my_map.insert(std::make_pair('g', 32));
         REQUIRE( my_map.size() == 1);
@@ -239,9 +276,8 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
         ft::vector<std::pair<char, int> > v;
         for (char i = 'a'; i < 'z'; ++i)
             v.push_back(std::make_pair(i, rand()));
-        auto first = v.begin();
-        first += 5;
-        auto last = first + 10;
+        auto first = v.begin() + 5;
+        auto last = v.begin() + 15;
         my_map.insert(first, last);
         REQUIRE( (my_map.size() == (unsigned long)std::distance(first, last)) );
         for (auto it = my_map.begin(); it != my_map.end(); ++it) {
@@ -254,38 +290,57 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
 
 TEST_CASE("erase works as expected", "[map][modifiers]")
 {
-    ft::map<char, int> my_map;
+    std::list<std::pair<const char, int> > data = {{{'a',1}, {'z', 25}, {'b',2}, {'c', 3}, {'d', 4}, {'r', 1}, {'e', 5}}};
+    ft::map<char, int> my_map (data.begin(), data.end());
+    data.sort();
 
-    SECTION("erase at iterator") {
-        //my_map.erase(my_map.begin()); // UB
-        //my_map.erase(my_map.end()); // UB
-        my_map['a'] = 1;
+    SECTION("erase at iterator removes correct element") {
         my_map.erase(my_map.begin());
-        REQUIRE( my_map.size() == 0 );
+        my_map.erase(++++my_map.begin());
+        my_map.erase(--my_map.end());
+        my_map.erase(++++++my_map.begin());
+        data.erase(data.begin());
+        data.erase(++++data.begin());
+        data.erase(--data.end());
+        data.erase(++++++data.begin());
+        REQUIRE( my_map.size() == data.size() );
+        auto it = my_map.begin();
+        auto lit = data.begin();
+        for (; it != my_map.end(); ++it, ++lit)
+            REQUIRE( *it == *lit );
     }
-    SECTION("erase key") {
-        int ret = my_map.erase('b');
-        REQUIRE( ret == 0 );
-        my_map['a'] = 1;
+    SECTION("erase removes correct element when given a key") {
+        int sum = 0;
+        int ret = 0;
+        ret = my_map.erase('b');
+        REQUIRE( ret == 1 );
+        sum += ret;
         ret = my_map.erase('b');
         REQUIRE( ret == 0 );
         ret = my_map.erase('a');
         REQUIRE( ret == 1 );
-        REQUIRE( my_map.size() == 0 );
+        sum += ret;
+        ret = my_map.erase('z');
+        REQUIRE( ret == 1 );
+        sum += ret;
+        ret = my_map.erase('z');
+        REQUIRE( ret == 0 );
+        ret = my_map.erase('/');
+        REQUIRE( ret == 0 );
+        ret = my_map.erase('$');
+        REQUIRE( ret == 0 );
+        REQUIRE( my_map.size() == data.size() - sum );
     }
     SECTION("erase iterator range") {
         my_map.erase(my_map.end(), my_map.end());
-        my_map.erase(my_map.begin(), my_map.end());
-        my_map['a'] = 1;
-        my_map['b'] = 2;
-        my_map['z'] = 3;
-        my_map['i'] = 4;
-        my_map['p'] = 5;
-        my_map['q'] = 6;
-        auto first = my_map.begin();
-        std::advance(first, 2);
-        my_map.erase(first, --my_map.end());
+        my_map.erase(++++my_map.begin(), --my_map.end());
+        data.erase(++++data.begin(), --data.end());
         REQUIRE( my_map.size() == 3 );
+        REQUIRE( my_map.size() == data.size() );
+        auto it = my_map.begin();
+        auto lit = data.begin();
+        for (; it != my_map.end(); ++it, ++lit)
+            REQUIRE( *it == *lit );
         my_map.erase(my_map.begin(), my_map.end());
         REQUIRE( my_map.size() == 0 );
     }
@@ -319,18 +374,19 @@ TEST_CASE("clear works as expected", "[map][modifiers]")
 {
     ft::map<int, int> my_map;
     my_map.clear();
-    REQUIRE( my_map.size() == 0 );
+    REQUIRE( my_map.empty() );
     my_map['a'] = 1;
     my_map['b'] = 2;
     my_map['z'] = 3;
     my_map['i'] = 4;
+    REQUIRE( my_map.size() == 4 );
     my_map.clear();
-    REQUIRE( my_map.size() == 0 );
+    REQUIRE( my_map.empty() );
     my_map['b'] = 2;
     REQUIRE( my_map.size() == 1 );
     my_map.clear();
-    REQUIRE( my_map.size() == 0 );
-    REQUIRE( (my_map.begin() == my_map.end()) );
+    REQUIRE( my_map.empty() );
+    REQUIRE(( my_map.begin() == my_map.end() ));
 }
 
 /* OBSERVERS */
