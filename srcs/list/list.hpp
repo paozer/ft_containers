@@ -341,13 +341,13 @@ class list
             if (_size < 2)
                 return ;
             iterator prev = begin();
-            iterator it = ++begin();
-            for (; it != end(); ++it) {
-                if (binary_pred(*it, *prev)) {
-                    erase(it);
-                    it = prev;
+            iterator curr = begin();
+            while (++curr != end()) {
+                if (binary_pred(*prev, *curr)) {
+                    erase(curr);
+                    curr = prev;
                 } else {
-                    prev = it;
+                    prev = curr;
                 }
             }
         }

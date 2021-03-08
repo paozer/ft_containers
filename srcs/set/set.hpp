@@ -51,7 +51,7 @@ class set : public avl_tree<T, Compare, Alloc>
             : _comp(comp), _alloc(alloc)
         {
             for (; first != last; ++first)
-                insert(*first);
+                Base::insert(*first);
         }
 
         set (const set& x)

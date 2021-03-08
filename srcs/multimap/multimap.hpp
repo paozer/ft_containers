@@ -39,7 +39,7 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         // in C++98, it is required to inherit binary_function<value_type,value_type,bool>
         class value_compare : std::binary_function<value_type, value_type, bool>
         {
-            friend class map;
+            friend class multimap;
             protected:
                 key_compare comp;
                 value_compare (Compare c) : comp(c) {}  // constructed with map's comparison object
@@ -157,7 +157,8 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         size_type erase (const key_type& k)
         {
             size_type old_size = Base::_size;
-            erase(find(k));
+            std::pair<iterator, iterator> eq = equal_range(k);
+            erase(eq.first, eq.second);
             return old_size - Base::_size;
         }
 
@@ -280,7 +281,7 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
             } else if (_comp(node->content.first, val.first)) {
                 node->right = aux_insert(node, node->right, val);
             } else {
-                node->left = aux_insert(node, node->left, val);
+                node->right = aux_insert(node, node->right, val);
             }
             return node;
         }

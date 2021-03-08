@@ -91,10 +91,10 @@ class multiset : public avl_tree<T, Compare, Alloc>
 
         iterator insert (iterator position, const value_type& val)
         {
-            if (position != Base::end() && _comp(position->first, val.first)) {
+            if (position != Base::end() && _comp(*position, val)) {
                 iterator next = position;
                 ++next;
-                if (next == Base::end() || _comp(val.first, next->first)) {
+                if (next == Base::end() || _comp(val, *next)) {
                     Base::unset_bounds();
                     node_pointer position_ptr = position.get_node();
                     aux_insert(position_ptr->parent, position_ptr, val);
@@ -135,7 +135,8 @@ class multiset : public avl_tree<T, Compare, Alloc>
         size_type erase (const key_type& k)
         {
             size_type old_size = Base::_size;
-            erase(find(k));
+            std::pair<iterator, iterator> eq = equal_range(k);
+            erase(eq.first, eq.second);
             return old_size - Base::_size;
         }
 
