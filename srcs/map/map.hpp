@@ -105,14 +105,10 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         /* MODIFIERS */
         std::pair<iterator, bool> insert (const value_type& val)
         {
-            if (Base::_root) {
-                Base::unset_bounds();
-                Base::_root = aux_insert(Base::_root->parent, Base::_root, val);
-                if (Base::_added_node)
-                    Base::rebalance(Base::_added_node_ptr);
-            } else {
-                Base::_root = aux_insert(NULL, NULL, val);
-            }
+            Base::unset_bounds();
+            Base::_root = aux_insert(NULL, Base::_root, val);
+            if (Base::_added_node)
+                Base::rebalance(Base::_added_node_ptr);
             Base::set_bounds();
             return std::make_pair(iterator(Base::_added_node_ptr), Base::_added_node);
         }
@@ -124,8 +120,7 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 ++next;
                 if (next == Base::end() || _comp(val.first, next->first)) {
                     Base::unset_bounds();
-                    node_pointer position_ptr = position.get_node();
-                    position_ptr = aux_insert(position_ptr->parent, position_ptr, val);
+                    aux_insert(position.get_node()->parent, position.get_node(), val);
                     if (Base::_added_node)
                         Base::rebalance(Base::_added_node_ptr);
                     Base::set_bounds();

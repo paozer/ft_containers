@@ -111,15 +111,10 @@ class avl_tree
         // maybe add check if val is greater than max or lesser than min and use as hint
         std::pair<iterator, bool> insert (const value_type& val)
         {
-            if (_root) {
-                // check if val is greater than max or lesser than min
-                unset_bounds();
-                _root = aux_insert(_root->parent, _root, val);
-                if (_added_node)
-                    rebalance(_added_node_ptr);
-            } else {
-                _root = aux_insert(NULL, NULL, val);
-            }
+            unset_bounds();
+            _root = aux_insert(NULL, _root, val);
+            if (_added_node)
+                rebalance(_added_node_ptr);
             set_bounds();
             return std::make_pair(iterator(_added_node_ptr), _added_node);
         }
@@ -131,8 +126,9 @@ class avl_tree
                 ++next;
                 if (next == end() || _comp(val, *next)) {
                     unset_bounds();
-                    node_pointer position_ptr = position.get_node();
-                    position_ptr = aux_insert(position_ptr->parent, position_ptr, val);
+                    aux_insert(position.get_node()->parent, position.get_node(), val);
+                    if (_added_node)
+                        rebalance(_added_node_ptr);
                     set_bounds();
                     return iterator(_added_node_ptr);
                 }
@@ -162,6 +158,7 @@ class avl_tree
                 tmp = aux_erase_one_child_node(node);
             else
                 tmp = aux_erase_two_child_node(node);
+            recompute_heights(tmp);
             rebalance(tmp);
             set_bounds();
         }
@@ -396,20 +393,14 @@ class avl_tree
                 int rheight = (node->right) ? node->right->height : -1;
                 int bf = rheight - lheight;
                 if (bf == 2) {
-                    if (!node->right->right) {
+                    if (!node->right->right)
                         node->right = right_rotate(node->right);
-                        update_height(node->right);
-                    }
                     node = left_rotate(node);
-                    update_height(node);
                     break ;
                 } else if (bf == -2) {
-                    if (!node->left->left) {
+                    if (!node->left->left)
                         node->left = left_rotate(node->left);
-                        update_height(node->left);
-                    }
                     node = right_rotate(node);
-                    update_height(node);
                     break ;
                 } else {
                     update_height(node);
