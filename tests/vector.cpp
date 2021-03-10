@@ -24,25 +24,31 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
         REQUIRE( cnt.empty() );
         REQUIRE( cnt.size() == 0 );
     }
+
     SECTION("fill constructor returns correct vector") {
         unsigned int size = GENERATE(0, 1, 5);
         int fill = GENERATE(0, -41);
         ft::vector<int> cnt (size, fill);
+
         REQUIRE( cnt.size() == size );
         for (unsigned int i = 0; i < size; ++i)
             REQUIRE( cnt[i] == fill );
     }
+
     SECTION("range constructor returns correct vector") {
+        int v[] = {2, 4, 12, 5, 60, 99, -12};
         unsigned int first = GENERATE(0, 1, 3);
         unsigned int last = GENERATE(0, 3, 6);
-        int v[] = {2, 4, 12, 5, 60, 99, -12};
+
         if (last >= first) {
             ft::vector<int> cnt (v + first, v + last);
+
             REQUIRE( cnt.size() == last - first );
             for (size_t i = 0; i < last - first; ++i)
                 REQUIRE( cnt[i] == v[i + first] );
         }
     }
+
     SECTION ("copy constructor returns correct vector") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
         ft::vector<int> v1;
@@ -61,7 +67,7 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
 
 TEMPLATE_PRODUCT_TEST_CASE("vector correctly copies value upon construction", "[vector][basics]", ft::vector, TYPE_LIST)
 {
-    // this test may produces double free  there is a problem with
+    // this test may produces double free there is a problem with
     // your allocation/copying with non builtin types
     TestType v1 (10, VALUE_TYPE());
     TestType v2 (v1);
@@ -162,6 +168,7 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         REQUIRE( *(v.begin() + 1) == 6 );
         REQUIRE( *(v.begin() + 2) == 10 );
     }
+
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
         ft::vector<int> v2 (arr, arr + 5);
@@ -201,6 +208,7 @@ TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int
         REQUIRE( *(v.end() - 2) == 6 );
         REQUIRE( *(v.begin() + 1) == 1 );
     }
+
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
         ft::vector<int> v2 (arr, arr + 5);
@@ -238,11 +246,14 @@ TEST_CASE("vector assign methods work correctly", "[vector][modifiers]")
 
         if (j >= i) {
             v.assign(arr + i, arr + j);
+
             REQUIRE( v.size() == j - i );
             for (size_t y = 0; y < v.size(); ++y)
                 REQUIRE( v[y] == arr[y + i] );
+
             SECTION("range assign clears values before assigning") {
                 v1.assign(arr + i, arr + j);
+
                 REQUIRE( v1.size() == j - i );
                 for (size_t y = 0; y < v1.size(); ++y)
                     REQUIRE( v1[y] == arr[y + i] );
@@ -252,13 +263,15 @@ TEST_CASE("vector assign methods work correctly", "[vector][modifiers]")
     SECTION("fill assign fills vector with correct values") {
         unsigned int i = GENERATE(0, 1, 25);
         int j = GENERATE(0, 42, -12);
-
         v.assign(i, j);
+
         REQUIRE( v.size() == i );
         for (size_t y = 0; y < v.size(); ++y)
             REQUIRE( v[y] == j );
+
         SECTION("fill assign clears values before assigning") {
             v1.assign(i, j);
+
             REQUIRE( v1.size() == i );
             for (size_t y = 0; y < v1.size(); ++y)
                 REQUIRE( v1[y] == j );
@@ -271,6 +284,7 @@ TEST_CASE("push/pop_back add/remove elements at back of the vector", "[vector][m
 {
     ft::vector<int> v;
     std::vector<int> stl;
+
     for (unsigned int i = 0; i < 100; ++i) {
         int rand = std::rand() % 200000 - 100000;
         v.push_back(rand);
@@ -278,6 +292,7 @@ TEST_CASE("push/pop_back add/remove elements at back of the vector", "[vector][m
         REQUIRE( *(v.end() - 1) == *(stl.end() - 1) );
     }
     REQUIRE( v.size() == stl.size() );
+
     ft::vector<int>::iterator it = v.begin();
     std::vector<int>::iterator stlit = stl.begin();
     for (; it != v.end() && stlit != stl.end(); ++it, ++stlit)
@@ -526,20 +541,39 @@ TEST_CASE("front and back return vectors first element", "[vector][element acces
 
 TEMPLATE_PRODUCT_TEST_CASE( "at throws only when index is out of range", "[vector][element access]", ft::vector, TYPE_LIST )
 {
+        unsigned int i = GENERATE(1, 25, 100);
         TestType cnt1;
-        TestType cnt2 (50);
+        TestType cnt2 (i);
         const TestType const_cnt1;
-        const TestType const_cnt2 (50);
+        const TestType const_cnt2 (i);
 
-        REQUIRE_NOTHROW( cnt2.at(13) );
-        REQUIRE_NOTHROW( cnt2.at(0) );
-        REQUIRE_THROWS_AS( cnt1.at(100), std::out_of_range);
-        REQUIRE_THROWS_AS( cnt2.at(100), std::out_of_range);
-        REQUIRE_THROWS_AS( const_cnt1.at(100), std::out_of_range);
-        REQUIRE_THROWS_AS( const_cnt2.at(100), std::out_of_range);
+        REQUIRE_NOTHROW( cnt2.at(rand() % i) );
+        REQUIRE_NOTHROW( const_cnt2.at(rand() % i) );
+        REQUIRE_THROWS_AS( cnt1.at(rand() % i + i), std::out_of_range);
+        REQUIRE_THROWS_AS( cnt2.at(rand() % i + i), std::out_of_range);
+        REQUIRE_THROWS_AS( const_cnt1.at(rand() % i + i), std::out_of_range);
+        REQUIRE_THROWS_AS( const_cnt2.at(rand() % i + i), std::out_of_range);
 }
 
 /* CAPACITY */
+TEST_CASE("reserve allocates enough memory", "[vector][capacity]")
+{
+    unsigned int i = GENERATE(0, 1, 25, 100);
+    ft::vector<std::string> v;
+    std::string arr[] = {"hello", "this", "is", "a", "test"};
+
+    v.reserve(i);
+    unsigned int cap = v.capacity();
+    // vector allocates at the least the requested memory
+    REQUIRE( cap >= i );
+    for (unsigned int j = 0; j < v.capacity(); ++j)
+        v.push_back(arr[std::rand() % 4]);
+    // vector only reallocates when full
+    REQUIRE( v.capacity() == cap );
+    v.push_back(arr[std::rand() % 4]);
+    REQUIRE( v.capacity() > cap );
+}
+
 TEMPLATE_PRODUCT_TEST_CASE("empty reflects vector state", "[vector][capacity]", ft::vector, TYPE_LIST)
 {
     TestType cnt;

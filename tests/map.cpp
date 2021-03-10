@@ -49,6 +49,7 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
             ++it1;
             ++it2;
         }
+
         my_map1.begin()->second = my_map2.begin()->second - 10;
         --my_map1.end()->second = --my_map2.end()->second - 1029;
         REQUIRE( (my_map1.begin()->second != my_map2.begin()->second) );
@@ -165,11 +166,12 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
         REQUIRE(( rcit2 == my_map.rbegin() ));
     }
     SECTION("iterators allow in-order access to the map elements") {
+        int rand;
         ft::map<int, char> map;
         std::list<int> list;
 
         for (int i = 0; i < 100; ++i) {
-            int rand = std::rand() % 1000;
+            rand = std::rand() % 1000;
             list.push_back(rand);
             map.insert(std::make_pair(rand, std::rand()));
         }
@@ -390,12 +392,26 @@ TEST_CASE("clear works as expected", "[map][modifiers]")
 }
 
 /* OBSERVERS */
-TEST_CASE("key_comp works as expected", "[map][observers]")
+TEST_CASE("value_comp & key_comp work as expected", "[map][observers]")
 {
-}
+    ft::map<char, int> mymap;
+    ft::map<char, int>::key_compare kc = mymap.key_comp();
+    ft::map<char, int>::value_compare vc = mymap.value_comp();
 
-TEST_CASE("value_comp works as expected", "[map][observers]")
-{
+    mymap['a'] = 20;
+    mymap['d'] = 20;
+
+    REQUIRE( kc(mymap.begin()->first, (++mymap.begin())->first) );
+    REQUIRE_FALSE( kc((++mymap.begin())->first, mymap.begin()->first) );
+    REQUIRE_FALSE( kc(mymap.begin()->first, mymap.begin()->first) );
+    REQUIRE_FALSE( kc(mymap.begin()->first, (----mymap.end())->first) );
+    REQUIRE_FALSE( kc((----mymap.end())->first, mymap.begin()->first) );
+
+    REQUIRE( vc(*mymap.begin(), *++mymap.begin()) );
+    REQUIRE_FALSE( vc(*++mymap.begin(), *mymap.begin()) );
+    REQUIRE_FALSE( vc(*mymap.begin(), *mymap.begin()) );
+    REQUIRE_FALSE( vc(*mymap.begin(), *(----mymap.end())) );
+    REQUIRE_FALSE( vc(*(----mymap.end()), *mymap.begin()) );
 }
 
 /* OPERATIONS */
