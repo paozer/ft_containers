@@ -41,15 +41,36 @@ class deque
             : _map(NULL), _size(0), _map_size(0), _alloc(alloc), _ptr_alloc(alloc)
         {
             realloc_map(true);
-            _first  = iterator(*_map + _chunk_size / 2, _map);
+            _first = iterator(*_map + _chunk_size / 2, _map);
             _last = _first + 1;
         }
 
         explicit deque (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type());
+
         template <class InputIterator>
         deque (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0);
+
         deque (const deque& x);
+
+        /* DESTRUCTOR */
+        ~deque()
+        {
+            for (size_t i = 0; i < _map_size; ++i) {
+                std::cout << "map [" << i << "] = ";
+                for (size_t j = 0; j < _chunk_size; ++j) {
+                    std::cout << _map[i][j] << " ";
+                }
+                std::cout << std::endl << std::endl;
+            }
+
+            iterator ite = end();
+            for (iterator it = begin(); it != ite; ++it)
+                _alloc.destroy(it.get_curr());
+            for (size_type i = 0; i < _map_size; ++i)
+                _alloc.deallocate(_map[i], _chunk_size);
+            _ptr_alloc.deallocate(_map, _map_size);
+        }
 
         /* OPERATORS */
         deque& operator= (const deque& x);
@@ -82,18 +103,6 @@ class deque
         friend bool operator<= (const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs) { return !(rhs < lhs); }
         friend bool operator> (const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs) { return rhs < lhs; }
         friend bool operator>= (const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs) { return !(lhs < rhs); }
-
-        /* DESTRUCTOR */
-        ~deque()
-        {
-            for (size_t i = 0; i < _map_size; ++i) {
-                std::cout << "map [" << i << "] = ";
-                for (size_t j = 0; j < _chunk_size; ++j) {
-                    std::cout << _map[i][j] << " ";
-                }
-                std::cout << std::endl << std::endl;
-            }
-        }
 
         /* ITERATORS */
         iterator begin() { return _first + 1; }
