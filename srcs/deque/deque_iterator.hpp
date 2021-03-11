@@ -44,7 +44,13 @@ class deque_iterator
 
         pointer operator-> (void) { return _curr; }
         reference operator* (void) { return *_curr; }
-        //reference operator[] (size_type n);
+
+        reference operator[] (size_type n)
+        {
+            self_type tmp = *this;
+            tmp += n;
+            return *tmp;
+        }
 
         friend bool operator== (const self_type& lhs, const self_type& rhs) { return lhs._curr == rhs._curr; }
         friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
@@ -79,20 +85,39 @@ class deque_iterator
             return *this;
         }
 
+        self_type& operator+= (difference_type n)
+        {
+
+            difference_type distance_to_start = _curr - *_map;
+            difference_type distance_to_end = *_map + chunk_size - 1 - _curr;
+
+            if (n > 0 && n > distance_to_end) {
+                _map += (n + distance_to_start) / chunk_size;
+                _curr = *_map + (n - distance_to_end - 1) % chunk_size;
+            } else if (n < 0 && n < -distance_to_start) {
+                _map -= (distance_to_end - n) / chunk_size;
+                _curr = *_map + chunk_size - 1 - (distance_to_end - n) % chunk_size;
+            } else {
+                _curr += n;
+            }
+            return *this;
+        }
+
+        self_type& operator-= (difference_type n)
+        {
+            return *this += -n;
+        }
+
         self_type operator+ (difference_type n)
         {
             self_type tmp = *this;
-            for (difference_type i = 0; i < n; ++i)
-                ++tmp;
-            return tmp;
+            return tmp += n;
         }
 
         self_type operator- (difference_type n)
         {
             self_type tmp = *this;
-            for (difference_type i = 0; i < n; ++i)
-                --tmp;
-            return tmp;
+            return tmp -= n;
         }
 
         /* UTILITIES */
