@@ -38,7 +38,7 @@ class deque
     public:
         /* CONSTRUCTORS */
         explicit deque (const allocator_type& alloc = allocator_type())
-            : _size(0), _map_size(0), _map(NULL), _alloc(alloc), _ptr_alloc(alloc)
+            : _map(NULL), _size(0), _map_size(0), _alloc(alloc), _ptr_alloc(alloc)
         {
             realloc_map(true);
             _first  = iterator(*_map + _chunk_size / 2, _map);
@@ -193,13 +193,13 @@ class deque
         void clear(void);
 
     private:
-        size_type _size;
-        size_type _map_size;
         map_pointer _map;
-        static const size_type _chunk_size = _CHUNK_SIZE_;
-
         iterator _first;
         iterator _last;
+
+        size_type _size;
+        size_type _map_size;
+        static const size_type _chunk_size = _CHUNK_SIZE_;
 
         allocator_type _alloc;
         ptr_allocator_type _ptr_alloc;
@@ -212,16 +212,14 @@ class deque
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i + 1] = _map[i];
                 _first.set_curr(tmp[0] + _chunk_size - 1);
-                _first.set_map(tmp);
-                _last.set_map(tmp + _map_size);
             } else {
                 tmp[_map_size] = _alloc.allocate(_chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i] = _map[i];
-                _first.set_map(tmp);
                 _last.set_curr(tmp[_map_size]);
-                _last.set_map(tmp + _map_size);
             }
+            _first.set_map(tmp);
+            _last.set_map(tmp + _map_size);
             _ptr_alloc.deallocate(_map, _map_size);
             _map = tmp;
             ++_map_size;
