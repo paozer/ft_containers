@@ -44,7 +44,7 @@ class deque_iterator
 
         pointer operator-> (void) { return _curr; }
         reference operator* (void) { return *_curr; }
-        reference operator[] (size_type n);
+        //reference operator[] (size_type n);
 
         friend bool operator== (const self_type& lhs, const self_type& rhs) { return lhs._curr == rhs._curr; }
         friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
@@ -54,25 +54,27 @@ class deque_iterator
         //friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
 
         /* ITERATOR SUBTRACTION */
-        friend difference_type operator- (const self_type& lhs, const self_type& rhs);
+        //friend difference_type operator- (const self_type& lhs, const self_type& rhs);
 
         /* INCREMENTING & DECREMENTING */
         self_type& operator++ (void)
         {
-            ++_curr;
-            if (_curr == *_map + chunk_size) {
+            if (is_last()) {
                 ++_map;
                 _curr = *_map;
+            } else {
+                ++_curr;
             }
             return *this;
         }
 
         self_type& operator-- (void)
         {
-            --_curr;
-            if (_curr == *_map - 1) {
+            if (is_first()) {
                 --_map;
                 _curr = *_map + chunk_size - 1;
+            } else {
+                --_curr;
             }
             return *this;
         }
@@ -93,11 +95,15 @@ class deque_iterator
             return tmp;
         }
 
+        /* UTILITIES */
+        bool is_last (void) const { return _curr == *_map + chunk_size - 1; }
+        bool is_first (void) const { return _curr == *_map; }
+
         /* GETTERS */
         pointer get_curr (void) const { return _curr; }
         map_pointer get_map (void) const { return _map; }
 
-        /* GETTERS */
+        /* SETTERS */
         void set_curr (pointer curr) { _curr = curr; }
         void set_map (map_pointer map) { _map = map; }
 

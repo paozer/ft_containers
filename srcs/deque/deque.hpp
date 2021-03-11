@@ -41,7 +41,7 @@ class deque
             : _size(0), _map_size(0), _map(NULL), _alloc(alloc), _ptr_alloc(alloc)
         {
             realloc_map(true);
-            _first = *_map + _chunk_size / 2;
+            _first  = iterator(*_map + _chunk_size / 2, _map);
             _last = _first + 1;
         }
 
@@ -96,10 +96,10 @@ class deque
         }
 
         /* ITERATORS */
-        iterator begin() { return iterator(_first + 1, _first_chunk); }
-        const_iterator begin() const { return iterator(_first + 1, _first_chunk); }
-        iterator end() { return iterator(_last, _last_chunk); }
-        const_iterator end() const { return iterator(_last, _last_chunk); }
+        iterator begin() { return _first + 1; }
+        const_iterator begin() const { return _first + 1; }
+        iterator end() { return _last; }
+        const_iterator end() const { return _last; }
         //reverse_iterator rbegin() { return reverse_iterator(_size - 1, _array); }
         //const_reverse_iterator rbegin() const { return const_reverse_iterator(_size - 1, _array); }
         //reverse_iterator rend() { return reverse_iterator(-1, _array); }
@@ -132,33 +132,31 @@ class deque
         // PUSH N POP
         void push_front (const value_type& val)
         {
-            if (_first + 1 == *_first_chunk) {  // if current first chunk is full
-                if (_first_chunk == _map) {     // if there is no empty chunk preceding it
-                    realloc_map(true);
-                    --_first;
-                } else {                        // else there is an available chunk preceding it
-                    --_first_chunk;
-                    _first = *_first_chunk + _chunk_size - 1;
-                }
+            // if current first chunk will be full after push_front
+            // and there is no empty chunk preceding it
+            if (_first.is_first() && _first.get_map() == _map) {
+                pointer tmp = _first.get_curr();
+                realloc_map(true);
+                _alloc.construct(tmp, val);
+            } else {
+                _alloc.construct(_first.get_curr(), val);
+                --_first;
             }
-            _alloc.construct(_first, val);
-            --_first;
             ++_size;
         }
 
         void push_back (const value_type& val)
         {
-            if (_last == *_last_chunk + _chunk_size) {      // if current last chunk is full
-                if (_last_chunk == _map + _map_size - 1) {  // if there is no empty chunk succeeding it
-                    realloc_map(false);
-                    ++_last;
-                } else {                                    // else there is an available chunk succeeding it
-                    ++_last_chunk;
-                    _last = *_last_chunk;
-                }
+            // if current last chunk will be full after push_back
+            // and there is no empty chunk suceeding it
+            if (_last.is_last() && _last.get_map() == _map + _map_size - 1) {
+                pointer tmp = _last.get_curr();
+                realloc_map(false);
+                _alloc.construct(tmp, val);
+            } else {
+                _alloc.construct(_last.get_curr(), val);
+                ++_last;
             }
-            _alloc.construct(_last, val);
-            ++_last;
             ++_size;
         }
 
@@ -166,7 +164,7 @@ class deque
         {
             if (_size > 0) {
                 ++_first;
-                _alloc.destroy(_first);
+                _alloc.destroy(_first.get_curr());
                 --_size;
             }
         }
@@ -175,7 +173,7 @@ class deque
         {
             if (_size > 0) {
                 --_last;
-                _alloc.destroy(_last);
+                _alloc.destroy(_last.get_curr());
                 --_size;
             }
         }
@@ -200,10 +198,8 @@ class deque
         map_pointer _map;
         static const size_type _chunk_size = _CHUNK_SIZE_;
 
-        pointer _first;
-        pointer _last;
-        map_pointer _first_chunk;
-        map_pointer _last_chunk;
+        iterator _first;
+        iterator _last;
 
         allocator_type _alloc;
         ptr_allocator_type _ptr_alloc;
@@ -211,32 +207,24 @@ class deque
         void realloc_map(bool at_front)
         {
             map_pointer tmp = _ptr_alloc.allocate(_map_size + 1);
-            if (at_front) { // add chunk at begin of map
-                tmp[0] = new_chunk();
+            if (at_front) {
+                tmp[0] = _alloc.allocate(_chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i + 1] = _map[i];
-                // update first/last pointers
-                _first = *tmp + _chunk_size;
-                _first_chunk = tmp;
-                _last_chunk = tmp + _map_size;
-            } else { // add chunk at end of map
-                tmp[_map_size] = new_chunk();
+                _first.set_curr(tmp[0] + _chunk_size - 1);
+                _first.set_map(tmp);
+                _last.set_map(tmp + _map_size);
+            } else {
+                tmp[_map_size] = _alloc.allocate(_chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i] = _map[i];
-                // update first/last pointers
-                _first_chunk = tmp;
-                _last = *(tmp + _map_size) - 1;
-                _last_chunk = tmp + _map_size;
+                _first.set_map(tmp);
+                _last.set_curr(tmp[_map_size]);
+                _last.set_map(tmp + _map_size);
             }
             _ptr_alloc.deallocate(_map, _map_size);
             _map = tmp;
             ++_map_size;
-        }
-
-        pointer new_chunk(void)
-        {
-            pointer new_chunk = _alloc.allocate(_chunk_size);
-            return new_chunk;
         }
 
 }; // CLASS DEQUE
