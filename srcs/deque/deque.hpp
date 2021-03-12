@@ -9,11 +9,9 @@
 #include <stdexcept> // std::out_of_range
 #include <limits> // std::numeric_limits
 
-#define _CHUNK_SIZE_ 10
-
 namespace ft {
 
-template < class T, class Alloc = std::allocator<T> >
+template < class T, class Alloc = std::allocator<T>, size_t chunk_size = 16 >
 class deque
 {
     public:
@@ -23,10 +21,10 @@ class deque
         typedef typename allocator_type::const_reference const_reference;
         typedef typename allocator_type::pointer pointer;
         typedef typename allocator_type::const_pointer const_pointer;
-        typedef deque_iterator<value_type, _CHUNK_SIZE_, false> iterator;
-        typedef deque_iterator<value_type, _CHUNK_SIZE_, true> const_iterator;
-        //typedef reverse_deque_iterator<value_type, _chunk_size, false> reverse_iterator;
-        //typedef reverse_deque_iterator<value_type, _chunk_size, true> const_reverse_iterator;
+        typedef deque_iterator<value_type, chunk_size, false> iterator;
+        typedef deque_iterator<value_type, chunk_size, true> const_iterator;
+        //typedef reverse_deque_iterator<value_type, chunk_size, false> reverse_iterator;
+        //typedef reverse_deque_iterator<value_type, chunk_size, true> const_reverse_iterator;
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
@@ -38,42 +36,61 @@ class deque
     public:
         /* CONSTRUCTORS */
         explicit deque (const allocator_type& alloc = allocator_type())
-            : _map(NULL), _size(0), _map_size(0), _alloc(alloc), _ptr_alloc(alloc)
+            : _alloc(alloc), _ptr_alloc(alloc)
         {
-            realloc_map(true);
-            _first = iterator(*_map + _chunk_size / 2, _map);
-            _last = _first + 1;
+            initialize_map();
         }
 
-        explicit deque (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type());
+        explicit deque (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
+            : _alloc(alloc), _ptr_alloc(alloc)
+        {
+            initialize_map();
+            assign(n, val);
+        }
 
         template <class InputIterator>
         deque (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
-              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0);
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
+            : _alloc(alloc), _ptr_alloc(alloc)
+        {
+            initialize_map();
+            assign(first, last);
+        }
 
-        deque (const deque& x);
+        deque (const deque& x)
+            : _alloc(x._alloc), _ptr_alloc(x._ptr_alloc)
+        {
+            initialize_map();
+            *this = x;
+        }
 
         /* DESTRUCTOR */
         ~deque()
         {
             for (size_t i = 0; i < _map_size; ++i) {
                 std::cout << "map [" << i << "] = ";
-                for (size_t j = 0; j < _chunk_size; ++j) {
-                    std::cout << _map[i][j] << " ";
+                for (size_t j = 0; j < chunk_size; ++j) {
+                    if (_map[i][j] > -2000)
+                        std::cout << _map[i][j] << " ";
                 }
-                std::cout << std::endl << std::endl;
+                std::cout << std::endl;
             }
 
-            iterator ite = end();
-            for (iterator it = begin(); it != ite; ++it)
-                _alloc.destroy(it.get_curr());
+            clear();
             for (size_type i = 0; i < _map_size; ++i)
-                _alloc.deallocate(_map[i], _chunk_size);
+                _alloc.deallocate(_map[i], chunk_size);
             _ptr_alloc.deallocate(_map, _map_size);
         }
 
         /* OPERATORS */
-        deque& operator= (const deque& x);
+        deque& operator= (const deque& x)
+        {
+            if (this != &x) {
+                assign(x.begin(), x.end());
+                assert(_size == x._size)
+            }
+            return *this;
+        }
 
         friend bool operator== (const deque<T, Alloc>& lhs, const deque<T, Alloc>& rhs)
         {
@@ -109,17 +126,26 @@ class deque
         const_iterator begin() const { return _first + 1; }
         iterator end() { return _last; }
         const_iterator end() const { return _last; }
-        //reverse_iterator rbegin() { return reverse_iterator(_size - 1, _array); }
-        //const_reverse_iterator rbegin() const { return const_reverse_iterator(_size - 1, _array); }
-        //reverse_iterator rend() { return reverse_iterator(-1, _array); }
-        //const_reverse_iterator rend() const { return const_reverse_iterator(-1, _array); }
+        //reverse_iterator rend() { return reverse_iterator(_first.get_curr(), _first.get_map()); }
+        //const_reverse_iterator rend() const { return const_reverse_iterator(_first.get_curr(), _first.get_map()); }
+        //reverse_iterator rbegin() { return reverse_iterator((_last - 1).get_curr(), (_last - 1).get_map()); }
+        //const_reverse_iterator rbegin() const { return const_reverse_iterator((_last - 1).get_curr(), (_last - 1).get_map()); }
 
         /* CAPACITY */
         size_type size() const { return _size; }
         size_type max_size() const { return _alloc.max_size(); }
         bool empty() const { return _size == 0; }
 
-        void resize (size_type n, value_type val = value_type());
+        void resize (size_type n, value_type val = value_type())
+        {
+            if (_size < n) {
+                while (_size < n)
+                    push_back(val);
+            } else {
+                while (n < _size)
+                    pop_back();
+            }
+        }
 
         /* ELEMENT ACCESS */
         reference front () { return *(_first + 1); }
@@ -127,16 +153,39 @@ class deque
         reference back () { return *(_last - 1); }
         const_reference back () const { return *(_last - 1); }
 
-        reference at (size_type n);
-        const_reference at (size_type n) const;
-        reference operator[] (size_type n);
-        const_reference operator[] (size_type n) const;
+        reference at (size_type n)
+        {
+            if (n >= _size)
+                throw std::out_of_range("ft::deque");
+            return _first[n + 1];
+        }
+
+        const_reference at (size_type n) const
+        {
+            if (n >= _size)
+                throw std::out_of_range("ft::deque");
+            return _first[n + 1];
+        }
+
+        reference operator[] (size_type n) { return _first[n + 1]; }
+        const_reference operator[] (size_type n) const { return _first[n + 1]; }
 
         /* MODIFIERS */
         template <class InputIterator>
         void assign (InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0);
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
+        {
+            clear();
+            for (; first != last; ++first)
+                push_back(*first);
+        }
+
         void assign(size_type n, const value_type& val);
+        {
+            clear();
+            for (size_type i = 0; i < n; ++i)
+                push_back(val);
+        }
 
         // PUSH N POP
         void push_front (const value_type& val)
@@ -198,8 +247,27 @@ class deque
         iterator erase (iterator position);
         iterator erase (iterator first, iterator last);
 
-        void swap (deque& x);
-        void clear(void);
+        void swap (deque& x)
+        {
+            ft::swap(_map, x._map);
+            ft::swap(_first, x._first);
+            ft::swap(_last, x._last);
+            ft::swap(_size, x._size);
+            ft::swap(_map_size, x._map_size);
+            ft::swap(chunk_size, x.chunk_size);
+            ft::swap(_alloc, x._alloc);
+            ft::swap(_ptr_alloc, x._ptr_alloc);
+        }
+
+        void clear(void)
+        {
+            _size = 0;
+            iterator ite = end();
+            for (iterator it = begin(); it != ite; ++it)
+                _alloc.destroy(it.get_curr());
+            _first = iterator(_map[_map_size / 2] + (chunk_size / 2), _map + _map_size / 2);
+            _last = _first + 1;
+        }
 
     private:
         map_pointer _map;
@@ -208,21 +276,20 @@ class deque
 
         size_type _size;
         size_type _map_size;
-        static const size_type _chunk_size = _CHUNK_SIZE_;
 
         allocator_type _alloc;
         ptr_allocator_type _ptr_alloc;
 
-        void realloc_map(bool at_front)
+        void realloc_map (bool at_front)
         {
             map_pointer tmp = _ptr_alloc.allocate(_map_size + 1);
-            if (at_front) {
-                tmp[0] = _alloc.allocate(_chunk_size);
+            if (at_front) { // add an empty chunk at the beginning of the map
+                tmp[0] = _alloc.allocate(chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i + 1] = _map[i];
-                _first.set_curr(tmp[0] + _chunk_size - 1);
-            } else {
-                tmp[_map_size] = _alloc.allocate(_chunk_size);
+                _first.set_curr(tmp[0] + chunk_size - 1);
+            } else { // add an empty chunk at the end of the map
+                tmp[_map_size] = _alloc.allocate(chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i] = _map[i];
                 _last.set_curr(tmp[_map_size]);
@@ -232,6 +299,17 @@ class deque
             _ptr_alloc.deallocate(_map, _map_size);
             _map = tmp;
             ++_map_size;
+        }
+
+        void initialize_map (void)
+        {
+            _size = 0;
+            _map_size = 8;
+            _map = _ptr_alloc.allocate(_map_size);
+            for (size_type i = 0; i < _map_size; ++i)
+                _map[i] = _alloc.allocate(chunk_size);
+            _first = iterator(_map[_map_size / 2] + (chunk_size / 2), _map + _map_size / 2);
+            _last = _first + 1;
         }
 
 }; // CLASS DEQUE
