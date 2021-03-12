@@ -54,13 +54,28 @@ class deque_iterator
 
         friend bool operator== (const self_type& lhs, const self_type& rhs) { return lhs._curr == rhs._curr; }
         friend bool operator!= (const self_type& lhs, const self_type& rhs) { return !(lhs == rhs); }
-        //friend bool operator< (const self_type& lhs, const self_type& rhs) { return rhs - lhs > 0; }
-        //friend bool operator> (const self_type& lhs, const self_type& rhs) { return rhs < lhs; }
-        //friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
-        //friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
+        friend bool operator< (const self_type& lhs, const self_type& rhs) { return rhs - lhs > 0; }
+        friend bool operator> (const self_type& lhs, const self_type& rhs) { return rhs < lhs; }
+        friend bool operator<= (const self_type& lhs, const self_type& rhs) { return !(rhs < lhs); }
+        friend bool operator>= (const self_type& lhs, const self_type& rhs) { return !(lhs < rhs); }
 
         /* ITERATOR SUBTRACTION */
-        //friend difference_type operator- (const self_type& lhs, const self_type& rhs);
+        friend difference_type operator- (const self_type& lhs, const self_type& rhs)
+        {
+            difference_type n = 0;
+            if (*lhs._map < *rhs._map) {
+                n += lhs.distance_to_end();                     // lhs distance to end
+                n += (*rhs._map - *lhs._map - 1) * chunk_size;  // map distance difference
+                n += rhs.distance_to_start();                   // rhs distance to start
+            } else if (*lhs._map > *rhs._map) {
+                n -= rhs.distance_to_end();
+                n -= (*lhs._map - *rhs._map - 1) * chunk_size;
+                n -= lhs.distance_to_start();
+            } else {
+                n = lhs._curr - rhs._curr;
+            }
+            return n;
+        }
 
         /* INCREMENTING & DECREMENTING */
         self_type& operator++ (void)
@@ -85,11 +100,25 @@ class deque_iterator
             return *this;
         }
 
+        self_type operator++ (int)
+        {
+            self_type tmp = *this;
+            ++tmp;
+            return tmp;
+        }
+
+        self_type operator-- (int)
+        {
+            self_type tmp = *this;
+            --tmp;
+            return tmp;
+        }
+
+        /* ITERATOR & INTEGER ARITHMETIC */
         self_type& operator+= (difference_type n)
         {
-
-            difference_type distance_to_start = _curr - *_map;
-            difference_type distance_to_end = *_map + chunk_size - 1 - _curr;
+            difference_type distance_to_start = distance_to_start();
+            difference_type distance_to_end = distance_to_end();
 
             if (n > 0 && n > distance_to_end) {
                 _map += (n + distance_to_start) / chunk_size;
@@ -120,9 +149,17 @@ class deque_iterator
             return tmp -= n;
         }
 
-        /* UTILITIES */
-        bool is_last (void) const { return _curr == *_map + chunk_size - 1; }
-        bool is_first (void) const { return _curr == *_map; }
+        friend self_type operator+ (difference_type n, const self_type& rhs)
+        {
+            self_type tmp = rhs;
+            return tmp += n;
+        }
+
+        friend self_type operator- (difference_type n, const self_type& rhs)
+        {
+            self_type tmp = rhs;
+            return tmp -= n;
+        }
 
         /* GETTERS */
         pointer get_curr (void) const { return _curr; }
@@ -132,10 +169,17 @@ class deque_iterator
         void set_curr (pointer curr) { _curr = curr; }
         void set_map (map_pointer map) { _map = map; }
 
+        /* UTILITIES */
+        bool is_last (void) const { return _curr == *_map + chunk_size - 1; }
+        bool is_first (void) const { return _curr == *_map; }
+
     private:
         pointer _curr;
         map_pointer _map;
 
-}; // CLASS VECTOR_ITERATOR
+        difference_type distance_to_start (void) { return _curr - *_map; }
+        difference_type distance_to_start (void) { return *_map + chunk_size - 1 - _curr; }
+
+}; // CLASS DEQUE_ITERATOR
 
 } // NAMESPACE FT
