@@ -115,7 +115,13 @@ class deque
 
         /* ITERATORS */
         iterator begin() { return _first + 1; }
-        const_iterator begin() const { return _first + 1; }
+
+        const_iterator begin() const
+        {
+            const_iterator it = _first;
+            return ++it;
+        }
+
         iterator end() { return _last; }
         const_iterator end() const { return _last; }
 
@@ -161,7 +167,12 @@ class deque
         }
 
         reference operator[] (size_type n) { return _first[n + 1]; }
-        const_reference operator[] (size_type n) const { return _first[n + 1]; }
+
+        const_reference operator[] (size_type n) const
+        {
+            const_iterator it = _first;
+            return it[n + 1];
+        }
 
         /* MODIFIERS */
         template <class InputIterator>
@@ -328,18 +339,29 @@ class deque
         {
             map_pointer tmp = _ptr_alloc.allocate(_map_size + 1);
             if (at_front) { // add an empty chunk at the beginning of the map
+
+                // + 1 to accounts for added array
+                difference_type offset = _last.get_map() - _map + 1;
                 tmp[0] = _alloc.allocate(chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i + 1] = _map[i];
-                _first.set_curr(tmp[0] + chunk_size - 1);
+                _first.set_map(tmp);
+                _first.set_curr(*tmp + chunk_size - 1);
+                _last.set_map(tmp + offset);
+                _last.set_curr(tmp[offset]);
+
             } else { // add an empty chunk at the end of the map
+
+                difference_type offset = _first.get_map() - _map;
                 tmp[_map_size] = _alloc.allocate(chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i] = _map[i];
+                _first.set_map(tmp + offset);
+                _first.set_curr(*(tmp + offset) + chunk_size - 1);
+                _last.set_map(tmp + _map_size);
                 _last.set_curr(tmp[_map_size]);
+
             }
-            _first.set_map(tmp);
-            _last.set_map(tmp + _map_size);
             _ptr_alloc.deallocate(_map, _map_size);
             _map = tmp;
             ++_map_size;
