@@ -6,12 +6,13 @@ MAIN_SRC =	tests/main.cpp
 
 TEST_SRC =	tests/map.cpp\
 			tests/list.cpp\
+			tests/deque.cpp\
 			tests/vector.cpp\
 			tests/stack_queue.cpp
 
 CFLAGS	=	-fsanitize=address -g3 -Wall -Wextra -Werror -std=c++2a
 
-CFLAGS_ =	-fsanitize=address -g3 -Wall -Wextra -Werror -std=c++98
+CFLAGS_ =	-fsanitize=address -g3 -Wall -Wextra -std=c++2a
 
 all:		$(NAME)
 
