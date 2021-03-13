@@ -3,6 +3,8 @@
 #include "deque_iterator.hpp"
 #include "../utils/utils.hpp"
 
+#include "../vector/vector.hpp"
+
 #include <cstddef> // std::ptrdiff_t, size_t, NULL
 
 #include <memory> // std::allocator
@@ -228,15 +230,68 @@ class deque
         }
 
         // INSERT
-        iterator insert (iterator position, const value_type& val);
-        void insert (iterator position, size_type n, const value_type& val);
+        iterator insert (iterator position, const value_type& val)
+        {
+            difference_type i = position - begin();
+            insert(position, 1, val);
+            return begin() + i;
+        }
+
+        void insert (iterator position, size_type n, const value_type& val)
+        {
+            ft::vector<value_type> tmp (position, end());
+            erase(position, end());
+            for (size_type i = 0; i < n; ++i)
+                push_back(val);
+            for (auto it = tmp.begin(); it != tmp.end(); ++it)
+                push_back(*it);
+        }
+
         template <class InputIterator>
         void insert (iterator position, InputIterator first, InputIterator last,
-              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0);
+              typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
+        {
+            ft::vector<value_type> tmp (position, end());
+            erase(position, end());
+            for (; first != last; ++first)
+                push_back(*first);
+            for (auto it = tmp.begin(); it != tmp.end(); ++it)
+                push_back(*it);
+        }
 
         // ERASE
-        iterator erase (iterator position);
-        iterator erase (iterator first, iterator last);
+        iterator erase (iterator position)
+        {
+            return erase(position, position + 1);
+        }
+
+        iterator erase (iterator first, iterator last)
+        {
+            _size -= last - first;
+            iterator tmp = first;
+            difference_type offset = first - begin();
+
+            for (; tmp != last; ++tmp)
+                _alloc.destroy(tmp.get_curr());
+
+            if (last - end() < first - begin()) { // shift succeeding elements to the left
+                for (iterator it = last; it != end(); ++it, ++first) {
+                    _alloc.construct(first.get_curr(), *it);
+                    _alloc.destroy(it.get_curr());
+                }
+                _last = _first + _size + 1;
+                _first = _last - _size - 1;
+            } else { // shift preceding elements to the right
+                tmp = first;
+                for (iterator it = begin(); it != first; ++it, ++tmp) {
+                    _alloc.construct(tmp.get_curr(), *it);
+                    _alloc.destroy(it.get_curr());
+                }
+                _first = _last - _size - 1;
+                _last = _first + _size + 1;
+            }
+            return begin() + offset;
+        }
 
         void swap (deque& x)
         {
