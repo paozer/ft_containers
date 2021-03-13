@@ -67,15 +67,6 @@ class deque
         /* DESTRUCTOR */
         ~deque()
         {
-            for (size_t i = 0; i < _map_size; ++i) {
-                std::cout << "map [" << i << "] = ";
-                for (size_t j = 0; j < chunk_size; ++j) {
-                    if (_map[i][j] > -2000)
-                        std::cout << _map[i][j] << " ";
-                }
-                std::cout << std::endl;
-            }
-
             clear();
             for (size_type i = 0; i < _map_size; ++i)
                 _alloc.deallocate(_map[i], chunk_size);
@@ -87,7 +78,6 @@ class deque
         {
             if (this != &x) {
                 assign(x.begin(), x.end());
-                assert(_size == x._size)
             }
             return *this;
         }
@@ -126,6 +116,7 @@ class deque
         const_iterator begin() const { return _first + 1; }
         iterator end() { return _last; }
         const_iterator end() const { return _last; }
+
         //reverse_iterator rend() { return reverse_iterator(_first.get_curr(), _first.get_map()); }
         //const_reverse_iterator rend() const { return const_reverse_iterator(_first.get_curr(), _first.get_map()); }
         //reverse_iterator rbegin() { return reverse_iterator((_last - 1).get_curr(), (_last - 1).get_map()); }
@@ -148,10 +139,10 @@ class deque
         }
 
         /* ELEMENT ACCESS */
-        reference front () { return *(_first + 1); }
-        const_reference front () const { return *(_first + 1); }
-        reference back () { return *(_last - 1); }
-        const_reference back () const { return *(_last - 1); }
+        reference front () { return _first[1]; }
+        const_reference front () const { return _first[1]; }
+        reference back () { return _last[-1]; }
+        const_reference back () const { return _last[-1]; }
 
         reference at (size_type n)
         {
@@ -180,7 +171,7 @@ class deque
                 push_back(*first);
         }
 
-        void assign(size_type n, const value_type& val);
+        void assign(size_type n, const value_type& val)
         {
             clear();
             for (size_type i = 0; i < n; ++i)
@@ -206,7 +197,7 @@ class deque
         void push_back (const value_type& val)
         {
             // if current last chunk will be full after push_back
-            // and there is no empty chunk suceeding it
+            // and there is no empty chunk succeeding it
             if (_last.is_last() && _last.get_map() == _map + _map_size - 1) {
                 pointer tmp = _last.get_curr();
                 realloc_map(false);
@@ -254,29 +245,27 @@ class deque
             ft::swap(_last, x._last);
             ft::swap(_size, x._size);
             ft::swap(_map_size, x._map_size);
-            ft::swap(chunk_size, x.chunk_size);
             ft::swap(_alloc, x._alloc);
             ft::swap(_ptr_alloc, x._ptr_alloc);
+            //ft::swap(_chunk_size, x._chunk_size);
         }
 
         void clear(void)
         {
-            _size = 0;
             iterator ite = end();
             for (iterator it = begin(); it != ite; ++it)
                 _alloc.destroy(it.get_curr());
             _first = iterator(_map[_map_size / 2] + (chunk_size / 2), _map + _map_size / 2);
             _last = _first + 1;
+            _size = 0;
         }
 
     private:
         map_pointer _map;
         iterator _first;
         iterator _last;
-
         size_type _size;
         size_type _map_size;
-
         allocator_type _alloc;
         ptr_allocator_type _ptr_alloc;
 
@@ -315,6 +304,9 @@ class deque
 }; // CLASS DEQUE
 
 template <class T, class Alloc>
-void swap (deque<T, Alloc>& x, deque<T, Alloc>& y);
+void swap (deque<T, Alloc>& x, deque<T, Alloc>& y)
+{
+    x.swap(y);
+}
 
 } // NAMESPACE FT

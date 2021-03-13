@@ -52,8 +52,7 @@ class multiset : public avl_tree<T, Compare, Alloc>
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _comp(comp), _alloc(alloc)
         {
-            for (; first != last; ++first)
-                insert(*first);
+            insert(first, last);
         }
 
         multiset (const multiset& x)
@@ -73,8 +72,7 @@ class multiset : public avl_tree<T, Compare, Alloc>
             if (this != &x) {
                 _comp = x._comp;
                 Base::clear();
-                for (const_iterator it = x.begin(); it != x.end(); ++it)
-                    insert(*it);
+                insert(x.begin(), x.end());
             }
             return *this;
         }

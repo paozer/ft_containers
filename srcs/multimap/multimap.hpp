@@ -49,7 +49,7 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 typedef value_type second_argument_type;
                 bool operator() (const value_type& x, const value_type& y) const
                 {
-                  return comp(x.first, y.first);
+                    return comp(x.first, y.first);
                 }
         };
 
@@ -70,8 +70,7 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _comp(comp), _alloc(alloc)
         {
-            for (; first != last; ++first)
-                insert(*first);
+            insert(first, last);
         }
 
         multimap (const multimap& x)
@@ -91,8 +90,7 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
             if (this != &x) {
                 _comp = x._comp;
                 Base::clear();
-                for (const_iterator it = x.begin(); it != x.end(); ++it)
-                    insert(*it);
+                insert(x.begin(), x.end());
             }
             return *this;
         }

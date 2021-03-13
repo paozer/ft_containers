@@ -117,8 +117,8 @@ class deque_iterator
         /* ITERATOR & INTEGER ARITHMETIC */
         self_type& operator+= (difference_type n)
         {
-            difference_type distance_to_start = distance_to_start();
-            difference_type distance_to_end = distance_to_end();
+            difference_type distance_to_start = distance_2_start();
+            difference_type distance_to_end = distance_2_end();
 
             if (n > 0 && n > distance_to_end) {
                 _map += (n + distance_to_start) / chunk_size;
@@ -146,7 +146,7 @@ class deque_iterator
         self_type operator- (difference_type n)
         {
             self_type tmp = *this;
-            return tmp -= n;
+            return tmp += -n;
         }
 
         friend self_type operator+ (difference_type n, const self_type& rhs)
@@ -158,7 +158,7 @@ class deque_iterator
         friend self_type operator- (difference_type n, const self_type& rhs)
         {
             self_type tmp = rhs;
-            return tmp -= n;
+            return tmp += -n;
         }
 
         /* GETTERS */
@@ -177,8 +177,8 @@ class deque_iterator
         pointer _curr;
         map_pointer _map;
 
-        difference_type distance_to_start (void) { return _curr - *_map; }
-        difference_type distance_to_start (void) { return *_map + chunk_size - 1 - _curr; }
+        difference_type distance_2_start (void) const { return _curr - *_map; }
+        difference_type distance_2_end (void) const { return *_map + chunk_size - 1 - _curr; }
 
 }; // CLASS DEQUE_ITERATOR
 

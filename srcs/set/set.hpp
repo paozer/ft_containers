@@ -50,8 +50,7 @@ class set : public avl_tree<T, Compare, Alloc>
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _comp(comp), _alloc(alloc)
         {
-            for (; first != last; ++first)
-                Base::insert(*first);
+            Base::insert(first, last);
         }
 
         set (const set& x)
@@ -78,6 +77,7 @@ class set : public avl_tree<T, Compare, Alloc>
         }
 
         /* OBSERVERS */
+        // TODO remove and use base class ones
         key_compare key_comp (void) const { return _comp; }
         value_compare value_comp (void) const { return value_compare(_comp); }
 

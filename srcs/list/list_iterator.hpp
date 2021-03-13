@@ -46,7 +46,6 @@ class list_iterator
         friend bool operator== (const self_type& rhs, const self_type& lhs) { return rhs._node == lhs._node; }
         friend bool operator!= (const self_type& rhs, const self_type& lhs) { return rhs._node != lhs._node; }
 
-
         reference operator* (void) { return _node->content; }
         pointer operator-> (void) { return &_node->content; }
 

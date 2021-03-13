@@ -45,6 +45,7 @@ class vector
             push_back_n(n, val);
         }
 
+        // TODO use range assign
         template <class InputIterator>
         vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)

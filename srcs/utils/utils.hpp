@@ -39,7 +39,7 @@ void swap ( T& a, T& b )
     b = c;
 }
 
-/* SWAP */
+/* MAX */
 template <class T>
 T max (const T& a, const T& b)
 {

@@ -14,8 +14,7 @@ template <class Key,
           class T,
           class Compare = std::less<Key>,
           class Alloc = std::allocator<std::pair<const Key, T> >
-          >
-class rb_tree
+          > class rb_tree
 {
     public:
         typedef Key key_type;
@@ -137,11 +136,11 @@ class rb_tree
                 _added_node_flag = true;
                 return p;
             }
-            if (_comp(val.first, node->p.first))
+            if (_comp(val.first, node->p.first)) {
                 node->left = aux_insert(node->left, node, val);
-            else if (_comp(node->p.first, val.first))
+            } else if (_comp(node->p.first, val.first)) {
                 node->right = aux_insert(node->right, node, val);
-            else {
+            } else {
                 // need to remember node in order to create iterator after return from recursion
                 _added_node_ptr = node;
                 _added_node_flag = false;
@@ -176,9 +175,9 @@ class rb_tree
                         swap_nodes(n, min);
                         n = min;
                         n->right = erase_min(n->right);
-                    }
-                    else
+                    } else {
                         n->right = aux_erase(n->right, key);
+                    }
                 }
             }
             return fix(n);
@@ -212,8 +211,7 @@ class rb_tree
                 else
                     parent1->right = n2;
                 n2->parent = parent1;
-            }
-            else {
+            } else {
                 _root = n2;
                 n2->parent = NULL;
             }
@@ -230,8 +228,7 @@ class rb_tree
                 right_n1->parent = n2;
                 parent2->left = n1;
                 n1->parent = parent2;
-            }
-            else {
+            } else {
                 n2->right = n1;
                 n1->parent = n2;
             }

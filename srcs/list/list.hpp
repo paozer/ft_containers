@@ -118,10 +118,9 @@ class list
         /* DESTRUCTOR */
         ~list()
         {
-            for (node_pointer tmp; _head; _head = tmp) {
-                tmp = _head->next;
-                delete_node(_head);
-            }
+            clear();
+            delete_node(_head);
+            delete_node(_tail);
         }
 
         /* ITERATORS */
@@ -273,8 +272,6 @@ class list
         void clear (void)
         {
             erase(begin(), end());
-            _head->next = _tail;
-            _tail->prev = _head;
             _size = 0;
         }
 
@@ -431,7 +428,7 @@ class list
         node_pointer new_node (const value_type& val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
-            _alloc.construct(p, val); // implictly calls list_node constructor to create tmp node
+            _alloc.construct(p, val); // implicitly calls list_node constructor to create tmp node
             return p;
         }
 
