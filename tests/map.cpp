@@ -1,8 +1,5 @@
 #include "../srcs/map/map.hpp"
-#include "../srcs/vector/vector.hpp"
-
 #include "catch.hpp"
-
 #include <map>
 #include <array>
 #include <list>
@@ -165,8 +162,9 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
         REQUIRE(( rcit == my_map.rbegin() ));
         REQUIRE(( rcit2 == my_map.rbegin() ));
     }
+
     SECTION("iterators allow in-order access to the map elements") {
-        int rand;
+        int rand = 0;
         ft::map<int, char> map;
         std::list<int> list;
 
@@ -175,6 +173,7 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
             list.push_back(rand);
             map.insert(std::make_pair(rand, std::rand()));
         }
+
         list.sort();
         list.unique();
         REQUIRE( std::distance(map.begin(), map.end()) == std::distance(list.begin(), list.end()) );
@@ -275,7 +274,7 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
         }
     }
     SECTION("range insert inserts a copy of the ranges elements") {
-        ft::vector<std::pair<char, int> > v;
+        std::vector<std::pair<char, int> > v;
         for (char i = 'a'; i < 'z'; ++i)
             v.push_back(std::make_pair(i, rand()));
         auto first = v.begin() + 5;

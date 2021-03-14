@@ -5,8 +5,10 @@
 #include "../srcs/stack/stack.hpp"
 #include "../srcs/queue/queue.hpp"
 #include "../srcs/map/map.hpp"
-#include "../srcs/utils/rb_tree.hpp"
-#include "../srcs/utils/avl_tree.hpp"
+#include "../srcs/set/set.hpp"
+#include "../srcs/multimap/multimap.hpp"
+#include "../srcs/multiset/multiset.hpp"
+#include "../srcs/deque/deque.hpp"
 
 #include <iostream>
 #include <list>
@@ -14,6 +16,8 @@
 #include <stack>
 #include <queue>
 #include <map>
+#include <set>
+#include <chrono>
 
 template <class T, class Alloc = std::allocator<T> >
 class testClass

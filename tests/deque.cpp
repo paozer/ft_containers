@@ -1,15 +1,9 @@
-#include "../srcs/list/list.hpp"
 #include "../srcs/deque/deque.hpp"
-#include "../srcs/vector/vector.hpp"
-
 #include "catch.hpp"
-
 #include <deque>
 #include <list>
-#include <iostream>
 
-#define TYPE_LIST ( int, char, std::string, ft::deque<int>, std::deque<std::string>, ft::list<std::string>, std::list<int> )
-
+#define TYPE_LIST  ( int, unsigned char, double, std::string, ft::deque<int>, std::deque<std::string>, std::list<std::string>, std::list<std::deque<int> > )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
@@ -301,16 +295,12 @@ TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][mod
         int rand = std::rand() % 200000 - 100000;
         v.push_back(rand);
         stl.push_back(rand);
-        REQUIRE( v.end()[-1] == stl.end()[-1] );
+        REQUIRE( v.back() == stl.back() );
     }
     REQUIRE( v.size() == stl.size() );
 
-    ft::deque<int>::iterator it = v.begin();
-    std::vector<int>::iterator stlit = stl.begin();
-    for (; it != v.end() && stlit != stl.end(); ++it, ++stlit)
-        REQUIRE( *it == *stlit );
     while (v.size() != 0 ) {
-        REQUIRE( v.end()[-1] == stl.end()[-1] );
+        REQUIRE( v.back() == stl.back() );
         v.pop_back();
         stl.pop_back();
     }
@@ -346,7 +336,7 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
 {
     ft::deque<int> v;
 
-    SECTION( "single element insert works correctly" ) {
+    SECTION("single element insert works correctly") {
         ft::deque<int>::iterator ret;
         ret = v.insert(v.begin(), 5);               // { 5 }
         REQUIRE( *ret == 5 );
@@ -366,7 +356,7 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
         REQUIRE( v[3] == 7 );
         REQUIRE( v[4] == 10 );
     }
-    SECTION( "fill insert works correctly" ) {
+    SECTION("fill insert works correctly") {
         v.insert(v.begin(), 5, 10);                 // { 10, 10, 10, 10, 10 }
         v.insert(v.end(), 1, 100);                  // { 10, 10, 10, 10, 10, 100 }
         v.insert(++v.begin(), 2, 0);                // { 10, 0, 0, 10, 10, 10, 10, 100 }
@@ -385,7 +375,7 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
         REQUIRE( v[10] == 21 );
         REQUIRE( v[11] == 100 );
     }
-    SECTION( "range insert works correctly" ) {
+    SECTION("range insert works correctly") {
         int arr[] = {12, 1, 4, 5, 6, 7};
         int arr1[] = { 0 , -32 };
         v.insert(v.begin(), arr1, arr1 + 1);        // { 0 }

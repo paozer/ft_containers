@@ -1,19 +1,9 @@
-#include "../srcs/list/list.hpp"
 #include "../srcs/vector/vector.hpp"
-
 #include "catch.hpp"
-
 #include <vector>
 #include <list>
-#include <iostream>
 
-#ifndef __linux__
-#define TYPE_LIST ( const int, int, char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
-#else
-#define TYPE_LIST ( char, std::string, ft::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int> )
-#endif
-#define VALUE_TYPE typename TestType::value_type
-
+#define TYPE_LIST  ( int, unsigned char, double, std::string, ft::vector<int>, std::vector<std::string>, std::list<std::string>, std::list<std::vector<int> > )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
@@ -49,7 +39,7 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
         }
     }
 
-    SECTION ("copy constructor returns correct vector") {
+    SECTION("copy constructor returns correct vector") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
         ft::vector<int> v1;
         ft::vector<int> v2 (v1);
@@ -216,7 +206,7 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
 
 }
 
-TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int> )
+TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", ft::vector<int>)
 {
     SECTION("non-const iterator behaviour") {
         ft::vector<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
@@ -332,7 +322,7 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
 {
     ft::vector<int> v;
 
-    SECTION( "single element insert works correctly" ) {
+    SECTION("single element insert works correctly") {
         ft::vector<int>::iterator ret;
         ret = v.insert(v.begin(), 5);               // { 5 }
         REQUIRE( *ret == 5 );
@@ -352,7 +342,7 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
         REQUIRE( v[3] == 7 );
         REQUIRE( v[4] == 10 );
     }
-    SECTION( "fill insert works correctly" ) {
+    SECTION("fill insert works correctly") {
         v.insert(v.begin(), 5, 10);                 // { 10, 10, 10, 10, 10 }
         v.insert(v.end(), 1, 100);                  // { 10, 10, 10, 10, 10, 100 }
         v.insert(++v.begin(), 2, 0);                // { 10, 0, 0, 10, 10, 10, 10, 100 }
@@ -371,7 +361,7 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
         REQUIRE( v[10] == 21 );
         REQUIRE( v[11] == 100 );
     }
-    SECTION( "range insert works correctly" ) {
+    SECTION("range insert works correctly") {
         int arr[] = {12, 1, 4, 5, 6, 7};
         int arr1[] = { 0 , -32 };
         v.insert(v.begin(), arr1, arr1 + 1);        // { 0 }
@@ -562,7 +552,7 @@ TEST_CASE("front and back return vectors first element", "[vector][element acces
     REQUIRE( back_ref == 0 );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "at throws only when index is out of range", "[vector][element access]", ft::vector, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[vector][element access]", ft::vector, TYPE_LIST)
 {
         unsigned int i = GENERATE(1, 25, 100);
         TestType cnt1;
@@ -618,8 +608,7 @@ TEMPLATE_PRODUCT_TEST_CASE("size returns updated vector size", "[vector][capacit
     REQUIRE( v.size() == 0 );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector,
-        (int, std::string, ft::vector<int>, std::list<int>) )
+TEMPLATE_PRODUCT_TEST_CASE("ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector, (int, std::string, ft::vector<int>, std::list<int>))
 {
     TestType ft_cnt;
     std::vector<VALUE_TYPE> stl_cnt;
