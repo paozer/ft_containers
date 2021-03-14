@@ -61,16 +61,15 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
     }
 }
 
-// TODO compilation errors
-//TEMPLATE_PRODUCT_TEST_CASE("deque correctly copies value upon construction", "[deque][basics]", ft::deque, TYPE_LIST)
-//{
-//    // this test may produces double free there is a problem with
-//    // your allocation/copying with non builtin types
-//    TestType v1 (10, VALUE_TYPE());
-//    TestType v2 (v1);
-//    v1.clear();
-//    v2.clear();
-//}
+TEMPLATE_PRODUCT_TEST_CASE("deque correctly copies value upon construction", "[deque][basics]", ft::deque, TYPE_LIST)
+{
+    // this test may produces double free there is a problem with
+    // your allocation/copying with non builtin types
+    TestType v1 (10, VALUE_TYPE());
+    TestType v2 (v1);
+    v1.clear();
+    v2.clear();
+}
 
 /* ASSIGNATION OPERATOR */
 TEST_CASE("deque assignation works correctly", "[deque][assignation operators]")
@@ -103,10 +102,12 @@ TEST_CASE("deque relational operators work correctly", "[deque][relational opera
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
     int c[] = {1, 4, -1, 2, 33, 0};
+    int d[] = {1, 4, -1, 67, 1, 0};
     ft::deque<int> mydeque1 (a, a + 5);
     ft::deque<int> mydeque2 (b, b + 2);
     ft::deque<int> mydeque3;
     ft::deque<int> mydeque4 (c, c + 6);
+    ft::deque<int> mydeque5 (d, d + 6);
 
     // mydeque1 vs mydeque2
     REQUIRE_FALSE( mydeque1 == mydeque2 );
@@ -147,6 +148,14 @@ TEST_CASE("deque relational operators work correctly", "[deque][relational opera
     REQUIRE( mydeque1 <= mydeque4 );
     REQUIRE_FALSE( mydeque1 > mydeque4 );
     REQUIRE_FALSE( mydeque1 >= mydeque4 );
+
+    // mydeque4 vs mydeque5
+    REQUIRE_FALSE( mydeque4 == mydeque5 );
+    REQUIRE( mydeque4 != mydeque5 );
+    REQUIRE( mydeque4 < mydeque5 );
+    REQUIRE( mydeque4 <= mydeque5 );
+    REQUIRE_FALSE( mydeque4 > mydeque5 );
+    REQUIRE_FALSE( mydeque4 >= mydeque5 );
 }
 
 /* ITERATORS */
@@ -164,6 +173,8 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
         REQUIRE( *v.begin() == 2 );
         REQUIRE( *(v.begin() + 1) == 6 );
         REQUIRE( *(v.begin() + 2) == 10 );
+
+        REQUIRE(( v.begin() - v.end() == -5 ));
     }
 
     SECTION("const iterator behaviour") {
@@ -283,6 +294,9 @@ TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][mod
     std::vector<int> stl;
     stl.reserve(100);
 
+    v.pop_back();
+    REQUIRE( v.empty() );
+
     for (unsigned int i = 0; i < 100; ++i) {
         int rand = std::rand() % 200000 - 100000;
         v.push_back(rand);
@@ -299,6 +313,31 @@ TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][mod
         REQUIRE( v.end()[-1] == stl.end()[-1] );
         v.pop_back();
         stl.pop_back();
+    }
+    REQUIRE( v.size() == stl.size() );
+}
+
+TEST_CASE("push/pop_front add/remove elements at the front of the deque", "[deque][modifiers]")
+{
+    ft::deque<int> v;
+    std::vector<int> stl;
+    stl.reserve(100);
+
+    v.pop_front();
+    REQUIRE( v.empty() );
+
+    for (unsigned int i = 0; i < 100; ++i) {
+        int rand = std::rand() % 200000 - 100000;
+        v.push_front(rand);
+        stl.insert(stl.begin(), rand);
+        REQUIRE( v.front() == stl.front() );
+    }
+    REQUIRE( v.size() == stl.size() );
+
+    while (v.size() != 0 ) {
+        REQUIRE( v[0] == stl[0] );
+        v.pop_front();
+        stl.erase(stl.begin());
     }
     REQUIRE( v.size() == stl.size() );
 }
@@ -373,37 +412,39 @@ TEST_CASE("deque erase work correctly", "[deque][modifiers]")
     ft::deque<int>::iterator ret;
 
     SECTION("single element erase works correctly") {
-        ret = v.erase(v.begin());                // { 1, 233, 4, 55, 3 }
+        ret = v.erase(v.begin() + 1);                // { 23, 233, 4, 55, 3 }
         REQUIRE( v.size() == 5 );
-        REQUIRE( *ret == 1 );
-        REQUIRE( *(ret + 1) == 233 );
+        REQUIRE( ret[-1] == 23 );
+        REQUIRE( ret[0] == 233 );
+        REQUIRE( ret[1] == 4 );
 
-        ret = v.erase(v.end() - 1);              // { 1, 233, 4, 55 }
+        ret = v.erase(v.end() - 1);              // { 23, 233, 4, 55 }
         REQUIRE( v.size() == 4 );
         REQUIRE( ret == v.end() );
-        REQUIRE( *(ret - 1) == 55 );
+        REQUIRE( ret[-1] == 55 );
 
-        ret = v.erase(v.begin() + 2);            // { 1, 233, 55 }
+        ret = v.erase(v.begin() + 2);            // { 23, 233, 55 }
         REQUIRE( v.size() == 3 );
-        REQUIRE( *(ret - 2) == 1 );
-        REQUIRE( *(ret - 1) == 233 );
-        REQUIRE( *ret == 55 );
+        REQUIRE( ret[-2] == 23 );
+        REQUIRE( ret[-1] == 233 );
+        REQUIRE( ret[0] == 55 );
     }
+
     SECTION("multiple element erase works correctly") {
         ret = v.erase(v.end() - 1, v.end());              // { 23, 1, 233, 4, 55 }
         REQUIRE( v.size() == 5 );
         REQUIRE( ret == v.end() );
-        REQUIRE( *(ret - 1) == 55 );
+        REQUIRE( ret[-1] == 55 );
 
-        ret = v.erase(v.begin() + 1, v.begin() + 2);     // { 23, 233, 4, 55 }
+        ret = v.erase(v.begin(), v.begin() + 1);     // { 1, 233, 4, 55 }
         REQUIRE( v.size() == 4 );
-        REQUIRE( *(ret - 1) == 23 );
-        REQUIRE( *ret == 233 );
-        REQUIRE( *(ret + 1) == 4 );
+        REQUIRE( ret[0] == 1 );
+        REQUIRE( ret[1] == 233 );
+        REQUIRE( ret[2] == 4 );
 
-        ret = v.erase(v.begin() + 1, v.end() - 1);      // { 23, 55 }
-        REQUIRE( *(ret - 1) == 23 );
-        REQUIRE( *ret == 55 );
+        ret = v.erase(v.begin() + 1, v.end() - 1);      // { 1, 55 }
+        REQUIRE( ret[-1] == 1 );
+        REQUIRE( ret[0] == 55 );
 
         ret = v.erase(v.begin(), v.end());              // { }
         REQUIRE( ret == v.end() );
@@ -424,13 +465,20 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
             REQUIRE( *it == -12 );
         for (auto it = v2.begin(); it != v2.end(); ++it)
             REQUIRE( *it == 100 );
+        ft::swap(v1, v2);
+        REQUIRE( v1.size() == 10 );
+        REQUIRE( v2.size() == 2 );
+        for (auto it = v1.begin(); it != v1.end(); ++it)
+            REQUIRE( *it == 100 );
+        for (auto it = v2.begin(); it != v2.end(); ++it)
+            REQUIRE( *it == -12 );
     }
     SECTION("works for swapping non-empty and empty deques") {
         ft::deque<int> v1 (10, 100);
         ft::deque<int> v2;
 
         v1.swap(v2);
-        REQUIRE( v1.size() == 0 );
+        REQUIRE( v1.empty() );
         REQUIRE( v2.size() == 10 );
         REQUIRE(( v1.begin() == v1.end() ));
         for (auto it = v2.begin(); it != v2.end(); ++it)
@@ -441,8 +489,14 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
         ft::deque<int> v2;
 
         v1.swap(v2);
-        REQUIRE( v1.size() == 0 );
-        REQUIRE( v2.size() == 0 );
+        REQUIRE( v1.empty() );
+        REQUIRE( v2.empty() );
+        REQUIRE(( v1.begin() == v1.end() ));
+        REQUIRE(( v2.begin() == v2.end() ));
+
+        ft::swap(v1, v2);
+        REQUIRE( v1.empty() );
+        REQUIRE( v2.empty() );
         REQUIRE(( v1.begin() == v1.end() ));
         REQUIRE(( v2.begin() == v2.end() ));
     }
@@ -484,94 +538,84 @@ TEST_CASE("deque resizing works correctly", "[deque][modifiers]")
     }
 }
 
-// TODO compilation errors
-//TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[deque][modifiers]", ft::deque, TYPE_LIST)
-//{
-//    TestType cnt;
-//    cnt.clear();
-//    REQUIRE( cnt.size() == 0 );
-//    cnt.assign(10, VALUE_TYPE());
-//    REQUIRE( cnt.size() == 10 );
-//    cnt.clear();
-//    REQUIRE( cnt.size() == 0 );
-//}
+TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[deque][modifiers]", ft::deque, TYPE_LIST)
+{
+    TestType cnt;
+    cnt.clear();
+    REQUIRE( cnt.size() == 0 );
+    cnt.assign(10, VALUE_TYPE());
+    REQUIRE( cnt.size() == 10 );
+    cnt.clear();
+    REQUIRE( cnt.size() == 0 );
+}
 
 /* ELEMENT ACCESS */
 TEST_CASE("front and back return deques first element", "[deque][element access]")
 {
     int arr[] = { 1, 32, 0, -23 };
     ft::deque<int> v (arr, arr + 4);
-    ft::deque<int> cv (arr, arr + 4);
-    ft::deque<int>::const_reference front_ref = v.front();
-    ft::deque<int>::const_reference back_ref = v.back();
+    const ft::deque<int> cdq (v);
+
+    // const
+    REQUIRE( cdq.front() == 1 );
+    REQUIRE( cdq.back() == -23 );
 
     // front
     REQUIRE( v.front() == 1 );
-    REQUIRE( front_ref == 1 );
     v.front() -= 22;
     REQUIRE( v.front() == -21 );
-    REQUIRE( front_ref == -21 );
     v.front() += 21;
     REQUIRE( v.front() == 0 );
-    REQUIRE( front_ref == 0 );
 
     // back
     REQUIRE( v.back() == -23 );
-    REQUIRE( back_ref == -23 );
     v.back() -= 22;
     REQUIRE( v.back() == -45 );
-    REQUIRE( back_ref == -45 );
     v.back() += 45;
     REQUIRE( v.back() == 0 );
-    REQUIRE( back_ref == 0 );
 }
 
-// TODO compilation errors
-//TEMPLATE_PRODUCT_TEST_CASE( "at throws only when index is out of range", "[deque][element access]", ft::deque, TYPE_LIST )
-//{
-//        unsigned int i = GENERATE(1, 25, 100);
-//        TestType cnt1;
-//        TestType cnt2 (i);
-//        const TestType const_cnt1;
-//        const TestType const_cnt2 (i);
-//
-//        REQUIRE_NOTHROW( cnt2.at(rand() % i) );
-//        REQUIRE_NOTHROW( const_cnt2.at(rand() % i) );
-//        REQUIRE_THROWS_AS( cnt1.at(rand() % i + i), std::out_of_range);
-//        REQUIRE_THROWS_AS( cnt2.at(rand() % i + i), std::out_of_range);
-//        REQUIRE_THROWS_AS( const_cnt1.at(rand() % i + i), std::out_of_range);
-//        REQUIRE_THROWS_AS( const_cnt2.at(rand() % i + i), std::out_of_range);
-//}
+TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[deque][element access]", ft::deque, TYPE_LIST)
+{
+        unsigned int i = GENERATE(1, 25, 100);
+        TestType cnt1;
+        TestType cnt2 (i);
+        const TestType const_cnt1;
+        const TestType const_cnt2 (i);
 
-///* CAPACITY */
-// TODO compilation errors
-//TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", ft::deque, TYPE_LIST)
-//{
-//    TestType cnt;
-//    REQUIRE( cnt.empty() );
-//    cnt.push_back(VALUE_TYPE());
-//    REQUIRE_FALSE( cnt.empty() );
-//    cnt.pop_back();
-//    REQUIRE( cnt.empty() );
-//}
+        REQUIRE_NOTHROW( cnt2.at(rand() % i) );
+        REQUIRE_NOTHROW( const_cnt2.at(rand() % i) );
+        REQUIRE_THROWS_AS( cnt1.at(rand() % i + i), std::out_of_range);
+        REQUIRE_THROWS_AS( cnt2.at(rand() % i + i), std::out_of_range);
+        REQUIRE_THROWS_AS( const_cnt1.at(rand() % i + i), std::out_of_range);
+        REQUIRE_THROWS_AS( const_cnt2.at(rand() % i + i), std::out_of_range);
+}
 
-// TODO compilation errors
-//TEMPLATE_PRODUCT_TEST_CASE("size returns updated deque size", "[deque][capacity]", ft::deque, TYPE_LIST)
-//{
-//    TestType v;
-//
-//    REQUIRE( v.size() == 0 );
-//    v.insert(v.begin(), 5, VALUE_TYPE());
-//    REQUIRE( v.size() == 5 );
-//    v.clear();
-//    REQUIRE( v.size() == 0 );
-//}
+/* CAPACITY */
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", ft::deque, TYPE_LIST)
+{
+    TestType cnt;
+    REQUIRE( cnt.empty() );
+    cnt.push_back(VALUE_TYPE());
+    REQUIRE_FALSE( cnt.empty() );
+    cnt.pop_back();
+    REQUIRE( cnt.empty() );
+}
 
-// TODO compilation errors
-//TEMPLATE_PRODUCT_TEST_CASE( "ft::deque max_size returns same value as std::deque", "[deque][capacity]", ft::deque,
-//        (int, std::string, ft::deque<int>, std::list<int>) )
-//{
-//    TestType ft_cnt;
-//    std::deque<VALUE_TYPE> stl_cnt;
-//    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
-//}
+TEMPLATE_PRODUCT_TEST_CASE("size returns updated deque size", "[deque][capacity]", ft::deque, TYPE_LIST)
+{
+    TestType v;
+
+    REQUIRE( v.size() == 0 );
+    v.insert(v.begin(), 5, VALUE_TYPE());
+    REQUIRE( v.size() == 5 );
+    v.clear();
+    REQUIRE( v.size() == 0 );
+}
+
+TEST_CASE("ft::deque max_size returns same value as std::deque", "[deque][capacity]")
+{
+    ft::deque<int> ft_cnt;
+    std::deque<int> stl_cnt;
+    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
+}

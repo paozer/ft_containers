@@ -191,6 +191,29 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         REQUIRE( *(it + 4) == 33 );
         REQUIRE( (it + 5) == v2.end() );
     }
+
+    SECTION("misc") {
+        int arr[] = {1, 4, -1, 2, 33};
+        ft::vector<int> v (arr, arr + 5);
+        ft::vector<int>::iterator it1 = v.begin();
+        ft::vector<int>::iterator it2;
+
+        // it1 = it1; // compilation error with -Werror
+        REQUIRE( it1 == v.begin() );
+        it1 += 2;
+        REQUIRE( *it1 == -1 );
+        REQUIRE( it1[0] == -1 );
+        REQUIRE( it1[1] == 2 );
+        REQUIRE( it1[2] == 33 );
+        REQUIRE( it1 + 3 == v.end() );
+        REQUIRE( 3 + it1 == v.end() );
+        REQUIRE( 3 - v.end() == it1 );
+        REQUIRE( it1 > v.begin() );
+        REQUIRE( it1 >= v.begin() );
+        REQUIRE_FALSE( it1 < v.begin() );
+        REQUIRE_FALSE( it1 <= v.begin() );
+    }
+
 }
 
 TEMPLATE_TEST_CASE( "end works correctly", "[vector][iterators]", ft::vector<int> )

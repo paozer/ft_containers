@@ -236,33 +236,33 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
         auto itf = my_map.find('f');
 
         //valid hint and key not in map
-        it_ret = my_map.insert(ite, std::make_pair('b', 'b'));
+        it_ret = my_map.insert(ita, std::make_pair('b', 'b'));
         REQUIRE( my_map.size() == 8 );
         REQUIRE( it_ret->first == 'b' );
         REQUIRE( it_ret->second == 'b' );
         //valid hint but key already in map
-        it_ret = my_map.insert(ite, std::make_pair('b', 'c'));
+        it_ret = my_map.insert(ita, std::make_pair('b', 'c'));
         REQUIRE( my_map.size() == 8 );
         REQUIRE( it_ret->first == 'b' );
-        REQUIRE( it_ret->first == 'b' );
-        it_ret = my_map.insert(my_map.find('b'), std::make_pair('a', 'c'));
+        REQUIRE( it_ret->second == 'b' );
+        it_ret = my_map.insert(my_map.find('b'), std::make_pair('e', 'c'));
         REQUIRE( my_map.size() == 8 );
-        REQUIRE( it_ret->first == 'a' );
-        REQUIRE( it_ret->first == 'a' );
+        REQUIRE( it_ret->first == 'e' );
+        REQUIRE( it_ret->second == 'e' );
         //invalid hint but key in map
         it_ret = my_map.insert(ite, std::make_pair('u', 'c'));
         REQUIRE( my_map.size() == 8 );
         REQUIRE( it_ret->first == 'u' );
-        REQUIRE( it_ret->first == 'u' );
+        REQUIRE( it_ret->second == 'u' );
         //invalid hint but key not in map
         it_ret = my_map.insert(itf, std::make_pair('c', 'c'));
         REQUIRE( my_map.size() == 9 );
         REQUIRE( it_ret->first == 'c' );
-        REQUIRE( it_ret->first == 'c' );
+        REQUIRE( it_ret->second == 'c' );
         it_ret = my_map.insert(ita, std::make_pair('z', 'z'));
         REQUIRE( my_map.size() == 10 );
         REQUIRE( it_ret->first == 'z' );
-        REQUIRE( it_ret->first == 'z' );
+        REQUIRE( it_ret->second == 'z' );
 
         //assert content is the sum of inserts
         std::array< std::pair<const char, int>, 10 > arr = {{{'a','a'},{'b','b'},{'c','c'},{'e','e'},{'f','f'},{'h','h'},{'i','i'},{'s','s'},{'u','u'},{'z','z'}}};
@@ -487,6 +487,7 @@ TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
         REQUIRE(( cmymap.upper_bound('c') == cmymap.lower_bound('c') ));
         REQUIRE(( cmymap.upper_bound('a')->first == 'b' ));
         REQUIRE(( cmymap.upper_bound('b')->first == 'd' ));
+        REQUIRE(( cmymap.upper_bound('z') == cmymap.end() ));
         REQUIRE(( cmymap.lower_bound('d')->first == 'd' ));
         REQUIRE(( cmymap.lower_bound('z') == cmymap.end() ));
     }
@@ -498,7 +499,11 @@ TEST_CASE("equal_range works as expected", "[map][operations]")
     mymap['a'] = 10;
     mymap['b'] = 20;
     mymap['c'] = 30;
+    const ft::map<char, int> cmymap (mymap);
+
     std::pair<ft::map<char, int>::iterator, ft::map<char, int>::iterator> ret = mymap.equal_range('b');
+    REQUIRE( ret.first->first == 'b' );
+    REQUIRE( ret.second->first == 'c' );
     REQUIRE( ret.first->second == 20 );
     REQUIRE( ret.second->second == 30 );
     REQUIRE(( mymap.equal_range('c').first->first == 'c' ));
@@ -506,4 +511,14 @@ TEST_CASE("equal_range works as expected", "[map][operations]")
     REQUIRE(( mymap.equal_range('c').second == mymap.end() ));
     REQUIRE(( mymap.equal_range('u').first == mymap.end() ));
     REQUIRE(( mymap.equal_range('u').second == mymap.end() ));
+
+    std::pair<ft::map<char, int>::const_iterator, ft::map<char, int>::const_iterator> cret = cmymap.equal_range('c');
+
+    REQUIRE( cret.first->first == 'c' );
+    REQUIRE( cret.first->second == 30 );
+    REQUIRE( cret.second == cmymap.end() );
+    REQUIRE(( cmymap.equal_range('a').first->first == 'a' ));
+    REQUIRE(( cmymap.equal_range('a').first->second == 10 ));
+    REQUIRE(( cmymap.equal_range('u').first == cmymap.end() ));
+    REQUIRE(( cmymap.equal_range('u').second == cmymap.end() ));
 }

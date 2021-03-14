@@ -113,10 +113,12 @@ TEST_CASE("relational operators work correctly", "[list][basics]")
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
     int c[] = {1, 4, -1, 2, 33, 0};
+    int d[] = {1, 4, -1, 12, 0, 0};
     ft::list<int> mylist1 (a, a + 5);
     ft::list<int> mylist2 (b, b + 2);
     ft::list<int> mylist3;
     ft::list<int> mylist4 (c, c + 6);
+    ft::list<int> mylist5 (d, d + 6);
 
     // mylist1 vs mylist2
     REQUIRE_FALSE( mylist1 == mylist2 );
@@ -157,6 +159,14 @@ TEST_CASE("relational operators work correctly", "[list][basics]")
     REQUIRE( mylist1 <= mylist4 );
     REQUIRE_FALSE( mylist1 > mylist4 );
     REQUIRE_FALSE( mylist1 >= mylist4 );
+
+    // mylist4 vs mylist5
+    REQUIRE_FALSE( mylist4 == mylist5 );
+    REQUIRE( mylist4 != mylist5 );
+    REQUIRE( mylist4 < mylist5 );
+    REQUIRE( mylist4 <= mylist5 );
+    REQUIRE_FALSE( mylist4 > mylist5 );
+    REQUIRE_FALSE( mylist4 >= mylist5 );
 }
 
 /* ITERATORS */
@@ -346,6 +356,10 @@ TEST_CASE("pop_front works correctly", "[list][modifiers]")
         --size;
     }
     REQUIRE( size == 0 );
+
+    ft::list<int> l2;
+    l2.pop_front();
+    REQUIRE( l2.empty() );
 }
 
 TEST_CASE("pop_back works correctly", "[list][modifiers]")
@@ -361,6 +375,10 @@ TEST_CASE("pop_back works correctly", "[list][modifiers]")
         --size;
     }
     REQUIRE( size == 0 );
+
+    ft::list<int> l2;
+    l2.pop_back();
+    REQUIRE( l2.empty() );
 }
 
 TEST_CASE("insert work correctly", "[list][modifiers]")
