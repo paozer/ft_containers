@@ -198,8 +198,11 @@ class vector
 
         void insert (iterator position, size_type n, const value_type& val)
         {
-            self_type tmp (position, end());
-            erase(position, end());
+            self_type tmp;
+            if (_size > 0) {
+                tmp.insert(tmp.begin(), position, end());
+                erase(position, end());
+            }
             reserve(_size + n + tmp._size);
             push_back_n(n, val);
             for (iterator it = tmp.begin(); it != tmp.end(); ++it)
@@ -210,8 +213,11 @@ class vector
         void insert (iterator position, InputIterator first, InputIterator last,
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
         {
-            self_type tmp (position, end());
-            erase(position, end());
+            self_type tmp;
+            if (_size > 0) {
+                tmp.insert(tmp.begin(), position, end());
+                erase(position, end());
+            }
             reserve(_size + std::distance(first, last) + tmp._size);
             for (; first != last; ++first)
                 push_back(*first);
