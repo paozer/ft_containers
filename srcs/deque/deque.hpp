@@ -348,7 +348,6 @@ class deque
                 _first.set_map(tmp);
                 _first.set_curr(*tmp + chunk_size - 1);
                 _last.set_map(tmp + offset);
-                _last.set_curr(tmp[offset]);
 
             } else { // add an empty chunk at the end of the map
 
@@ -357,7 +356,6 @@ class deque
                 for (size_t i = 0; i < _map_size; ++i)
                     tmp[i] = _map[i];
                 _first.set_map(tmp + offset);
-                _first.set_curr(*(tmp + offset) + chunk_size - 1);
                 _last.set_map(tmp + _map_size);
                 _last.set_curr(tmp[_map_size]);
 
