@@ -13,9 +13,11 @@
 
 namespace ft {
 
-template < class T, class Alloc = std::allocator<T>, size_t chunk_size = 16 >
+template < class T, class Alloc = std::allocator<T> >
 class deque
 {
+    static const size_t chunk_size = 32;
+
     public:
         typedef T value_type;
         typedef Alloc allocator_type;
