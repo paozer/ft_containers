@@ -150,9 +150,9 @@ class deque
 
         /* ELEMENT ACCESS */
         reference front () { return _first[1]; }
-        const_reference front () const { return _first[1]; }
+        const_reference front () const { return begin()[0]; }
         reference back () { return _last[-1]; }
-        const_reference back () const { return _last[-1]; }
+        const_reference back () const { return end()[-1]; }
 
         reference at (size_type n)
         {
@@ -165,16 +165,11 @@ class deque
         {
             if (n >= _size)
                 throw std::out_of_range("ft::deque");
-            return _first[n + 1];
+            return begin()[n];
         }
 
         reference operator[] (size_type n) { return _first[n + 1]; }
-
-        const_reference operator[] (size_type n) const
-        {
-            const_iterator it = _first;
-            return it[n + 1];
-        }
+        const_reference operator[] (size_type n) const { return begin()[n]; }
 
         /* MODIFIERS */
         template <class InputIterator>
@@ -256,7 +251,7 @@ class deque
             erase(position, end());
             for (size_type i = 0; i < n; ++i)
                 push_back(val);
-            for (auto it = tmp.begin(); it != tmp.end(); ++it)
+            for (typename ft::vector<value_type>::iterator it = tmp.begin(); it != tmp.end(); ++it)
                 push_back(*it);
         }
 
@@ -268,7 +263,7 @@ class deque
             erase(position, end());
             for (; first != last; ++first)
                 push_back(*first);
-            for (auto it = tmp.begin(); it != tmp.end(); ++it)
+            for (typename ft::vector<value_type>::iterator it = tmp.begin(); it != tmp.end(); ++it)
                 push_back(*it);
         }
 
