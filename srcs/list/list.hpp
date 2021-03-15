@@ -174,8 +174,6 @@ class list
 
         void pop_front (void)
         {
-            if (_size == 0)
-                return ;
             node_pointer tmp = _head->next;
             _head->next->next->prev = _head;
             _head->next = _head->next->next;
@@ -195,8 +193,6 @@ class list
 
         void pop_back (void)
         {
-            if (_size == 0)
-                return ;
             node_pointer tmp = _tail->prev;
             _tail->prev->prev->next = _tail;
             _tail->prev = _tail->prev->prev;

@@ -348,10 +348,6 @@ TEST_CASE("pop_front works correctly", "[list][modifiers]")
         --size;
     }
     REQUIRE( size == 0 );
-
-    ft::list<int> l2;
-    l2.pop_front();
-    REQUIRE( l2.empty() );
 }
 
 TEST_CASE("pop_back works correctly", "[list][modifiers]")
@@ -367,10 +363,6 @@ TEST_CASE("pop_back works correctly", "[list][modifiers]")
         --size;
     }
     REQUIRE( size == 0 );
-
-    ft::list<int> l2;
-    l2.pop_back();
-    REQUIRE( l2.empty() );
 }
 
 TEST_CASE("insert work correctly", "[list][modifiers]")

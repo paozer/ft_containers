@@ -288,9 +288,6 @@ TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][mod
     std::vector<int> stl;
     stl.reserve(100);
 
-    v.pop_back();
-    REQUIRE( v.empty() );
-
     for (unsigned int i = 0; i < 100; ++i) {
         int rand = std::rand() % 200000 - 100000;
         v.push_back(rand);
@@ -312,9 +309,6 @@ TEST_CASE("push/pop_front add/remove elements at the front of the deque", "[dequ
     ft::deque<int> v;
     std::vector<int> stl;
     stl.reserve(100);
-
-    v.pop_front();
-    REQUIRE( v.empty() );
 
     for (unsigned int i = 0; i < 100; ++i) {
         int rand = std::rand() % 200000 - 100000;
