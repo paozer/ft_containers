@@ -33,7 +33,10 @@ class testClass
 int main(void)
 {
     //compile under linux fails
-    testClass<const int> tc;
+    //testClass<const int> tc;
+    std::vector<int> v (10, 23);
+
+    std::cout << *(3 - v.end()) << std::endl;
     return 0;
 }
 

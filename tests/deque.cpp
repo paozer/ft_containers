@@ -3,14 +3,20 @@
 #include <deque>
 #include <list>
 
-#define TYPE_LIST  ( int, unsigned char, double, std::string, ft::deque<int>, std::deque<std::string>, std::list<std::string>, std::list<std::deque<int> > )
+#ifdef VERIFY_UNIT_TESTS
+# define LIB std
+#else
+# define LIB ft
+#endif
+
+#define TYPE_LIST  ( int, unsigned char, double, std::string, LIB::deque<int>, std::deque<std::string>, std::list<std::string>, std::list<std::deque<int> > )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
 TEST_CASE("deque construction works correctly", "[deque][basics]")
 {
     SECTION("deque declaration creates empty deque") {
-        ft::deque<int> cnt;
+        LIB::deque<int> cnt;
         REQUIRE( cnt.empty() );
         REQUIRE( cnt.size() == 0 );
     }
@@ -18,7 +24,7 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
     SECTION("fill constructor returns correct deque") {
         unsigned int size = GENERATE(0, 1, 5);
         int fill = GENERATE(0, -41);
-        ft::deque<int> cnt (size, fill);
+        LIB::deque<int> cnt (size, fill);
 
         REQUIRE( cnt.size() == size );
         for (unsigned int i = 0; i < size; ++i)
@@ -31,7 +37,7 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
         unsigned int last = GENERATE(0, 3, 6);
 
         if (last >= first) {
-            ft::deque<int> cnt (v + first, v + last);
+            LIB::deque<int> cnt (v + first, v + last);
 
             REQUIRE( cnt.size() == last - first );
             for (size_t i = 0; i < last - first; ++i)
@@ -41,9 +47,9 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
 
     SECTION ("copy constructor returns correct deque") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
-        ft::deque<int> v1;
-        ft::deque<int> v2 (v1);
-        ft::deque<int> v3 (arr + 2, arr + 6); // { 12, 5, 60, 99 }
+        LIB::deque<int> v1;
+        LIB::deque<int> v2 (v1);
+        LIB::deque<int> v3 (arr + 2, arr + 6); // { 12, 5, 60, 99 }
 
         REQUIRE( v1.size() == 0 );
         REQUIRE( v2.size() == 0 );
@@ -55,7 +61,7 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("deque correctly copies value upon construction", "[deque][basics]", ft::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("deque correctly copies value upon construction", "[deque][basics]", LIB::deque, TYPE_LIST)
 {
     // this test may produces double free there is a problem with
     // your allocation/copying with non builtin types
@@ -70,11 +76,11 @@ TEST_CASE("deque assignation works correctly", "[deque][assignation operators]")
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
-    ft::deque<int> mydeque1 (a, a + 5);
-    ft::deque<int> mydeque2 (b, b + 2);
-    ft::deque<int> mydeque3;
-    ft::deque<int>::iterator lit;
-    ft::deque<int>::iterator rit;
+    LIB::deque<int> mydeque1 (a, a + 5);
+    LIB::deque<int> mydeque2 (b, b + 2);
+    LIB::deque<int> mydeque3;
+    LIB::deque<int>::iterator lit;
+    LIB::deque<int>::iterator rit;
 
     mydeque1 = mydeque2;
     REQUIRE( mydeque1.size() == mydeque2.size() );
@@ -97,11 +103,11 @@ TEST_CASE("deque relational operators work correctly", "[deque][relational opera
     int b[] = {1, 4};
     int c[] = {1, 4, -1, 2, 33, 0};
     int d[] = {1, 4, -1, 67, 1, 0};
-    ft::deque<int> mydeque1 (a, a + 5);
-    ft::deque<int> mydeque2 (b, b + 2);
-    ft::deque<int> mydeque3;
-    ft::deque<int> mydeque4 (c, c + 6);
-    ft::deque<int> mydeque5 (d, d + 6);
+    LIB::deque<int> mydeque1 (a, a + 5);
+    LIB::deque<int> mydeque2 (b, b + 2);
+    LIB::deque<int> mydeque3;
+    LIB::deque<int> mydeque4 (c, c + 6);
+    LIB::deque<int> mydeque5 (d, d + 6);
 
     // mydeque1 vs mydeque2
     REQUIRE_FALSE( mydeque1 == mydeque2 );
@@ -156,7 +162,7 @@ TEST_CASE("deque relational operators work correctly", "[deque][relational opera
 TEST_CASE("deque begin returns first element and can be incremented", "[deque][iterators]")
 {
     SECTION("non-const iterator behaviour") {
-        ft::deque<int> v (5, 10);              // { 10, 10, 10, 10, 10 }
+        LIB::deque<int> v (5, 10);              // { 10, 10, 10, 10, 10 }
         REQUIRE( *v.begin() == 10 );
         *v.begin() = 5;                         // { 5, 10, 10, 10, 10 }
         *++v.begin() = 6;                       // { 5, 6, 10, 10, 10 }
@@ -173,9 +179,9 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
 
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
-        ft::deque<int> v2 (arr, arr + 5);
-        const ft::deque<int> v (v2);
-        const ft::deque<int> v1;
+        LIB::deque<int> v2 (arr, arr + 5);
+        const LIB::deque<int> v (v2);
+        const LIB::deque<int> v1;
 
         REQUIRE( *v.begin() == 1 );
         REQUIRE( *(v.begin() + 1) == 4 );
@@ -185,7 +191,7 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
         REQUIRE( (v.begin() + 5) == v.end() );
         REQUIRE( v1.begin() == v1.end() );
 
-        ft::deque<int>::const_iterator it = v2.begin();
+        LIB::deque<int>::const_iterator it = v2.begin();
         REQUIRE( *it == 1 );
         REQUIRE( *(it + 1) == 4 );
         REQUIRE( *(it + 2) == -1 );
@@ -195,10 +201,10 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
     }
 }
 
-TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", ft::deque<int>)
+TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", LIB::deque<int>)
 {
     SECTION("non-const iterator behaviour") {
-        ft::deque<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
+        LIB::deque<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
         REQUIRE( *(v.end() - 1) == 10 );
         *(v.end() - 1) = 5;                         // { 10, 10, 10, 10, 5 }
         *(v.end() - 2) = 6;                         // { 10, 10, 10, 6, 5 }
@@ -213,9 +219,9 @@ TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", ft::deque<
 
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
-        ft::deque<int> v2 (arr, arr + 5);
-        const ft::deque<int> v (v2);
-        const ft::deque<int> v1;
+        LIB::deque<int> v2 (arr, arr + 5);
+        const LIB::deque<int> v (v2);
+        const LIB::deque<int> v1;
 
         REQUIRE( *(v.end() - 1) == 33 );
         REQUIRE( *(v.end() - 2) == 2 );
@@ -225,7 +231,7 @@ TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", ft::deque<
         REQUIRE( v.begin() == (v.end() - 5) );
         REQUIRE( v1.begin() == v1.end() );
 
-        ft::deque<int>::const_iterator it = v2.end();
+        LIB::deque<int>::const_iterator it = v2.end();
         REQUIRE( *(it - 1) == 33 );
         REQUIRE( *(it - 2) == 2 );
         REQUIRE( *(it - 3) == -1 );
@@ -239,8 +245,8 @@ TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", ft::deque<
 TEST_CASE("deque assign methods work correctly", "[deque][modifiers]")
 {
     int arr[] = {1, 4, -1, 2, 33};
-    ft::deque<int> v;
-    ft::deque<int> v1 (10, 1);
+    LIB::deque<int> v;
+    LIB::deque<int> v1 (10, 1);
 
     SECTION("range assign creates deque with correct values") {
         unsigned int i = GENERATE(0, 1, 3);
@@ -284,7 +290,7 @@ TEST_CASE("deque assign methods work correctly", "[deque][modifiers]")
 
 TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][modifiers]")
 {
-    ft::deque<int> v;
+    LIB::deque<int> v;
     std::vector<int> stl;
     stl.reserve(100);
 
@@ -306,7 +312,7 @@ TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][mod
 
 TEST_CASE("push/pop_front add/remove elements at the front of the deque", "[deque][modifiers]")
 {
-    ft::deque<int> v;
+    LIB::deque<int> v;
     std::vector<int> stl;
     stl.reserve(100);
 
@@ -328,10 +334,10 @@ TEST_CASE("push/pop_front add/remove elements at the front of the deque", "[dequ
 
 TEST_CASE("deque insert work correctly", "[deque][modifiers]")
 {
-    ft::deque<int> v;
+    LIB::deque<int> v;
 
     SECTION("single element insert works correctly") {
-        ft::deque<int>::iterator ret;
+        LIB::deque<int>::iterator ret;
         ret = v.insert(v.begin(), 5);               // { 5 }
         REQUIRE( *ret == 5 );
         ret = v.insert(v.end(), 10);                // { 5, 10 }
@@ -392,8 +398,8 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
 TEST_CASE("deque erase work correctly", "[deque][modifiers]")
 {
     int arr[] = {23, 1, 233, 4, 55, 3};
-    ft::deque<int> v (arr, arr + 6);             // { 23, 1, 233, 4, 55, 3 }
-    ft::deque<int>::iterator ret;
+    LIB::deque<int> v (arr, arr + 6);             // { 23, 1, 233, 4, 55, 3 }
+    LIB::deque<int>::iterator ret;
 
     SECTION("single element erase works correctly") {
         ret = v.erase(v.begin() + 1);                // { 23, 233, 4, 55, 3 }
@@ -439,8 +445,8 @@ TEST_CASE("deque erase work correctly", "[deque][modifiers]")
 TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
 {
     SECTION("works for non empty deques") {
-        ft::deque<int> v1 (10, 100);
-        ft::deque<int> v2 (2, -12);
+        LIB::deque<int> v1 (10, 100);
+        LIB::deque<int> v2 (2, -12);
 
         v1.swap(v2);
         REQUIRE( v1.size() == 2 );
@@ -449,7 +455,7 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
             REQUIRE( *it == -12 );
         for (auto it = v2.begin(); it != v2.end(); ++it)
             REQUIRE( *it == 100 );
-        ft::swap(v1, v2);
+        LIB::swap(v1, v2);
         REQUIRE( v1.size() == 10 );
         REQUIRE( v2.size() == 2 );
         for (auto it = v1.begin(); it != v1.end(); ++it)
@@ -458,8 +464,8 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
             REQUIRE( *it == -12 );
     }
     SECTION("works for swapping non-empty and empty deques") {
-        ft::deque<int> v1 (10, 100);
-        ft::deque<int> v2;
+        LIB::deque<int> v1 (10, 100);
+        LIB::deque<int> v2;
 
         v1.swap(v2);
         REQUIRE( v1.empty() );
@@ -469,8 +475,8 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
             REQUIRE( *it == 100 );
     }
     SECTION("works for empty deques") {
-        ft::deque<int> v1;
-        ft::deque<int> v2;
+        LIB::deque<int> v1;
+        LIB::deque<int> v2;
 
         v1.swap(v2);
         REQUIRE( v1.empty() );
@@ -478,7 +484,7 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
         REQUIRE(( v1.begin() == v1.end() ));
         REQUIRE(( v2.begin() == v2.end() ));
 
-        ft::swap(v1, v2);
+        LIB::swap(v1, v2);
         REQUIRE( v1.empty() );
         REQUIRE( v2.empty() );
         REQUIRE(( v1.begin() == v1.end() ));
@@ -489,7 +495,7 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
 TEST_CASE("deque resizing works correctly", "[deque][modifiers]")
 {
     int arr[] = { 1, 32, 0, -23 };
-    ft::deque<int> v (arr, arr + 4);
+    LIB::deque<int> v (arr, arr + 4);
 
     SECTION("deque elements are removed when arg is smaller than current size") {
         REQUIRE( v.size() == 4 );
@@ -522,7 +528,7 @@ TEST_CASE("deque resizing works correctly", "[deque][modifiers]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[deque][modifiers]", ft::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[deque][modifiers]", LIB::deque, TYPE_LIST)
 {
     TestType cnt;
     cnt.clear();
@@ -537,8 +543,8 @@ TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "
 TEST_CASE("front and back return deques first element", "[deque][element access]")
 {
     int arr[] = { 1, 32, 0, -23 };
-    ft::deque<int> v (arr, arr + 4);
-    const ft::deque<int> cdq (v);
+    LIB::deque<int> v (arr, arr + 4);
+    const LIB::deque<int> cdq (v);
 
     // const
     REQUIRE( cdq.front() == 1 );
@@ -559,7 +565,7 @@ TEST_CASE("front and back return deques first element", "[deque][element access]
     REQUIRE( v.back() == 0 );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[deque][element access]", ft::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[deque][element access]", LIB::deque, TYPE_LIST)
 {
         unsigned int i = GENERATE(1, 25, 100);
         TestType cnt1;
@@ -576,7 +582,7 @@ TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[deque]
 }
 
 /* CAPACITY */
-TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", ft::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", LIB::deque, TYPE_LIST)
 {
     TestType cnt;
     REQUIRE( cnt.empty() );
@@ -586,7 +592,7 @@ TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", ft
     REQUIRE( cnt.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("size returns updated deque size", "[deque][capacity]", ft::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("size returns updated deque size", "[deque][capacity]", LIB::deque, TYPE_LIST)
 {
     TestType v;
 

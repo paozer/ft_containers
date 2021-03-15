@@ -23,37 +23,46 @@ COVERAGE_FLAGS	=	--coverage -g -O0 -Wall -Wextra -std=c++2a
 
 all:		$(NAME)
 
-$(NAME):	Makefile $(MAIN_SRC) $(TEST_SRC) srcs/**/*.hpp
-			@echo "building unit tests..."
-			@$(CC) $(UNIT_FLAGS) $(MAIN_SRC) $(TEST_SRC) -o $(NAME)
-			@echo "execute ./$(NAME) to run all unit tests"
+# compile program with unit tests
+$(NAME):		Makefile $(MAIN_SRC) $(TEST_SRC) srcs/**/*.hpp
+				@echo "building unit tests..."
+				@$(CC) $(UNIT_FLAGS) $(MAIN_SRC) $(TEST_SRC) -o $(NAME)
+				@echo "execute ./$(NAME) to run all unit tests"
 
-coverage:	Makefile $(MAIN_SRC) $(TEST_SRC) srcs/**/*.hpp
-			@echo "building unit tests with coverage..."
-			@$(CC) $(COVERAGE_FLAGS) $(MAIN_SRC) $(TEST_SRC) -o $(NAME)
-			@echo "running executable to generate coverage data..."
-			@./$(NAME)
-			@echo "creating html report..."
-			@gcovr --delete --root . --html --html-details -o coverage.html
-			@mkdir -p COVERAGE_REPORT && mv *.html COVERAGE_REPORT
-			@echo "report can be found in ./COVERAGE_REPORT/coverage.html"
-			@make clean
+# compile program with unit tests and stl container to verify test correctness
+verify_tests:	Makefile $(MAIN_SRC) $(TEST_SRC) srcs/**/*.hpp
+				@echo "building unit tests with stl containers..."
+				@$(CC) $(UNIT_FLAGS) -DVERIFY_UNIT_TESTS $(MAIN_SRC) $(TEST_SRC) -o $(NAME)
+				@echo "execute ./$(NAME) to run all unit tests"
 
-no_unit_tests: Makefile $(MAIN_SRC) srcs/**
-			$(CC) $(NO_UNIT_FLAGS) $(MAIN_SRC) -o $(NAME)
-			@echo "execute ./$(NAME) to run main specified in tests/main.cpp"
+# compile program with in tests/main.cpp i.e no unit tests
+no_unit_tests: 	Makefile $(MAIN_SRC) srcs/**
+				$(CC) $(NO_UNIT_FLAGS) $(MAIN_SRC) -o $(NAME)
+				@echo "execute ./$(NAME) to run main specified in tests/main.cpp"
+
+# compile program with coverage info and create html report
+coverage:		Makefile $(MAIN_SRC) $(TEST_SRC) srcs/**/*.hpp
+				@echo "building unit tests with coverage..."
+				@$(CC) $(COVERAGE_FLAGS) $(MAIN_SRC) $(TEST_SRC) -o $(NAME)
+				@echo "running executable to generate coverage data..."
+				@./$(NAME)
+				@echo "creating html report..."
+				@gcovr --delete --root . --html --html-details -o coverage.html
+				@mkdir -p COVERAGE_REPORT && mv *.html COVERAGE_REPORT
+				@echo "report can be found in ./COVERAGE_REPORT/coverage.html"
+				@make clean
 
 clean:
-			@rm -rf $(NAME).o
-			@rm -rf $(NAME).dSYM
-			@rm -f *.gcno
-			@echo "make clean done..."
+				@rm -rf $(NAME).o
+				@rm -rf $(NAME).dSYM
+				@rm -f *.gcno
+				@echo "make clean done..."
 
-fclean:		clean
-			@rm -rf $(NAME)
-			@rm -rf COVERAGE_REPORT
-			@echo "make fclean done..."
+fclean:			clean
+				@rm -rf $(NAME)
+				@rm -rf COVERAGE_REPORT
+				@echo "make fclean done..."
 
-re:			fclean all
+re:				fclean all
 
 .PHONY:		all fclean clean re

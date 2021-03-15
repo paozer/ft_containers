@@ -5,13 +5,17 @@
 #include <list>
 #include <string>
 
-#include <iostream>
+#ifdef VERIFY_UNIT_TESTS
+# define LIB std
+#else
+# define LIB ft
+#endif
 
 /* CONSTRUCTION */
 TEST_CASE("set contructors work as expected", "[set][basics]")
 {
     SECTION("default constructor constructs an empty set") {
-        ft::set<int> set;
+        LIB::set<int> set;
         REQUIRE( set.empty() );
         REQUIRE( set.size() == 0 );
     }
@@ -22,7 +26,7 @@ TEST_CASE("set contructors work as expected", "[set][basics]")
         for (int i = 0; i < 25; ++i)
             stl.push_back(rand());
 
-        ft::set<int> my_set (stl.begin(), stl.end());
+        LIB::set<int> my_set (stl.begin(), stl.end());
         REQUIRE( stl.size() == my_set.size() );
         REQUIRE_FALSE( my_set.empty() );
 
@@ -37,10 +41,10 @@ TEST_CASE("set contructors work as expected", "[set][basics]")
         }
     }
     SECTION("copy constructor constructs a copy with a copy of each element") {
-        ft::set<int> my_set1;
+        LIB::set<int> my_set1;
         for (int i = 0; i < 25; ++i)
             my_set1.insert(rand());
-        ft::set<int> my_set2 (my_set1);
+        LIB::set<int> my_set2 (my_set1);
 
         REQUIRE_FALSE( my_set2.empty() );
         REQUIRE( my_set2.size() == my_set1.size() );
@@ -53,21 +57,22 @@ TEST_CASE("set contructors work as expected", "[set][basics]")
             ++it2;
         }
 
-        *my_set1.begin() = *my_set2.begin() - 10;
-        *--my_set1.end() = *--my_set2.end() - 10;
-        REQUIRE( *my_set1.begin() != *my_set2.begin() );
-        REQUIRE( *--my_set1.end() != *--my_set2.end() );
+        // TODO: see set todo
+        //*my_set1.begin() = *my_set2.begin() - 10;
+        //*--my_set1.end() = *--my_set2.end() - 10;
+        //REQUIRE( *my_set1.begin() != *my_set2.begin() );
+        //REQUIRE( *--my_set1.end() != *--my_set2.end() );
     }
 }
 
 TEST_CASE("set assignment operator copies elements", "[set][operators]")
 {
-    ft::set<int> my_set1;
+    LIB::set<int> my_set1;
 
     for (int i = 0; i < 10; ++i)
         my_set1.insert(rand());
 
-    ft::set<int> my_set2 = my_set1;
+    LIB::set<int> my_set2 = my_set1;
 
     REQUIRE( my_set2.size() == my_set1.size() );
 
@@ -79,15 +84,16 @@ TEST_CASE("set assignment operator copies elements", "[set][operators]")
         ++it2;
     }
 
-    *my_set1.begin() -= 10;
-    *--my_set1.end() += 10;
-    REQUIRE( *my_set1.begin() != *my_set2.begin() );
-    REQUIRE( *--my_set1.end() != *--my_set2.end() );
+    // TODO: see set todo
+    //*my_set1.begin() -= 10;
+    //*--my_set1.end() += 10;
+    //REQUIRE( *my_set1.begin() != *my_set2.begin() );
+    //REQUIRE( *--my_set1.end() != *--my_set2.end() );
 }
 
 TEST_CASE("there are no duplicates in a set", "[set][basics]")
 {
-    ft::set<int> set;
+    LIB::set<int> set;
     std::list<int> list;
 
     for (int i = 0; i < 10000; ++i) {
@@ -107,10 +113,10 @@ TEST_CASE("set relational operators work correctly", "[set][operators]")
     std::array<char, 4> a = { 'b', 'z', 'p', 'a' };
     std::array<char, 4> b = { 'b', 'z', 'c', 'z' };
 
-    ft::set<char> myset1 (a.begin(), a.end());
-    ft::set<char> myset2 (a.begin(), a.begin() + 2);
-    ft::set<char> myset3;
-    ft::set<char> myset4 (b.begin(), b.end());
+    LIB::set<char> myset1 (a.begin(), a.end());
+    LIB::set<char> myset2 (a.begin(), a.begin() + 2);
+    LIB::set<char> myset3;
+    LIB::set<char> myset4 (b.begin(), b.end());
 
     // myset1 vs myset2
     REQUIRE_FALSE( myset1 == myset2 );
@@ -157,24 +163,24 @@ TEST_CASE("set relational operators work correctly", "[set][operators]")
 TEST_CASE("set iterators works correctly", "[set][iterators]")
 {
     SECTION("iterators can be created as expected") {
-        ft::set<int> my_set;
+        LIB::set<int> my_set;
 
-        ft::set<int>::iterator it = my_set.begin();
-        ft::set<int>::const_iterator cit = it;
-        ft::set<int>::const_iterator cit2 = my_set.begin();
+        LIB::set<int>::iterator it = my_set.begin();
+        LIB::set<int>::const_iterator cit = it;
+        LIB::set<int>::const_iterator cit2 = my_set.begin();
         REQUIRE(( cit == my_set.begin() ));
         REQUIRE(( cit2 == my_set.begin() ));
 
-        ft::set<int>::reverse_iterator rit = my_set.rbegin();
-        ft::set<int>::const_reverse_iterator rcit = rit;
-        ft::set<int>::const_reverse_iterator rcit2 = my_set.rbegin();
+        LIB::set<int>::reverse_iterator rit = my_set.rbegin();
+        LIB::set<int>::const_reverse_iterator rcit = rit;
+        LIB::set<int>::const_reverse_iterator rcit2 = my_set.rbegin();
         REQUIRE(( rcit == my_set.rbegin() ));
         REQUIRE(( rcit2 == my_set.rbegin() ));
     }
 
     SECTION("iterators allow in-order access to the set elements") {
         int rand = 0;
-        ft::set<int> set;
+        LIB::set<int> set;
         std::list<int> list;
 
         for (int i = 0; i < 100; ++i) {
@@ -197,9 +203,9 @@ TEST_CASE("set iterators works correctly", "[set][iterators]")
 /* MODIFIERS */
 TEST_CASE("set insert works as expected", "[set][modifiers]")
 {
-    ft::set<int> my_set;
-    std::pair<ft::set<int>::iterator, bool> ret;
-    ft::set<int>::iterator it_ret;
+    LIB::set<int> my_set;
+    std::pair<LIB::set<int>::iterator, bool> ret;
+    LIB::set<int>::iterator it_ret;
 
     SECTION("single element insert add the pair to the set if its not present") {
         REQUIRE( my_set.empty() );
@@ -286,7 +292,7 @@ TEST_CASE("set insert works as expected", "[set][modifiers]")
 TEST_CASE("set erase works as expected", "[set][modifiers]")
 {
     std::list<char> data = { 'a', '1', '%', '#', 'z', 'b', 'c', 'd', '@', 'r', 'e'};
-    ft::set<char> my_set (data.begin(), data.end());
+    LIB::set<char> my_set (data.begin(), data.end());
     data.sort();
 
     SECTION("erase at iterator removes correct element") {
@@ -344,8 +350,8 @@ TEST_CASE("set erase works as expected", "[set][modifiers]")
 
 TEST_CASE("set swap works as expected", "[set][modifiers]")
 {
-    ft::set<std::string> my_set1;
-    ft::set<std::string> my_set2;
+    LIB::set<std::string> my_set1;
+    LIB::set<std::string> my_set2;
     my_set1.insert("fifteen");
     my_set1.insert("dog");
     my_set1.insert("78");
@@ -370,7 +376,7 @@ TEST_CASE("set swap works as expected", "[set][modifiers]")
 
 TEST_CASE("set clear works as expected", "[set][modifiers]")
 {
-    ft::set<int> my_set;
+    LIB::set<int> my_set;
     my_set.clear();
     REQUIRE( my_set.empty() );
     my_set.insert(1);
@@ -391,9 +397,9 @@ TEST_CASE("set clear works as expected", "[set][modifiers]")
 /* OBSERVERS */
 TEST_CASE("set value_comp & key_comp work as expected", "[set][observers]")
 {
-    ft::set<int> myset;
-    ft::set<int>::key_compare kc = myset.key_comp();
-    ft::set<int>::value_compare vc = myset.value_comp();
+    LIB::set<int> myset;
+    LIB::set<int>::key_compare kc = myset.key_comp();
+    LIB::set<int>::value_compare vc = myset.value_comp();
 
     myset.insert(10);
     myset.insert(20);
@@ -414,7 +420,7 @@ TEST_CASE("set value_comp & key_comp work as expected", "[set][observers]")
 /* OPERATIONS */
 TEST_CASE("set find works as expected", "[set][operations]")
 {
-    ft::set<int> myset;
+    LIB::set<int> myset;
     myset.insert(20);
     myset.insert(80);
 
@@ -435,7 +441,7 @@ TEST_CASE("set find works as expected", "[set][operations]")
 
 TEST_CASE("set count works as expected", "[set][operations]")
 {
-    ft::set<int> myset;
+    LIB::set<int> myset;
     myset.insert(20);
     myset.insert(80);
 
@@ -449,7 +455,7 @@ TEST_CASE("set count works as expected", "[set][operations]")
 
 TEST_CASE("set lower_bound & upper_bound work as expected", "[set][operations]")
 {
-    ft::set<int> myset;
+    LIB::set<int> myset;
 
     SECTION("reference example") {
         myset.insert(20);
@@ -457,8 +463,8 @@ TEST_CASE("set lower_bound & upper_bound work as expected", "[set][operations]")
         myset.insert(60);
         myset.insert(80);
         myset.insert(100);
-        ft::set<int>::iterator itlow = myset.lower_bound (40);
-        ft::set<int>::iterator itup = myset.upper_bound (80);
+        LIB::set<int>::iterator itlow = myset.lower_bound (40);
+        LIB::set<int>::iterator itup = myset.upper_bound (80);
 
         REQUIRE( *itlow == 40 );
         REQUIRE( *itup == 100 );
@@ -485,7 +491,7 @@ TEST_CASE("set lower_bound & upper_bound work as expected", "[set][operations]")
         myset.insert(80);
         myset.insert(100);
         myset.insert(60);
-        const ft::set<int> cmyset (myset);
+        const LIB::set<int> cmyset (myset);
 
         REQUIRE(( cmyset.upper_bound(50) == cmyset.lower_bound(50) ));
         REQUIRE(( *cmyset.upper_bound(20) == 40 ));
@@ -498,13 +504,13 @@ TEST_CASE("set lower_bound & upper_bound work as expected", "[set][operations]")
 
 TEST_CASE("set equal_range works as expected", "[set][operations]")
 {
-    ft::set<int> myset;
+    LIB::set<int> myset;
     myset.insert(10);
     myset.insert(20);
     myset.insert(30);
-    const ft::set<int> cmyset (myset);
+    const LIB::set<int> cmyset (myset);
 
-    std::pair<ft::set<int>::iterator, ft::set<int>::iterator> ret = myset.equal_range(20);
+    std::pair<LIB::set<int>::iterator, LIB::set<int>::iterator> ret = myset.equal_range(20);
     REQUIRE( *ret.first == 20 );
     REQUIRE( *ret.second == 30 );
     REQUIRE(( *myset.equal_range(30).first == 30 ));
@@ -512,7 +518,7 @@ TEST_CASE("set equal_range works as expected", "[set][operations]")
     REQUIRE(( myset.equal_range(50).first == myset.end() ));
     REQUIRE(( myset.equal_range(50).second == myset.end() ));
 
-    std::pair<ft::set<int>::const_iterator, ft::set<int>::const_iterator> cret = cmyset.equal_range(30);
+    std::pair<LIB::set<int>::const_iterator, LIB::set<int>::const_iterator> cret = cmyset.equal_range(30);
 
     REQUIRE( *cret.first == 30 );
     REQUIRE( cret.second == cmyset.end() );

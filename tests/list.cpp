@@ -3,14 +3,20 @@
 #include <list>
 #include <vector>
 
-#define TYPE_LIST ( int, char, unsigned int, std::string, std::vector<int>, std::vector<std::string>, ft::list<std::string>, std::list<int>, std::vector<std::list<int> >)
+#ifdef VERIFY_UNIT_TESTS
+# define LIB std
+#else
+# define LIB ft
+#endif
+
+#define TYPE_LIST ( int, char, unsigned int, std::string, std::vector<int>, std::vector<std::string>, LIB::list<std::string>, std::list<int>, std::vector<std::list<int> >)
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
 TEST_CASE("list construction works correctly", "[list][basics]")
 {
     SECTION("declaration creates empty list") {
-        ft::list<int> c;
+        LIB::list<int> c;
 
         REQUIRE( c.empty() );
         REQUIRE( c.size() == 0 );
@@ -19,7 +25,7 @@ TEST_CASE("list construction works correctly", "[list][basics]")
     SECTION("fill constructor creates list of specified size & filled with elements") {
         size_t i = GENERATE(0, 1, 100);
         int j = GENERATE(-100, 914);
-        ft::list<int> c (i, j);
+        LIB::list<int> c (i, j);
 
         REQUIRE( c.size() == i );
         for (auto it = c.begin(); it != c.end(); ++it)
@@ -33,14 +39,14 @@ TEST_CASE("list construction works correctly", "[list][basics]")
         int i = 0;
 
         if (last >= first) {
-            ft::list<int> l (arr + first, arr + last);
+            LIB::list<int> l (arr + first, arr + last);
 
             REQUIRE( l.size() == last - first );
             for (auto it = l.begin(); it != l.end(); ++it, ++i)
                 REQUIRE( *it == arr[first + i] );
         }
 
-        ft::list<int> l2 (arr, arr);
+        LIB::list<int> l2 (arr, arr);
         REQUIRE( l2.empty() );
     }
 
@@ -49,14 +55,14 @@ TEST_CASE("list construction works correctly", "[list][basics]")
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
         unsigned int first = GENERATE(0, 1, 3);
         unsigned int last = GENERATE(0, 3, 6);
-        ft::list<int> l1;
-        ft::list<int> l2 (l1);
+        LIB::list<int> l1;
+        LIB::list<int> l2 (l1);
 
         REQUIRE( l1.empty() );
         REQUIRE( l2.empty() );
 
         if (last >= first) {
-            ft::list<int> l3 (arr + first, arr + last);
+            LIB::list<int> l3 (arr + first, arr + last);
 
             REQUIRE( l3.size() == last - first );
             for (auto it = l3.begin(); it != l3.end(); ++it, ++i)
@@ -76,8 +82,8 @@ TEST_CASE("assignation operator works correctly", "[list][basics]")
         unsigned int last = GENERATE(0, 3, 6);
 
         if (last >= first) {
-            ft::list<int> mylist1 (arr + first, arr + last);
-            ft::list<int> mylist2 = mylist1;
+            LIB::list<int> mylist1 (arr + first, arr + last);
+            LIB::list<int> mylist2 = mylist1;
 
             REQUIRE( mylist2.size() == last - first );
             for (auto it = mylist2.begin(); it != mylist2.end(); ++it, ++i)
@@ -86,9 +92,9 @@ TEST_CASE("assignation operator works correctly", "[list][basics]")
     }
 
     SECTION("assignation from empty list works") {
-        ft::list<int> mylist3;
-        ft::list<int> mylist4 = mylist3;
-        ft::list<int> mylist5 (arr, arr + 3);
+        LIB::list<int> mylist3;
+        LIB::list<int> mylist4 = mylist3;
+        LIB::list<int> mylist5 (arr, arr + 3);
 
         REQUIRE( mylist4.size() == mylist3.size() );
         REQUIRE( mylist4.empty() );
@@ -106,11 +112,11 @@ TEST_CASE("relational operators work correctly", "[list][basics]")
     int b[] = {1, 4};
     int c[] = {1, 4, -1, 2, 33, 0};
     int d[] = {1, 4, -1, 12, 0, 0};
-    ft::list<int> mylist1 (a, a + 5);
-    ft::list<int> mylist2 (b, b + 2);
-    ft::list<int> mylist3;
-    ft::list<int> mylist4 (c, c + 6);
-    ft::list<int> mylist5 (d, d + 6);
+    LIB::list<int> mylist1 (a, a + 5);
+    LIB::list<int> mylist2 (b, b + 2);
+    LIB::list<int> mylist3;
+    LIB::list<int> mylist4 (c, c + 6);
+    LIB::list<int> mylist5 (d, d + 6);
 
     // mylist1 vs mylist2
     REQUIRE_FALSE( mylist1 == mylist2 );
@@ -165,7 +171,7 @@ TEST_CASE("relational operators work correctly", "[list][basics]")
 TEST_CASE( "list begin/rbegin work correctly", "[list][basics]")
 {
     SECTION("non-const iterator behaviour") {
-        ft::list<int> mylist (1, 10);       // { 10 }
+        LIB::list<int> mylist (1, 10);       // { 10 }
         REQUIRE( *mylist.begin() == 10 );
         REQUIRE( *mylist.rbegin() == 10 );
 
@@ -199,11 +205,11 @@ TEST_CASE( "list begin/rbegin work correctly", "[list][basics]")
 
     SECTION("const iterator behaviour") {
         int arr[] = {1, 2, 3, 4, 5, 6};
-        const ft::list<int> mylist (1, 10);
-        const ft::list<int> mylist1;
-        ft::list<int> mylist2 (arr, arr + 6);
-        ft::list<int>::const_iterator it = mylist2.begin();
-        ft::list<int>::const_reverse_iterator rit = mylist2.rbegin();
+        const LIB::list<int> mylist (1, 10);
+        const LIB::list<int> mylist1;
+        LIB::list<int> mylist2 (arr, arr + 6);
+        LIB::list<int>::const_iterator it = mylist2.begin();
+        LIB::list<int>::const_reverse_iterator rit = mylist2.rbegin();
 
         REQUIRE( *mylist.begin() == 10 );
         REQUIRE( *mylist.rbegin() == 10 );
@@ -224,7 +230,7 @@ TEST_CASE( "list begin/rbegin work correctly", "[list][basics]")
 TEST_CASE("list end works correctly", "[list][basics]")
 {
     SECTION("non-const iterator behaviour") {
-        ft::list<int> mylist (1, 10);               // { 10 }
+        LIB::list<int> mylist (1, 10);               // { 10 }
 
         REQUIRE( *--mylist.end() == 10 );
         REQUIRE( *--mylist.rend() == 10 );
@@ -259,11 +265,11 @@ TEST_CASE("list end works correctly", "[list][basics]")
 
     SECTION("const iterator behaviour") {
         int arr[] = {1, 2, 3, 4, 5, 6};
-        const ft::list<int> mylist (1, 10);
-        const ft::list<int> mylist1;
-        ft::list<int> mylist2 (arr, arr + 6);
-        ft::list<int>::const_iterator it = --mylist2.end();
-        ft::list<int>::const_reverse_iterator rit = --mylist2.rend();
+        const LIB::list<int> mylist (1, 10);
+        const LIB::list<int> mylist1;
+        LIB::list<int> mylist2 (arr, arr + 6);
+        LIB::list<int>::const_iterator it = --mylist2.end();
+        LIB::list<int>::const_reverse_iterator rit = --mylist2.rend();
 
         REQUIRE( *--mylist.end() == 10 );
         REQUIRE( *--mylist.rend() == 10 );
@@ -280,7 +286,7 @@ TEST_CASE("list end works correctly", "[list][basics]")
 }
 
 /* MODIFIERS */
-TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", ft::list, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", LIB::list, TYPE_LIST )
 {
     SECTION("range assign works correctly") {
         TestType c;
@@ -309,7 +315,7 @@ TEST_CASE("push_front works correctly", "[list][modifiers]")
 {
     SECTION( "the element is added at the front & size is incremented" ) {
         int value;
-        ft::list<int> l1;
+        LIB::list<int> l1;
 
         for (int i = 0; i < 50; ++i) {
             value = rand();
@@ -324,7 +330,7 @@ TEST_CASE("push_back works correctly", "[list][modifiers]")
 {
     SECTION( "containers size is incremented & the element is added at the back" ) {
         int value;
-        ft::list<int> l1;
+        LIB::list<int> l1;
 
         for (int i = 0; i < 50; ++i) {
             value = rand();
@@ -338,7 +344,7 @@ TEST_CASE("push_back works correctly", "[list][modifiers]")
 TEST_CASE("pop_front works correctly", "[list][modifiers]")
 {
     unsigned int size = GENERATE(0, 1, 2, 15);
-    ft::list<int> l1 (size, 100);
+    LIB::list<int> l1 (size, 100);
 
     while (!l1.empty()) {
         REQUIRE( l1.size() == size);
@@ -353,7 +359,7 @@ TEST_CASE("pop_front works correctly", "[list][modifiers]")
 TEST_CASE("pop_back works correctly", "[list][modifiers]")
 {
     unsigned int size = GENERATE(0, 1, 2, 15);
-    ft::list<int> l1 (size, 100);
+    LIB::list<int> l1 (size, 100);
 
     while (!l1.empty()) {
         REQUIRE( l1.size() == size);
@@ -367,8 +373,8 @@ TEST_CASE("pop_back works correctly", "[list][modifiers]")
 
 TEST_CASE("insert work correctly", "[list][modifiers]")
 {
-    ft::list<int> c;
-    ft::list<int>::iterator it = c.begin();
+    LIB::list<int> c;
+    LIB::list<int>::iterator it = c.begin();
 
     SECTION( "single element insert works correctly" ) {
         c.insert(it, 5);            // { 5 }
@@ -413,8 +419,8 @@ TEST_CASE("insert work correctly", "[list][modifiers]")
 TEST_CASE("erase return value & remaining values are consistent", "[list][modifiers]")
 {
     int arr[] = {1, 2, 3, 4, 5, 6};
-    ft::list<int> mylist (arr, arr + 6);    // { 1, 2, 3, 4, 5, 6 }
-    ft::list<int>::iterator ret;
+    LIB::list<int> mylist (arr, arr + 6);    // { 1, 2, 3, 4, 5, 6 }
+    LIB::list<int>::iterator ret;
 
     ret = mylist.erase(mylist.begin());     // { 2, 3, 4, 5, 6 }
     REQUIRE( mylist.size() == 5 );
@@ -438,12 +444,12 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
 {
     int arr1[] = {1, 2, 3, 4, 5, 6};
     int arr2[] = {-3, 69, 1};
-    ft::list<int>::iterator it;
+    LIB::list<int>::iterator it;
     int i = 0;
 
     SECTION("non-empty lists can be swapped") {
-        ft::list<int> mylist1 (arr1, arr1 + 6);
-        ft::list<int> mylist2 (arr2, arr2 + 3);
+        LIB::list<int> mylist1 (arr1, arr1 + 6);
+        LIB::list<int> mylist2 (arr2, arr2 + 3);
 
         mylist1.swap(mylist2);
         REQUIRE( mylist1.size() == 3 );
@@ -458,8 +464,8 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
     }
 
     SECTION("empty lists can be swapped w/ filled lists") {
-        ft::list<int> mylist1 (arr1, arr1 + 6);
-        ft::list<int> mylist2;
+        LIB::list<int> mylist1 (arr1, arr1 + 6);
+        LIB::list<int> mylist2;
 
         mylist1.swap(mylist2);
         REQUIRE( mylist1.size() == 0 );
@@ -470,8 +476,8 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
     }
 
     SECTION("empty lists can be swapped") {
-        ft::list<int> mylist1;
-        ft::list<int> mylist2;
+        LIB::list<int> mylist1;
+        LIB::list<int> mylist2;
 
         mylist1.swap(mylist2);
         REQUIRE( mylist1.empty() );
@@ -479,7 +485,7 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[list][modifiers]", ft::list, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[list][modifiers]", LIB::list, TYPE_LIST )
 {
     TestType c;
 
@@ -518,7 +524,7 @@ TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[list][modifiers]", ft::l
 TEST_CASE("resize added elements are consistent")
 {
     int arr[] = {1, 2, 3, 4, 5};
-    ft::list<int> mylist (arr, arr + 5);
+    LIB::list<int> mylist (arr, arr + 5);
 
     mylist.resize(4);
     REQUIRE( mylist.size() == 4 );
@@ -532,7 +538,7 @@ TEST_CASE("resize added elements are consistent")
     REQUIRE( mylist.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("clear works correctly", "[list][modifiers]", ft::list, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("clear works correctly", "[list][modifiers]", LIB::list, TYPE_LIST)
 {
     TestType c;
 
@@ -553,7 +559,7 @@ TEMPLATE_PRODUCT_TEST_CASE("clear works correctly", "[list][modifiers]", ft::lis
 TEST_CASE("element access works correctly", "[list][element access]")
 {
     int arr[] = {1, 2, 3, 4, 5};
-    ft::list<int> mylist (arr, arr + 5);
+    LIB::list<int> mylist (arr, arr + 5);
 
     mylist.front() -= 21;
     REQUIRE( mylist.front() == -20 );
@@ -564,7 +570,7 @@ TEST_CASE("element access works correctly", "[list][element access]")
 
 /* CAPACITY */
 
-TEMPLATE_PRODUCT_TEST_CASE("empty reflects list state", "[list][basics]", ft::list, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects list state", "[list][basics]", LIB::list, TYPE_LIST)
 {
     TestType c;
     REQUIRE( c.empty() );
@@ -574,7 +580,7 @@ TEMPLATE_PRODUCT_TEST_CASE("empty reflects list state", "[list][basics]", ft::li
     REQUIRE( c.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("size works correctly", "[list][capacity]", ft::list, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("size works correctly", "[list][capacity]", LIB::list, TYPE_LIST)
 {
     TestType c;
     REQUIRE( c.size() == 0 );
@@ -589,9 +595,9 @@ TEMPLATE_PRODUCT_TEST_CASE("size works correctly", "[list][capacity]", ft::list,
 TEST_CASE("splice work correctly", "[list][operations]")
 {
     int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-    ft::list<int> c1 (v, v + 8);
-    ft::list<int> c2;
-    ft::list<int>::iterator it;
+    LIB::list<int> c1 (v, v + 8);
+    LIB::list<int> c2;
+    LIB::list<int>::iterator it;
 
     SECTION( "entire list splice works correctly" ) {
         c2.splice(c2.begin(), c1);
@@ -631,7 +637,7 @@ TEST_CASE("splice work correctly", "[list][operations]")
 TEST_CASE("remove(_if) works correctly", "[list][operations]")
 {
     int v[] = { 0, 1, 2, 3, 3, 5, 1, 7 };
-    ft::list<int> c (v, v + 8);
+    LIB::list<int> c (v, v + 8);
 
     SECTION("remove works correctly") {
         c.remove(42);
@@ -680,8 +686,8 @@ TEST_CASE("unique works correctly", "[list][operations]")
     std::string arr2[] = {"fdjks", "fdjks", "haha", "hahaha", "ba", "ab", "echo", "echo", "echo", "echo1"};
     std::string arr2_unique[] = {"fdjks", "haha", "hahaha", "ba", "ab", "echo", "echo1"};
 
-    ft::list<int> l (arr, arr + sizeof(arr) / sizeof(int));
-    ft::list<std::string> l1 (arr2, arr2 + sizeof(arr2) / sizeof(*arr2));
+    LIB::list<int> l (arr, arr + sizeof(arr) / sizeof(int));
+    LIB::list<std::string> l1 (arr2, arr2 + sizeof(arr2) / sizeof(*arr2));
 
     SECTION("not specifying how to compare") {
         // INT ARRAY
@@ -707,8 +713,8 @@ TEST_CASE("unique works correctly", "[list][operations]")
     }
 
     SECTION("special cases") {
-        ft::list<int> l2;
-        ft::list<int> l3 (arr, arr + sizeof(arr) / sizeof(*arr));
+        LIB::list<int> l2;
+        LIB::list<int> l3 (arr, arr + sizeof(arr) / sizeof(*arr));
 
         l2.unique();
         REQUIRE( l2.empty() );
@@ -727,8 +733,8 @@ TEST_CASE( "merge work correctly", "[list][operations]")
         int a[] = { -66, -22, -1, 9, 109 };
         int b[] = { -12, 2, 2, 4, 5, 12, 99 };
         int c[] = { -66, -22, -12, -1, 2, 2, 4, 5, 9, 12, 99, 109 };
-        ft::list<int> c1 (a, a + sizeof(a) / sizeof(int));
-        ft::list<int> c2 (b, b + sizeof(b) / sizeof(int));
+        LIB::list<int> c1 (a, a + sizeof(a) / sizeof(int));
+        LIB::list<int> c2 (b, b + sizeof(b) / sizeof(int));
 
         c1.merge(c2);
         REQUIRE( c2.empty() );
@@ -742,8 +748,8 @@ TEST_CASE( "merge work correctly", "[list][operations]")
         int a[] = { 109, 9, -1, -22, -66 };
         int b[] = { 99, 12, 5, 4, 2, 2, -12 };
         int c[] = { 109, 99, 12, 9, 5, 4, 2, 2, -1, -12, -22, -66 };
-        ft::list<int> c1 (a, a + sizeof(a) / sizeof(int));
-        ft::list<int> c2 (b, b + sizeof(b) / sizeof(int));
+        LIB::list<int> c1 (a, a + sizeof(a) / sizeof(int));
+        LIB::list<int> c2 (b, b + sizeof(b) / sizeof(int));
 
         c1.merge(c2, std::greater<int>());
         REQUIRE( c2.empty() );
@@ -753,9 +759,9 @@ TEST_CASE( "merge work correctly", "[list][operations]")
     }
 
     SECTION( "mergin with empty list" ) {
-        ft::list<int> l1 (5, 10);
-        ft::list<int> l2;
-        ft::list<int> l3;
+        LIB::list<int> l1 (5, 10);
+        LIB::list<int> l2;
+        LIB::list<int> l3;
 
         l1.merge(l2);
         REQUIRE( l1.size() == 5 );
@@ -773,17 +779,17 @@ TEST_CASE("sort work correctly", "[list][operations]")
     int arr1[] = {2, 4, 12, 5, 2, 99, -12};
     int arr1_sorted[] = {-12, 2, 2, 4, 5, 12, 99};
     size_t arr1_size = sizeof(arr1) / sizeof(int);
-    ft::list<int> l1 (arr1, arr1 + arr1_size);
+    LIB::list<int> l1 (arr1, arr1 + arr1_size);
     // ARRAY 2
     int arr2[] = {2, 32, 43, 4, 12, 5, 2, 99, 99, 1, 100, 15, 12, 1111111, 21, 42, 0, -1111, 43, -12};
     int arr2_sorted[] = {2, 2, 32, 4, 12, 5, 1, 15, 12, 21, 42, 0, -1111, -12, 43, 1111111, 100, 99, 99, 43};
     size_t arr2_size = sizeof(arr2) / sizeof(int);
-    ft::list<int> l2 (arr2, arr2 + arr2_size);
+    LIB::list<int> l2 (arr2, arr2 + arr2_size);
     // ARRAY 3
     std::string arr3[] = {"abcdef", "ahblk", "$", "42", "?", "ßüäopajgh"};
     std::string arr3_sorted[] = {"$", "42", "?", "abcdef", "ahblk", "ßüäopajgh"};
     size_t arr3_size = sizeof(arr3) / sizeof(std::string);
-    ft::list<std::string> l5 (arr3, arr3 + arr3_size);
+    LIB::list<std::string> l5 (arr3, arr3 + arr3_size);
 
     SECTION( "sorting without specifying how to compare" ) {
         // ARRAY 1
@@ -822,8 +828,8 @@ TEST_CASE("sort work correctly", "[list][operations]")
     }
 
     SECTION ( "sorting unsortable lists" ) {
-        ft::list<int> l3;
-        ft::list<int> l4 (1, 0);
+        LIB::list<int> l3;
+        LIB::list<int> l4 (1, 0);
 
         l3.sort();
         REQUIRE( l3.empty() );
@@ -836,8 +842,8 @@ TEST_CASE("reverse works correctly", "[list][operations]")
 {
     int i = 8;
     int v[] = {2, 4, 2, 5, 2, 99, -12, 1, 312};
-    ft::list<int> l1 (v, v + 9);
-    ft::list<int> l2 (v, v + 1);
+    LIB::list<int> l1 (v, v + 9);
+    LIB::list<int> l2 (v, v + 1);
 
     l1.reverse();
     REQUIRE( l1.size() == 9 );

@@ -3,14 +3,20 @@
 #include <vector>
 #include <list>
 
-#define TYPE_LIST  ( int, unsigned char, double, std::string, ft::vector<int>, std::vector<std::string>, std::list<std::string>, std::list<std::vector<int> > )
+#ifdef VERIFY_UNIT_TESTS
+# define LIB std
+#else
+# define LIB ft
+#endif
+
+#define TYPE_LIST  ( int, unsigned char, double, std::string, LIB::vector<int>, std::vector<std::string>, std::list<std::string>, std::list<std::vector<int> > )
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
 TEST_CASE("vector construction works correctly", "[vector][basics]")
 {
     SECTION("vector declaration creates empty vector") {
-        ft::vector<int> cnt;
+        LIB::vector<int> cnt;
         REQUIRE( cnt.empty() );
         REQUIRE( cnt.size() == 0 );
     }
@@ -18,7 +24,7 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
     SECTION("fill constructor returns correct vector") {
         unsigned int size = GENERATE(0, 1, 5);
         int fill = GENERATE(0, -41);
-        ft::vector<int> cnt (size, fill);
+        LIB::vector<int> cnt (size, fill);
 
         REQUIRE( cnt.size() == size );
         for (unsigned int i = 0; i < size; ++i)
@@ -31,7 +37,7 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
         unsigned int last = GENERATE(0, 3, 6);
 
         if (last >= first) {
-            ft::vector<int> cnt (v + first, v + last);
+            LIB::vector<int> cnt (v + first, v + last);
 
             REQUIRE( cnt.size() == last - first );
             for (size_t i = 0; i < last - first; ++i)
@@ -41,9 +47,9 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
 
     SECTION("copy constructor returns correct vector") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
-        ft::vector<int> v1;
-        ft::vector<int> v2 (v1);
-        ft::vector<int> v3 (arr + 2, arr + 6); // { 12, 5, 60, 99 }
+        LIB::vector<int> v1;
+        LIB::vector<int> v2 (v1);
+        LIB::vector<int> v3 (arr + 2, arr + 6); // { 12, 5, 60, 99 }
 
         REQUIRE( v1.size() == 0 );
         REQUIRE( v2.size() == 0 );
@@ -55,7 +61,7 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("vector correctly copies value upon construction", "[vector][basics]", ft::vector, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("vector correctly copies value upon construction", "[vector][basics]", LIB::vector, TYPE_LIST)
 {
     // this test may produces double free there is a problem with
     // your allocation/copying with non builtin types
@@ -70,11 +76,11 @@ TEST_CASE("vector assignation works correctly", "[vector][assignation operators]
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
-    ft::vector<int> myvector1 (a, a + 5);
-    ft::vector<int> myvector2 (b, b + 2);
-    ft::vector<int> myvector3;
-    ft::vector<int>::iterator lit;
-    ft::vector<int>::iterator rit;
+    LIB::vector<int> myvector1 (a, a + 5);
+    LIB::vector<int> myvector2 (b, b + 2);
+    LIB::vector<int> myvector3;
+    LIB::vector<int>::iterator lit;
+    LIB::vector<int>::iterator rit;
 
     myvector1 = myvector2;
     REQUIRE( myvector1.size() == myvector2.size() );
@@ -96,10 +102,10 @@ TEST_CASE("vector relational operators work correctly", "[vector][relational ope
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
     int c[] = {1, 4, -1, 2, 33, 0};
-    ft::vector<int> myvector1 (a, a + 5);
-    ft::vector<int> myvector2 (b, b + 2);
-    ft::vector<int> myvector3;
-    ft::vector<int> myvector4 (c, c + 6);
+    LIB::vector<int> myvector1 (a, a + 5);
+    LIB::vector<int> myvector2 (b, b + 2);
+    LIB::vector<int> myvector3;
+    LIB::vector<int> myvector4 (c, c + 6);
 
     // myvector1 vs myvector2
     REQUIRE_FALSE( myvector1 == myvector2 );
@@ -146,7 +152,7 @@ TEST_CASE("vector relational operators work correctly", "[vector][relational ope
 TEST_CASE("begin returns first element and can be incremented", "[vector][iterators]")
 {
     SECTION("non-const iterator behaviour") {
-        ft::vector<int> v (5, 10);              // { 10, 10, 10, 10, 10 }
+        LIB::vector<int> v (5, 10);              // { 10, 10, 10, 10, 10 }
         REQUIRE( *v.begin() == 10 );
         *v.begin() = 5;                         // { 5, 10, 10, 10, 10 }
         *++v.begin() = 6;                       // { 5, 6, 10, 10, 10 }
@@ -161,9 +167,9 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
 
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
-        ft::vector<int> v2 (arr, arr + 5);
-        const ft::vector<int> v (v2);
-        const ft::vector<int> v1;
+        LIB::vector<int> v2 (arr, arr + 5);
+        const LIB::vector<int> v (v2);
+        const LIB::vector<int> v1;
 
         REQUIRE( *v.begin() == 1 );
         REQUIRE( *(v.begin() + 1) == 4 );
@@ -173,7 +179,7 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         REQUIRE( (v.begin() + 5) == v.end() );
         REQUIRE( v1.begin() == v1.end() );
 
-        ft::vector<int>::const_iterator it = v2.begin();
+        LIB::vector<int>::const_iterator it = v2.begin();
         REQUIRE( *it == 1 );
         REQUIRE( *(it + 1) == 4 );
         REQUIRE( *(it + 2) == -1 );
@@ -184,11 +190,9 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
 
     SECTION("misc") {
         int arr[] = {1, 4, -1, 2, 33};
-        ft::vector<int> v (arr, arr + 5);
-        ft::vector<int>::iterator it1 = v.begin();
-        ft::vector<int>::iterator it2;
+        LIB::vector<int> v (arr, arr + 5);
+        LIB::vector<int>::iterator it1 = v.begin();
 
-        // it1 = it1; // compilation error with -Werror
         REQUIRE( it1 == v.begin() );
         it1 += 2;
         REQUIRE( *it1 == -1 );
@@ -197,7 +201,7 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         REQUIRE( it1[2] == 33 );
         REQUIRE( it1 + 3 == v.end() );
         REQUIRE( 3 + it1 == v.end() );
-        REQUIRE( 3 - v.end() == it1 );
+        REQUIRE( -3 + v.end() == it1 );
         REQUIRE( it1 > v.begin() );
         REQUIRE( it1 >= v.begin() );
         REQUIRE_FALSE( it1 < v.begin() );
@@ -206,10 +210,10 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
 
 }
 
-TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", ft::vector<int>)
+TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", LIB::vector<int>)
 {
     SECTION("non-const iterator behaviour") {
-        ft::vector<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
+        LIB::vector<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
         REQUIRE( *(v.end() - 1) == 10 );
         *(v.end() - 1) = 5;                         // { 10, 10, 10, 10, 5 }
         *(v.end() - 2) = 6;                         // { 10, 10, 10, 6, 5 }
@@ -224,9 +228,9 @@ TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", ft::vector<int>
 
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
-        ft::vector<int> v2 (arr, arr + 5);
-        const ft::vector<int> v (v2);
-        const ft::vector<int> v1;
+        LIB::vector<int> v2 (arr, arr + 5);
+        const LIB::vector<int> v (v2);
+        const LIB::vector<int> v1;
 
         REQUIRE( *(v.end() - 1) == 33 );
         REQUIRE( *(v.end() - 2) == 2 );
@@ -236,7 +240,7 @@ TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", ft::vector<int>
         REQUIRE( v.begin() == (v.end() - 5) );
         REQUIRE( v1.begin() == v1.end() );
 
-        ft::vector<int>::const_iterator it = v2.end();
+        LIB::vector<int>::const_iterator it = v2.end();
         REQUIRE( *(it - 1) == 33 );
         REQUIRE( *(it - 2) == 2 );
         REQUIRE( *(it - 3) == -1 );
@@ -250,8 +254,8 @@ TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", ft::vector<int>
 TEST_CASE("vector assign methods work correctly", "[vector][modifiers]")
 {
     int arr[] = {1, 4, -1, 2, 33};
-    ft::vector<int> v;
-    ft::vector<int> v1 (10, 1);
+    LIB::vector<int> v;
+    LIB::vector<int> v1 (10, 1);
 
     SECTION("range assign creates vector with correct values") {
         unsigned int i = GENERATE(0, 1, 3);
@@ -295,7 +299,7 @@ TEST_CASE("vector assign methods work correctly", "[vector][modifiers]")
 
 TEST_CASE("push/pop_back add/remove elements at back of the vector", "[vector][modifiers]")
 {
-    ft::vector<int> v;
+    LIB::vector<int> v;
     std::vector<int> stl;
 
     for (unsigned int i = 0; i < 100; ++i) {
@@ -306,7 +310,7 @@ TEST_CASE("push/pop_back add/remove elements at back of the vector", "[vector][m
     }
     REQUIRE( v.size() == stl.size() );
 
-    ft::vector<int>::iterator it = v.begin();
+    LIB::vector<int>::iterator it = v.begin();
     std::vector<int>::iterator stlit = stl.begin();
     for (; it != v.end() && stlit != stl.end(); ++it, ++stlit)
         REQUIRE( *it == *stlit );
@@ -320,10 +324,10 @@ TEST_CASE("push/pop_back add/remove elements at back of the vector", "[vector][m
 
 TEST_CASE("vector insert work correctly", "[vector][modifiers]")
 {
-    ft::vector<int> v;
+    LIB::vector<int> v;
 
     SECTION("single element insert works correctly") {
-        ft::vector<int>::iterator ret;
+        LIB::vector<int>::iterator ret;
         ret = v.insert(v.begin(), 5);               // { 5 }
         REQUIRE( *ret == 5 );
         ret = v.insert(v.end(), 10);                // { 5, 10 }
@@ -384,8 +388,8 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
 TEST_CASE("erase work correctly", "[vector][modifiers]")
 {
     int arr[] = {23, 1, 233, 4, 55, 3};
-    ft::vector<int> v (arr, arr + 6);             // { 23, 1, 233, 4, 55, 3 }
-    ft::vector<int>::iterator ret;
+    LIB::vector<int> v (arr, arr + 6);             // { 23, 1, 233, 4, 55, 3 }
+    LIB::vector<int>::iterator ret;
 
     SECTION("single element erase works correctly") {
         ret = v.erase(v.begin());                // { 1, 233, 4, 55, 3 }
@@ -429,8 +433,8 @@ TEST_CASE("erase work correctly", "[vector][modifiers]")
 TEST_CASE("swap swaps vector sizes, capacities and content", "[vector][modifiers]")
 {
     SECTION("works for non empty vectors") {
-        ft::vector<int> v1 (10, 100);
-        ft::vector<int> v2 (2, -12);
+        LIB::vector<int> v1 (10, 100);
+        LIB::vector<int> v2 (2, -12);
         auto v1_cap = v1.capacity();
         auto v2_cap = v2.capacity();
 
@@ -445,8 +449,8 @@ TEST_CASE("swap swaps vector sizes, capacities and content", "[vector][modifiers
             REQUIRE( *it == 100 );
     }
     SECTION("works for swapping non-empty and empty vectors") {
-        ft::vector<int> v1 (10, 100);
-        ft::vector<int> v2;
+        LIB::vector<int> v1 (10, 100);
+        LIB::vector<int> v2;
         auto v1_cap = v1.capacity();
         auto v2_cap = v2.capacity();
 
@@ -460,8 +464,8 @@ TEST_CASE("swap swaps vector sizes, capacities and content", "[vector][modifiers
             REQUIRE( *it == 100 );
     }
     SECTION("works for empty vectors") {
-        ft::vector<int> v1;
-        ft::vector<int> v2;
+        LIB::vector<int> v1;
+        LIB::vector<int> v2;
         auto v1_cap = v1.capacity();
         auto v2_cap = v2.capacity();
 
@@ -478,7 +482,7 @@ TEST_CASE("swap swaps vector sizes, capacities and content", "[vector][modifiers
 TEST_CASE("resize works correctly", "[vector][modifiers]")
 {
     int arr[] = { 1, 32, 0, -23 };
-    ft::vector<int> v (arr, arr + 4);
+    LIB::vector<int> v (arr, arr + 4);
 
     SECTION("vector elements are removed when arg is smaller than current size") {
         REQUIRE( v.size() == 4 );
@@ -511,7 +515,7 @@ TEST_CASE("resize works correctly", "[vector][modifiers]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[vector][modifiers]", ft::vector, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[vector][modifiers]", LIB::vector, TYPE_LIST)
 {
     TestType cnt;
     cnt.clear();
@@ -526,10 +530,10 @@ TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "
 TEST_CASE("front and back return vectors first element", "[vector][element access]")
 {
     int arr[] = { 1, 32, 0, -23 };
-    ft::vector<int> v (arr, arr + 4);
-    ft::vector<int> cv (arr, arr + 4);
-    ft::vector<int>::const_reference front_ref = v.front();
-    ft::vector<int>::const_reference back_ref = v.back();
+    LIB::vector<int> v (arr, arr + 4);
+    LIB::vector<int> cv (arr, arr + 4);
+    LIB::vector<int>::const_reference front_ref = v.front();
+    LIB::vector<int>::const_reference back_ref = v.back();
 
     // front
     REQUIRE( v.front() == 1 );
@@ -552,7 +556,7 @@ TEST_CASE("front and back return vectors first element", "[vector][element acces
     REQUIRE( back_ref == 0 );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[vector][element access]", ft::vector, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[vector][element access]", LIB::vector, TYPE_LIST)
 {
         unsigned int i = GENERATE(1, 25, 100);
         TestType cnt1;
@@ -572,7 +576,7 @@ TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[vector
 TEST_CASE("reserve allocates enough memory", "[vector][capacity]")
 {
     unsigned int i = GENERATE(0, 1, 25, 100);
-    ft::vector<std::string> v;
+    LIB::vector<std::string> v;
     std::string arr[] = {"hello", "this", "is", "a", "test"};
 
     v.reserve(i);
@@ -587,7 +591,7 @@ TEST_CASE("reserve allocates enough memory", "[vector][capacity]")
     REQUIRE( v.capacity() > cap );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("empty reflects vector state", "[vector][capacity]", ft::vector, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects vector state", "[vector][capacity]", LIB::vector, TYPE_LIST)
 {
     TestType cnt;
     REQUIRE( cnt.empty() );
@@ -597,7 +601,7 @@ TEMPLATE_PRODUCT_TEST_CASE("empty reflects vector state", "[vector][capacity]", 
     REQUIRE( cnt.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("size returns updated vector size", "[vector][capacity]", ft::vector, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("size returns updated vector size", "[vector][capacity]", LIB::vector, TYPE_LIST)
 {
     TestType v;
 

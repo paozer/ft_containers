@@ -6,7 +6,13 @@
 #include <stack>
 #include <queue>
 
-#define CONTAINER_LIST ( ft::stack, ft::queue )
+#ifdef VERIFY_UNIT_TESTS
+# define LIB std
+#else
+# define LIB ft
+#endif
+
+#define CONTAINER_LIST ( LIB::stack, LIB::queue )
 #define TYPE_LIST ( int, char, std::string, std::vector<int>, std::vector<std::string>, std::list<std::string>, std::list<std::deque<int> > )
 #define VALUE_TYPE typename TestType::value_type
 
@@ -95,7 +101,7 @@ TEMPLATE_PRODUCT_TEST_CASE("relational operators work as expected", "[container_
 /* STACK TESTS */
 TEST_CASE("stack specific methods work as expected", "[container_adaptors][stack]")
 {
-    ft::stack<int> my_cnt;
+    LIB::stack<int> my_cnt;
     std::stack<int> stl_cnt;
 
     SECTION("top method works like stl container") {
@@ -115,7 +121,7 @@ TEST_CASE("stack specific methods work as expected", "[container_adaptors][stack
 /* QUEUE TESTS */
 TEST_CASE("deque specific methods work as expected", "[container_adaptors][queue]")
 {
-    ft::queue<int> my_cnt;
+    LIB::queue<int> my_cnt;
     std::queue<int> stl_cnt;
 
     SECTION("back method works like stl container") {

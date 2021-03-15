@@ -5,11 +5,17 @@
 #include <list>
 #include <string>
 
+#ifdef VERIFY_UNIT_TESTS
+# define LIB std
+#else
+# define LIB ft
+#endif
+
 /* CONSTRUCTION */
 TEST_CASE("map contructors work as expected", "[map][basics]")
 {
     SECTION("default constructor constructs an empty map") {
-        ft::map<int, int> map;
+        LIB::map<int, int> map;
         REQUIRE( map.empty() );
         REQUIRE( map.size() == 0 );
     }
@@ -17,7 +23,7 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
         std::map<char, int> stl_map;
         for (int i = 0; i < 25; ++i)
             stl_map[rand() % 93 + 33] = rand();
-        ft::map<char, int> my_map (stl_map.begin(), stl_map.end());
+        LIB::map<char, int> my_map (stl_map.begin(), stl_map.end());
 
         REQUIRE( stl_map.size() == my_map.size() );
         REQUIRE_FALSE( my_map.empty() );
@@ -31,10 +37,10 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
         }
     }
     SECTION("copy constructor constructs a copy with a copy of each element") {
-        ft::map<char, int> my_map1;
+        LIB::map<char, int> my_map1;
         for (int i = 0; i < 25; ++i)
             my_map1[rand() % 93 + 33] = rand();
-        ft::map<char, int> my_map2 (my_map1);
+        LIB::map<char, int> my_map2 (my_map1);
 
         REQUIRE_FALSE( my_map2.empty() );
         REQUIRE( my_map2.size() == my_map1.size() );
@@ -46,20 +52,19 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
             ++it1;
             ++it2;
         }
-
         my_map1.begin()->second = my_map2.begin()->second - 10;
-        --my_map1.end()->second = --my_map2.end()->second - 1029;
-        REQUIRE( (my_map1.begin()->second != my_map2.begin()->second) );
-        REQUIRE( (--my_map1.end()->second != --my_map2.end()->second) );
+        (--my_map1.end())->second = (--my_map2.end())->second - 1029;
+        REQUIRE(( my_map1.begin()->second != my_map2.begin()->second ));
+        REQUIRE(( (--my_map1.end())->second != (--my_map2.end())->second ));
     }
 }
 
 TEST_CASE("Assignment operator copies elements", "[map][operators]")
 {
-    ft::map<char, int> my_map1;
+    LIB::map<char, int> my_map1;
     for (int i = 0; i < 10; ++i)
         my_map1[rand() % 93 + 33] = rand() % 10000;
-    ft::map<char, int> my_map2 = my_map1;
+    LIB::map<char, int> my_map2 = my_map1;
 
     REQUIRE( my_map2.size() == my_map1.size() );
 
@@ -79,7 +84,7 @@ TEST_CASE("Assignment operator copies elements", "[map][operators]")
 
 TEST_CASE("there are no duplicates in a map", "[map][basics]")
 {
-    ft::map<int, int> map;
+    LIB::map<int, int> map;
     std::list<int> list;
 
     for (int i = 0; i < 10000; ++i) {
@@ -98,10 +103,10 @@ TEST_CASE("map relational operators work correctly", "[map][operators]")
 {
     std::array<std::pair<char, int>, 4> a = {{ {'b', 2}, {'z', 40}, {'p', 1}, {'a', 680} }};
     std::array<std::pair<char, int>, 4> b = {{ {'b', 1}, {'z', 10}, {'c', 1}, {'z', 680} }};
-    ft::map<char, int> mymap1 (a.begin(), a.end());
-    ft::map<char, int> mymap2 (a.begin(), a.begin() + 2);
-    ft::map<char, int> mymap3;
-    ft::map<char, int> mymap4 (b.begin(), b.end());
+    LIB::map<char, int> mymap1 (a.begin(), a.end());
+    LIB::map<char, int> mymap2 (a.begin(), a.begin() + 2);
+    LIB::map<char, int> mymap3;
+    LIB::map<char, int> mymap4 (b.begin(), b.end());
 
     // mymap1 vs mymap2
     REQUIRE_FALSE( mymap1 == mymap2 );
@@ -148,24 +153,24 @@ TEST_CASE("map relational operators work correctly", "[map][operators]")
 TEST_CASE("Iterators works correctly", "[map][iterators]")
 {
     SECTION("iterators can be created as expected") {
-        ft::map<char, int> my_map;
+        LIB::map<char, int> my_map;
 
-        ft::map<char, int>::iterator it = my_map.begin();
-        ft::map<char, int>::const_iterator cit = it;
-        ft::map<char, int>::const_iterator cit2 = my_map.begin();
+        LIB::map<char, int>::iterator it = my_map.begin();
+        LIB::map<char, int>::const_iterator cit = it;
+        LIB::map<char, int>::const_iterator cit2 = my_map.begin();
         REQUIRE(( cit == my_map.begin() ));
         REQUIRE(( cit2 == my_map.begin() ));
 
-        ft::map<char, int>::reverse_iterator rit = my_map.rbegin();
-        ft::map<char, int>::const_reverse_iterator rcit = rit;
-        ft::map<char, int>::const_reverse_iterator rcit2 = my_map.rbegin();
+        LIB::map<char, int>::reverse_iterator rit = my_map.rbegin();
+        LIB::map<char, int>::const_reverse_iterator rcit = rit;
+        LIB::map<char, int>::const_reverse_iterator rcit2 = my_map.rbegin();
         REQUIRE(( rcit == my_map.rbegin() ));
         REQUIRE(( rcit2 == my_map.rbegin() ));
     }
 
     SECTION("iterators allow in-order access to the map elements") {
         int rand = 0;
-        ft::map<int, char> map;
+        LIB::map<int, char> map;
         std::list<int> list;
 
         for (int i = 0; i < 100; ++i) {
@@ -187,9 +192,9 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
 /* MODIFIERS */
 TEST_CASE("insert works as expected", "[map][modifiers]")
 {
-    ft::map<char, int> my_map;
-    std::pair<ft::map<char, int>::iterator, bool> ret;
-    ft::map<char, int>::iterator it_ret;
+    LIB::map<char, int> my_map;
+    std::pair<LIB::map<char, int>::iterator, bool> ret;
+    LIB::map<char, int>::iterator it_ret;
 
     SECTION("single element insert add the pair to the map if its not present") {
         REQUIRE( my_map.empty() );
@@ -284,7 +289,7 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
 TEST_CASE("erase works as expected", "[map][modifiers]")
 {
     std::list<std::pair<const char, int> > data = {{{'a',1}, {'z', 25}, {'b',2}, {'c', 3}, {'d', 4}, {'r', 1}, {'e', 5}}};
-    ft::map<char, int> my_map (data.begin(), data.end());
+    LIB::map<char, int> my_map (data.begin(), data.end());
     data.sort();
 
     SECTION("erase at iterator removes correct element") {
@@ -341,8 +346,8 @@ TEST_CASE("erase works as expected", "[map][modifiers]")
 
 TEST_CASE("swap works as expected", "[map][modifiers]")
 {
-    ft::map<int, std::string> my_map1;
-    ft::map<int, std::string> my_map2;
+    LIB::map<int, std::string> my_map1;
+    LIB::map<int, std::string> my_map2;
 
     my_map1[14] = "fifteen";
     my_map1[19] = "dog";
@@ -365,7 +370,7 @@ TEST_CASE("swap works as expected", "[map][modifiers]")
 
 TEST_CASE("clear works as expected", "[map][modifiers]")
 {
-    ft::map<int, int> my_map;
+    LIB::map<int, int> my_map;
     my_map.clear();
     REQUIRE( my_map.empty() );
     my_map['a'] = 1;
@@ -385,9 +390,9 @@ TEST_CASE("clear works as expected", "[map][modifiers]")
 /* OBSERVERS */
 TEST_CASE("value_comp & key_comp work as expected", "[map][observers]")
 {
-    ft::map<char, int> mymap;
-    ft::map<char, int>::key_compare kc = mymap.key_comp();
-    ft::map<char, int>::value_compare vc = mymap.value_comp();
+    LIB::map<char, int> mymap;
+    LIB::map<char, int>::key_compare kc = mymap.key_comp();
+    LIB::map<char, int>::value_compare vc = mymap.value_comp();
 
     mymap['a'] = 20;
     mymap['d'] = 20;
@@ -408,7 +413,7 @@ TEST_CASE("value_comp & key_comp work as expected", "[map][observers]")
 /* OPERATIONS */
 TEST_CASE("find works as expected", "[map][operations]")
 {
-    ft::map<char, int> mymap;
+    LIB::map<char, int> mymap;
     mymap['a'] = 20;
     mymap['d'] = 80;
 
@@ -423,7 +428,7 @@ TEST_CASE("find works as expected", "[map][operations]")
 
 TEST_CASE("count works as expected", "[map][operations]")
 {
-    ft::map<char, int> mymap;
+    LIB::map<char, int> mymap;
     mymap['a'] = 20;
     mymap['d'] = 80;
     REQUIRE( mymap.count('a') == 1 );
@@ -436,7 +441,7 @@ TEST_CASE("count works as expected", "[map][operations]")
 
 TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
 {
-    ft::map<char, int> mymap;
+    LIB::map<char, int> mymap;
 
     SECTION("reference example") {
         mymap['a'] = 20;
@@ -444,8 +449,8 @@ TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
         mymap['c'] = 60;
         mymap['d'] = 80;
         mymap['e'] = 100;
-        ft::map<char, int>::iterator itlow = mymap.lower_bound ('b');
-        ft::map<char, int>::iterator itup = mymap.upper_bound ('d');
+        LIB::map<char, int>::iterator itlow = mymap.lower_bound ('b');
+        LIB::map<char, int>::iterator itup = mymap.upper_bound ('d');
         REQUIRE( itlow->first == 'b' );
         REQUIRE( itlow->second == 40 );
         REQUIRE( itup->first == 'e' );
@@ -474,7 +479,7 @@ TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
         mymap['d'] = 80;
         mymap['e'] = 100;
         mymap['f'] = 60;
-        const ft::map<char, int> cmymap (mymap);
+        const LIB::map<char, int> cmymap (mymap);
         REQUIRE(( cmymap.upper_bound('c') == cmymap.lower_bound('c') ));
         REQUIRE(( cmymap.upper_bound('a')->first == 'b' ));
         REQUIRE(( cmymap.upper_bound('b')->first == 'd' ));
@@ -486,13 +491,13 @@ TEST_CASE("lower_bound & upper_bound work as expected", "[map][operations]")
 
 TEST_CASE("equal_range works as expected", "[map][operations]")
 {
-    ft::map<char, int> mymap;
+    LIB::map<char, int> mymap;
     mymap['a'] = 10;
     mymap['b'] = 20;
     mymap['c'] = 30;
-    const ft::map<char, int> cmymap (mymap);
+    const LIB::map<char, int> cmymap (mymap);
 
-    std::pair<ft::map<char, int>::iterator, ft::map<char, int>::iterator> ret = mymap.equal_range('b');
+    std::pair<LIB::map<char, int>::iterator, LIB::map<char, int>::iterator> ret = mymap.equal_range('b');
     REQUIRE( ret.first->first == 'b' );
     REQUIRE( ret.second->first == 'c' );
     REQUIRE( ret.first->second == 20 );
@@ -503,7 +508,7 @@ TEST_CASE("equal_range works as expected", "[map][operations]")
     REQUIRE(( mymap.equal_range('u').first == mymap.end() ));
     REQUIRE(( mymap.equal_range('u').second == mymap.end() ));
 
-    std::pair<ft::map<char, int>::const_iterator, ft::map<char, int>::const_iterator> cret = cmymap.equal_range('c');
+    std::pair<LIB::map<char, int>::const_iterator, LIB::map<char, int>::const_iterator> cret = cmymap.equal_range('c');
 
     REQUIRE( cret.first->first == 'c' );
     REQUIRE( cret.first->second == 30 );
