@@ -119,8 +119,9 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 if (next == Base::end() || _comp(val.first, next->first)) {
                     Base::unset_bounds();
                     aux_insert(position.get_node()->parent, position.get_node(), val);
-                    if (Base::_added_node)
-                        Base::rebalance(Base::_added_node_ptr);
+                    // do not need to check if node was inserted since
+                    // if prev < val < next there cannot be a duplicate
+                    Base::rebalance(Base::_added_node_ptr);
                     Base::set_bounds();
                     return iterator(Base::_added_node_ptr);
                 }

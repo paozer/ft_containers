@@ -77,9 +77,8 @@ class set : public avl_tree<T, Compare, Alloc>
         }
 
         /* OBSERVERS */
-        // TODO remove and use base class ones
         key_compare key_comp (void) const { return _comp; }
-        value_compare value_comp (void) const { return value_compare(_comp); }
+        value_compare value_comp (void) const { return _comp; }
 
     private:
         value_compare _comp;

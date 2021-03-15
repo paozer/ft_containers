@@ -5,6 +5,7 @@
 #include "../utils/utils.hpp" // ft::enable_if
 
 #include <cstddef> // NULL, std::ptrdiff_t
+#include <cassert> // assert
 
 #include <memory> // std::allocator
 #include <limits> // std::numeric_limits
@@ -362,10 +363,10 @@ class list
 
             list<value_type> result;
             while (_size != 0 && x._size != 0) {
-                if (comp(*begin(), *x.begin()))
-                    result.splice(result.end(), *this, begin());
-                else
+                if (comp(*x.begin(), *begin()))
                     result.splice(result.end(), x, x.begin());
+                else
+                    result.splice(result.end(), *this, begin());
             }
             if (_size != 0) {
                 assert(x._size == 0);

@@ -337,7 +337,7 @@ class deque
             map_pointer tmp = _ptr_alloc.allocate(_map_size + 1);
             if (at_front) { // add an empty chunk at the beginning of the map
 
-                // + 1 to accounts for added array
+                // + 1 to account for added array
                 difference_type offset = _last.get_map() - _map + 1;
                 tmp[0] = _alloc.allocate(chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)

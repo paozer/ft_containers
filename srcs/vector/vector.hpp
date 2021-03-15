@@ -42,18 +42,15 @@ class vector
         explicit vector (size_type n, const value_type& val = value_type(), const allocator_type& alloc = allocator_type())
             : _size(0), _capacity(0), _array(NULL), _alloc(alloc)
         {
-            push_back_n(n, val);
+            assign(n, val);
         }
 
-        // TODO use range assign
         template <class InputIterator>
         vector (InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
               typename ft::enable_if< !std::numeric_limits<InputIterator>::is_integer , void >::type* = 0)
             : _size(0), _capacity(0), _array(NULL), _alloc(alloc)
         {
-            reserve(std::distance(first, last));
-            for (; first != last; ++first)
-                push_back(*first);
+            assign(first, last);
         }
 
         vector (const vector& x)

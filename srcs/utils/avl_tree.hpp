@@ -1,7 +1,5 @@
 #pragma once
 
-#include <iostream>
-
 #include "avl_node.hpp"
 #include "avl_iterator.hpp"
 #include "utils.hpp"
@@ -11,6 +9,7 @@
 
 #include <memory> // std::allocator
 #include <functional> // std::less
+#include <limits> // std::numeric_limits
 
 namespace ft {
 
@@ -52,8 +51,7 @@ class avl_tree
             : _root(NULL), _begin(new_node()), _end(new_node()), _added_node_ptr(NULL),
               _added_node(false), _size(0), _alloc(alloc), _comp(comp)
         {
-            for (; first != last; ++first)
-                insert(*first);
+            insert(first, last);
         }
 
         avl_tree (const avl_tree& x)
@@ -70,6 +68,16 @@ class avl_tree
         }
 
         /* OPERATORS */
+        avl_tree& operator= (const avl_tree& x)
+        {
+            if (this != &x) {
+                insert(x.begin(), x.end());
+                _alloc = x._alloc;
+                _comp = x._comp;
+            }
+            return *this;
+        }
+
         friend bool operator== (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs)
         {
             if (lhs._size != rhs._size)
@@ -108,7 +116,7 @@ class avl_tree
         friend bool operator>= (const avl_tree<T, Compare, Alloc>& lhs, const avl_tree<T, Compare, Alloc>& rhs) { return !(lhs < rhs); }
 
         /* MODIFIERS */
-        // maybe add check if val is greater than max or lesser than min and use as hint
+        // TODO: add check if arg is greater than max or lesser than min and use as hint
         std::pair<iterator, bool> insert (const value_type& val)
         {
             unset_bounds();
@@ -127,8 +135,9 @@ class avl_tree
                 if (next == end() || _comp(val, *next)) {
                     unset_bounds();
                     aux_insert(position.get_node()->parent, position.get_node(), val);
-                    if (_added_node)
-                        rebalance(_added_node_ptr);
+                    // do not need to check if node was inserted since
+                    // if prev < val < next there cannot be a duplicate
+                    rebalance(_added_node_ptr);
                     set_bounds();
                     return iterator(_added_node_ptr);
                 }
@@ -383,9 +392,9 @@ class avl_tree
         }
 
         /* REBALANCING */
-        // could use bf instead of height and break
-        // out of retracing when deletion/insertion
-        // has been balanced out at a node
+
+        // TODO: use bf instead of height and break when
+        // deletion/insertion has been balanced out
         void rebalance (node_pointer node)
         {
             for (; node; node = node->parent) {
@@ -544,10 +553,9 @@ class avl_tree
             delete_node(node);
         }
 
+        // TODO: check potential bugs with NULL arg
         node_pointer get_min (node_pointer node)
         {
-            if (!node)
-                return NULL;
             while (node->left)
                 node = node->left;
             return node;
@@ -555,8 +563,6 @@ class avl_tree
 
         node_pointer get_max (node_pointer node)
         {
-            if (!node)
-                return NULL;
             while (node->right)
                 node = node->right;
             return node;
@@ -566,7 +572,8 @@ class avl_tree
         node_pointer new_node (const value_type& val = value_type())
         {
             node_pointer p = _alloc.allocate(1);
-            _alloc.construct(p, val); // implicitly calls avl_node constructor to create tmp node
+            // implicitly calls avl_node constructor to create tmp node
+            _alloc.construct(p, val);
             return p;
         }
 
