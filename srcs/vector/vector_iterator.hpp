@@ -112,12 +112,6 @@ class vector_iterator
             return tmp += n;
         }
 
-        friend self_type operator- (difference_type n, const self_type& rhs)
-        {
-            self_type tmp = rhs;
-            return tmp -= n;
-        }
-
         /* GETTERS */
         size_type get_index (void) const { return _index; }
         pointer get_array (void) const { return _array; }
@@ -234,12 +228,6 @@ class reverse_vector_iterator
         {
             self_type tmp = rhs;
             return tmp += n;
-        }
-
-        friend self_type operator- (difference_type n, const self_type& rhs)
-        {
-            self_type tmp = rhs;
-            return tmp -= n;
         }
 
         /* GETTERS */

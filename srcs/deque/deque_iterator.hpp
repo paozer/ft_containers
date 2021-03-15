@@ -163,12 +163,6 @@ class deque_iterator
             return tmp += n;
         }
 
-        friend self_type operator- (difference_type n, const self_type& rhs)
-        {
-            self_type tmp = rhs;
-            return tmp += -n;
-        }
-
         /* GETTERS */
         pointer get_curr (void) const { return _curr; }
         map_pointer get_map (void) const { return _map; }

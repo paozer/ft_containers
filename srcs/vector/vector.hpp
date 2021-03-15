@@ -181,10 +181,8 @@ class vector
 
         void pop_back (void)
         {
-            if (_size > 0) {
-                --_size;
-                _alloc.destroy(_array + _size);
-            }
+            --_size;
+            _alloc.destroy(_array + _size);
         }
 
         iterator insert (iterator position, const value_type& val)

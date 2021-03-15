@@ -221,20 +221,16 @@ class deque
 
         void pop_front (void)
         {
-            if (_size > 0) {
-                ++_first;
-                _alloc.destroy(_first.get_curr());
-                --_size;
-            }
+            ++_first;
+            _alloc.destroy(_first.get_curr());
+            --_size;
         }
 
         void pop_back (void)
         {
-            if (_size > 0) {
-                --_last;
-                _alloc.destroy(_last.get_curr());
-                --_size;
-            }
+            --_last;
+            _alloc.destroy(_last.get_curr());
+            --_size;
         }
 
         // INSERT
