@@ -29,8 +29,6 @@ class avl_iterator
         {
         }
 
-        // need GETTER to node because if non-const_it to const_it the classes are not
-        // the same and we can't access private members
         avl_iterator (const avl_iterator<value_type, false>& other)
             : _node(other.get_node())
         {

@@ -57,7 +57,7 @@ TEST_CASE("set contructors work as expected", "[set][basics]")
             ++it2;
         }
 
-        // TODO: see set todo
+        // TODO: set operator returns non const reference
         //*my_set1.begin() = *my_set2.begin() - 10;
         //*--my_set1.end() = *--my_set2.end() - 10;
         //REQUIRE( *my_set1.begin() != *my_set2.begin() );
@@ -84,7 +84,7 @@ TEST_CASE("set assignment operator copies elements", "[set][operators]")
         ++it2;
     }
 
-    // TODO: see set todo
+    // TODO: set operator returns non const reference
     //*my_set1.begin() -= 10;
     //*--my_set1.end() += 10;
     //REQUIRE( *my_set1.begin() != *my_set2.begin() );

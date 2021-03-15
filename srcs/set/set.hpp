@@ -10,6 +10,8 @@
 #include <limits> // std::numeric_limits
 #include <functional> // std::less
 
+// TODO: make iterator operator* return a const reference
+
 namespace ft {
 
 template < class T,
