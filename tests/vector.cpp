@@ -607,10 +607,3 @@ TEMPLATE_PRODUCT_TEST_CASE("size returns updated vector size", "[vector][capacit
     v.clear();
     REQUIRE( v.size() == 0 );
 }
-
-TEMPLATE_PRODUCT_TEST_CASE("ft::vector max_size returns same value as std::vector", "[vector][capacity]", ft::vector, (int, std::string, ft::vector<int>, std::list<int>))
-{
-    TestType ft_cnt;
-    std::vector<VALUE_TYPE> stl_cnt;
-    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
-}

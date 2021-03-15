@@ -602,10 +602,3 @@ TEMPLATE_PRODUCT_TEST_CASE("size returns updated deque size", "[deque][capacity]
     v.clear();
     REQUIRE( v.size() == 0 );
 }
-
-TEST_CASE("ft::deque max_size returns same value as std::deque", "[deque][capacity]")
-{
-    ft::deque<int> ft_cnt;
-    std::deque<int> stl_cnt;
-    REQUIRE( ft_cnt.max_size() == stl_cnt.max_size() );
-}

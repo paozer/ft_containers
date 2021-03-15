@@ -184,14 +184,6 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
     }
 }
 
-/* CAPACITY */
-TEST_CASE( "max_size returns same value as std::map", "[map][capacity]")
-{
-    ft::map<char,int> my_map;
-    std::map<char,int> stl_map;
-    REQUIRE( my_map.max_size() == stl_map.max_size() );
-}
-
 /* MODIFIERS */
 TEST_CASE("insert works as expected", "[map][modifiers]")
 {

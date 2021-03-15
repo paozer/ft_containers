@@ -862,11 +862,3 @@ TEST_CASE("reverse works correctly", "[list][operations]")
     REQUIRE( *l2.begin() == 2 );
     REQUIRE( *++l2.begin() == 4 );
 }
-
-TEMPLATE_TEST_CASE( "ft::list returns same value as std::list", "[list][capacity]",
-        int, char, std::string, std::list<int>, std::vector<std::string> )
-{
-    ft::list<TestType> ft_c;
-    std::list<TestType> stl_c;
-    REQUIRE( ft_c.max_size() == stl_c.max_size() );
-}

@@ -194,14 +194,6 @@ TEST_CASE("set iterators works correctly", "[set][iterators]")
     }
 }
 
-/* CAPACITY */
-TEST_CASE("max_size returns same value as std::set", "[set][capacity]")
-{
-    ft::set<int> my_set;
-    std::set<int> stl_set;
-    REQUIRE( my_set.max_size() == stl_set.max_size() );
-}
-
 /* MODIFIERS */
 TEST_CASE("set insert works as expected", "[set][modifiers]")
 {
