@@ -8,15 +8,16 @@ TEST_SRC =	tests/map.cpp\
 			tests/list.cpp\
 			tests/deque.cpp\
 			tests/vector.cpp\
+			tests/set.cpp\
 			tests/stack_queue.cpp
 
 CC		=	clang++
 
 NO_UNIT_FLAGS =	-fsanitize=address -g3 -Wall -Wextra -std=c++98 -DNO_UNIT_TESTS
 
-UNIT_FLAGS	=	-fsanitize=address -g3 -Wall -Wextra -Werror -std=c++2a
+UNIT_FLAGS	=	-fsanitize=address -g3 -Wall -Wextra -std=c++2a
 
-COVERAGE_FLAGS	=	--coverage -g -O0 -Wall -Wextra -Werror -std=c++2a
+COVERAGE_FLAGS	=	--coverage -g -O0 -Wall -Wextra -std=c++2a
 
 ############## RECIPES ##############
 
