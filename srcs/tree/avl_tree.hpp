@@ -2,7 +2,7 @@
 
 #include "avl_node.hpp"
 #include "avl_iterator.hpp"
-#include "utils.hpp"
+#include "../utils/utils.hpp"
 
 #include <cstddef> // size_t, NULL
 #include <cmath> // std::abs

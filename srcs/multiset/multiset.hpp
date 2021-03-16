@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../utils/avl_tree.hpp"
-#include "../utils/avl_iterator.hpp"
+#include "../tree/avl_tree.hpp"
+#include "../tree/avl_iterator.hpp"
 
 #include <cstddef> // std::ptddiff_t, size_t
 
