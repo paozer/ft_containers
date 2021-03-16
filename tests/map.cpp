@@ -12,14 +12,14 @@
 #endif
 
 /* CONSTRUCTION */
-TEST_CASE("map contructors work as expected", "[map][basics]")
+TEST_CASE("map constructors return the requested map", "[map][basics]")
 {
-    SECTION("default constructor constructs an empty map") {
+    SECTION("declaration creates an empty map") {
         LIB::map<int, int> map;
         REQUIRE( map.empty() );
         REQUIRE( map.size() == 0 );
     }
-    SECTION("range constructor fills with corresponding element in range") {
+    SECTION("range constructor creates a map filled with the elements of the passed range") {
         std::map<char, int> stl_map;
         for (int i = 0; i < 25; ++i)
             stl_map[rand() % 93 + 33] = rand();
@@ -36,7 +36,7 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
             ++stl_it;
         }
     }
-    SECTION("copy constructor constructs a copy with a copy of each element") {
+    SECTION("copy constructor constructs an exact copy of a given map") {
         LIB::map<char, int> my_map1;
         for (int i = 0; i < 25; ++i)
             my_map1[rand() % 93 + 33] = rand();
@@ -59,30 +59,29 @@ TEST_CASE("map contructors work as expected", "[map][basics]")
     }
 }
 
-TEST_CASE("Assignment operator copies elements", "[map][operators]")
+TEST_CASE("maps can be assigned using the = operator", "[map][operators]")
 {
     LIB::map<char, int> my_map1;
     for (int i = 0; i < 10; ++i)
         my_map1[rand() % 93 + 33] = rand() % 10000;
-    LIB::map<char, int> my_map2 = my_map1;
 
+    LIB::map<char, int> my_map2 = my_map1;
     REQUIRE( my_map2.size() == my_map1.size() );
 
+    // assigned maps contain the same values
     auto it1 = my_map1.begin();
     auto it2 = my_map2.begin();
-    while (it1 != my_map1.end()) {
+    for (; it1 != my_map1.end(); ++it1, ++it2)
         REQUIRE( *it1 == *it2 );
-        ++it1;
-        ++it2;
-    }
 
+    // values are copied when maps are assigned
     my_map1.begin()->second -= 1;
     (--my_map1.end())->second += 1;
     REQUIRE(( my_map1.begin()->second != my_map2.begin()->second ));
     REQUIRE(( (--my_map1.end())->second != (--my_map2.end())->second ));
 }
 
-TEST_CASE("there are no duplicates in a map", "[map][basics]")
+TEST_CASE("maps contain no duplicates", "[map][basics]")
 {
     LIB::map<int, int> map;
     std::list<int> list;
@@ -92,6 +91,9 @@ TEST_CASE("there are no duplicates in a map", "[map][basics]")
         list.push_back(rand);
         map.insert(std::make_pair(rand, i));
     }
+    // there should be duplicates in the list
+    REQUIRE_FALSE( map.size() == list.size() );
+    // removing those duplicates & sorting the resulting list
     list.sort();
     list.unique();
     REQUIRE( map.size() == list.size() );
@@ -99,7 +101,7 @@ TEST_CASE("there are no duplicates in a map", "[map][basics]")
 }
 
 /* RELATIONAL OPERATORS */
-TEST_CASE("map relational operators work correctly", "[map][operators]")
+TEST_CASE("maps can be compared using relational operators", "[map][operators]")
 {
     std::array<std::pair<char, int>, 4> a = {{ {'b', 2}, {'z', 40}, {'p', 1}, {'a', 680} }};
     std::array<std::pair<char, int>, 4> b = {{ {'b', 1}, {'z', 10}, {'c', 1}, {'z', 680} }};
@@ -150,7 +152,7 @@ TEST_CASE("map relational operators work correctly", "[map][operators]")
 }
 
 /* ITERATORS */
-TEST_CASE("Iterators works correctly", "[map][iterators]")
+TEST_CASE("maps can be iterated over", "[map][iterators]")
 {
     SECTION("iterators can be created as expected") {
         LIB::map<char, int> my_map;
@@ -182,10 +184,28 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
         list.sort();
         list.unique();
         REQUIRE( std::distance(map.begin(), map.end()) == std::distance(list.begin(), list.end()) );
+
         auto it = map.begin();
         auto lit = list.begin();
         for (; it != map.end(); ++it, ++lit)
             REQUIRE( it->first == *lit );
+
+        auto rit = map.rbegin();
+        auto rlit = list.rbegin();
+        for (; rit != map.rend(); ++rit, ++rlit)
+            REQUIRE( rit->first == *rlit );
+
+        it = --map.end();
+        lit = --list.end();
+        while (true) {
+            REQUIRE( it->first == *lit );
+            if (it == map.begin())
+                break;
+            it--;
+            lit--;
+        }
+        REQUIRE( it == map.begin());
+        REQUIRE( lit == list.begin());
     }
 }
 
@@ -193,8 +213,8 @@ TEST_CASE("Iterators works correctly", "[map][iterators]")
 TEST_CASE("insert works as expected", "[map][modifiers]")
 {
     LIB::map<char, int> my_map;
-    std::pair<LIB::map<char, int>::iterator, bool> ret;
     LIB::map<char, int>::iterator it_ret;
+    std::pair<LIB::map<char, int>::iterator, bool> ret;
 
     SECTION("single element insert add the pair to the map if its not present") {
         REQUIRE( my_map.empty() );
@@ -264,24 +284,19 @@ TEST_CASE("insert works as expected", "[map][modifiers]")
         std::array< std::pair<const char, int>, 10 > arr = {{{'a','a'},{'b','b'},{'c','c'},{'e','e'},{'f','f'},{'h','h'},{'i','i'},{'s','s'},{'u','u'},{'z','z'}}};
         auto mapit = my_map.begin();
         auto arrit = arr.begin();
-        while (mapit != my_map.end()) {
+        for (; mapit != my_map.end(); ++mapit, ++arrit)
             REQUIRE( *mapit == *arrit );
-            ++mapit;
-            ++arrit;
-        }
     }
     SECTION("range insert inserts a copy of the ranges elements") {
         std::vector<std::pair<char, int> > v;
         for (char i = 'a'; i < 'z'; ++i)
             v.push_back(std::make_pair(i, rand()));
         auto first = v.begin() + 5;
-        auto last = v.begin() + 15;
-        my_map.insert(first, last);
-        REQUIRE( (my_map.size() == (unsigned long)std::distance(first, last)) );
-        for (auto it = my_map.begin(); it != my_map.end(); ++it) {
+        my_map.insert(first, first + 10);
+        REQUIRE(( my_map.size() == 10 ));
+        for (auto it = my_map.begin(); it != my_map.end(); ++it, ++first) {
             REQUIRE( it->first == first->first );
             REQUIRE( it->second == first->second );
-            ++first;
         }
     }
 }
@@ -344,7 +359,7 @@ TEST_CASE("erase works as expected", "[map][modifiers]")
     }
 }
 
-TEST_CASE("swap works as expected", "[map][modifiers]")
+TEST_CASE("maps can be swapped", "[map][modifiers]")
 {
     LIB::map<int, std::string> my_map1;
     LIB::map<int, std::string> my_map2;
@@ -355,7 +370,7 @@ TEST_CASE("swap works as expected", "[map][modifiers]")
     my_map1[-22] = "34";
     my_map1[10] = "autobahn";
     my_map2.swap(my_map1);
-    REQUIRE( my_map1.size() == 0 );
+    REQUIRE( my_map1.empty() );
     REQUIRE( my_map2.size() == 5 );
     REQUIRE( my_map2[14] == "fifteen" );
     REQUIRE( my_map2[19] == "dog" );
@@ -365,7 +380,7 @@ TEST_CASE("swap works as expected", "[map][modifiers]")
     my_map2.erase(++my_map2.begin(), my_map2.end());
     my_map2.swap(my_map1);
     REQUIRE( my_map1.size() == 1 );
-    REQUIRE( my_map2.size() == 0 );
+    REQUIRE( my_map2.empty() );
 }
 
 TEST_CASE("clear works as expected", "[map][modifiers]")

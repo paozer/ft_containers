@@ -20,7 +20,6 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
         REQUIRE( cnt.empty() );
         REQUIRE( cnt.size() == 0 );
     }
-
     SECTION("fill constructor returns correct vector") {
         unsigned int size = GENERATE(0, 1, 5);
         int fill = GENERATE(0, -41);
@@ -30,7 +29,6 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
         for (unsigned int i = 0; i < size; ++i)
             REQUIRE( cnt[i] == fill );
     }
-
     SECTION("range constructor returns correct vector") {
         int v[] = {2, 4, 12, 5, 60, 99, -12};
         unsigned int first = GENERATE(0, 1, 3);
@@ -44,7 +42,6 @@ TEST_CASE("vector construction works correctly", "[vector][basics]")
                 REQUIRE( cnt[i] == v[i + first] );
         }
     }
-
     SECTION("copy constructor returns correct vector") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
         LIB::vector<int> v1;
@@ -76,24 +73,21 @@ TEST_CASE("vector assignation works correctly", "[vector][assignation operators]
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
-    LIB::vector<int> myvector1 (a, a + 5);
-    LIB::vector<int> myvector2 (b, b + 2);
-    LIB::vector<int> myvector3;
+    LIB::vector<int> v1 (a, a + 5);
+    LIB::vector<int> v2 (b, b + 2);
+    LIB::vector<int> v3;
     LIB::vector<int>::iterator lit;
     LIB::vector<int>::iterator rit;
 
-    myvector1 = myvector2;
-    REQUIRE( myvector1.size() == myvector2.size() );
-    lit = myvector1.begin();
-    rit = myvector2.begin();
-    while (lit != myvector1.end()) {
+    v1 = v2;
+    REQUIRE( v1.size() == v2.size() );
+    lit = v1.begin();
+    rit = v2.begin();
+    for (; lit != v1.end(); ++lit, ++rit)
         REQUIRE( *lit == *rit );
-        ++lit;
-        ++rit;
-    }
-    myvector2 = myvector3;
-    REQUIRE( myvector2.size() == myvector3.size() );
-    REQUIRE( myvector2.begin() == myvector2.end() );
+    v2 = v3;
+    REQUIRE( v2.size() == v3.size() );
+    REQUIRE( v2.begin() == v2.end() );
 }
 
 /* RELATIONAL OPERATORS */
@@ -102,67 +96,96 @@ TEST_CASE("vector relational operators work correctly", "[vector][relational ope
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
     int c[] = {1, 4, -1, 2, 33, 0};
-    LIB::vector<int> myvector1 (a, a + 5);
-    LIB::vector<int> myvector2 (b, b + 2);
-    LIB::vector<int> myvector3;
-    LIB::vector<int> myvector4 (c, c + 6);
+    int d[] = {1, 4, -1, -32, 33, 0};
+    LIB::vector<int> v1 (a, a + 5);
+    LIB::vector<int> v2 (b, b + 2);
+    LIB::vector<int> v3;
+    LIB::vector<int> v4 (c, c + 6);
+    LIB::vector<int> v5 (d, d + 6);
 
-    // myvector1 vs myvector2
-    REQUIRE_FALSE( myvector1 == myvector2 );
-    REQUIRE( myvector1 != myvector2 );
-    REQUIRE_FALSE( myvector1 < myvector2 );
-    REQUIRE_FALSE( myvector1 <= myvector2 );
-    REQUIRE( myvector1 > myvector2 );
-    REQUIRE( myvector1 >= myvector2 );
+    // v1 vs v2
+    REQUIRE_FALSE( v1 == v2 );
+    REQUIRE( v1 != v2 );
+    REQUIRE_FALSE( v1 < v2 );
+    REQUIRE_FALSE( v1 <= v2 );
+    REQUIRE( v1 > v2 );
+    REQUIRE( v1 >= v2 );
 
-    // myvector1 vs myvector1
-    REQUIRE( myvector1 == myvector1 );
-    REQUIRE_FALSE( myvector1 != myvector1 );
-    REQUIRE_FALSE( myvector1 < myvector1 );
-    REQUIRE( myvector1 <= myvector1 );
-    REQUIRE_FALSE( myvector1 > myvector1 );
-    REQUIRE( myvector1 >= myvector1 );
+    // v1 vs v1
+    REQUIRE( v1 == v1 );
+    REQUIRE_FALSE( v1 != v1 );
+    REQUIRE_FALSE( v1 < v1 );
+    REQUIRE( v1 <= v1 );
+    REQUIRE_FALSE( v1 > v1 );
+    REQUIRE( v1 >= v1 );
 
-    // myvector1 vs myvector3
-    REQUIRE_FALSE( myvector1 == myvector3 );
-    REQUIRE( myvector1 != myvector3 );
-    REQUIRE_FALSE( myvector1 < myvector3 );
-    REQUIRE_FALSE( myvector1 <= myvector3 );
-    REQUIRE( myvector1 > myvector3 );
-    REQUIRE( myvector1 >= myvector3 );
+    // v1 vs v3
+    REQUIRE_FALSE( v1 == v3 );
+    REQUIRE( v1 != v3 );
+    REQUIRE_FALSE( v1 < v3 );
+    REQUIRE_FALSE( v1 <= v3 );
+    REQUIRE( v1 > v3 );
+    REQUIRE( v1 >= v3 );
 
-    // myvector3 vs myvector3
-    REQUIRE( myvector3 == myvector3 );
-    REQUIRE_FALSE( myvector3 != myvector3 );
-    REQUIRE_FALSE( myvector3 < myvector3 );
-    REQUIRE( myvector3 <= myvector3 );
-    REQUIRE_FALSE( myvector3 > myvector3 );
-    REQUIRE( myvector3 >= myvector3 );
+    // v3 vs v3
+    REQUIRE( v3 == v3 );
+    REQUIRE_FALSE( v3 != v3 );
+    REQUIRE_FALSE( v3 < v3 );
+    REQUIRE( v3 <= v3 );
+    REQUIRE_FALSE( v3 > v3 );
+    REQUIRE( v3 >= v3 );
 
-    // myvector1 vs myvector4
-    REQUIRE_FALSE( myvector1 == myvector4 );
-    REQUIRE( myvector1 != myvector4 );
-    REQUIRE( myvector1 < myvector4 );
-    REQUIRE( myvector1 <= myvector4 );
-    REQUIRE_FALSE( myvector1 > myvector4 );
-    REQUIRE_FALSE( myvector1 >= myvector4 );
+    // v1 vs v4
+    REQUIRE_FALSE( v1 == v4 );
+    REQUIRE( v1 != v4 );
+    REQUIRE( v1 < v4 );
+    REQUIRE( v1 <= v4 );
+    REQUIRE_FALSE( v1 > v4 );
+    REQUIRE_FALSE( v1 >= v4 );
+
+    // v4 vs v5
+    REQUIRE_FALSE( v4 == v5 );
+    REQUIRE( v4 != v5 );
+    REQUIRE_FALSE( v4 < v5 );
+    REQUIRE_FALSE( v4 <= v5 );
+    REQUIRE( v4 > v5 );
+    REQUIRE( v4 >= v5 );
 }
 
 /* ITERATORS */
 TEST_CASE("begin returns first element and can be incremented", "[vector][iterators]")
 {
     SECTION("non-const iterator behaviour") {
-        LIB::vector<int> v (5, 10);              // { 10, 10, 10, 10, 10 }
-        REQUIRE( *v.begin() == 10 );
-        *v.begin() = 5;                         // { 5, 10, 10, 10, 10 }
-        *++v.begin() = 6;                       // { 5, 6, 10, 10, 10 }
+        LIB::vector<int> v (5, 10);                             // { 10, 10, 10, 10, 10 }
+        LIB::vector<int>::iterator it = v.begin();
+        LIB::vector<int>::reverse_iterator rit = v.rbegin();
+
+        REQUIRE( *rit == 10 );
+        REQUIRE( *it == 10 );
+        *(it++) = 5;                                            // { 5, 10, 10, 10, 10 }
+        *it = 6;                                                // { 5, 6, 10, 10, 10 }
         REQUIRE( *v.begin() == 5 );
-        REQUIRE( *(v.begin() + 1) == 6 );
-        REQUIRE( *(v.begin() + 2) == 10 );
-        *v.begin() = 2;                         // { 2, 6, 10, 10, 10 }
+        REQUIRE( v.begin()[1] == 6 );
+        REQUIRE( v.begin()[2] == 10 );
+        REQUIRE( v.rend()[-1] == 5 );
+        REQUIRE( v.rend()[-2] == 6 );
+        REQUIRE( v.rend()[-3] == 10 );
+        *v.begin() = 2;                                         // { 2, 6, 10, 10, 10 }
         REQUIRE( *v.begin() == 2 );
         REQUIRE( *(v.begin() + 1) == 6 );
         REQUIRE( *(v.begin() + 2) == 10 );
+        REQUIRE( *(v.rend() - 1) == 2 );
+        REQUIRE( *(v.rend() - 2) == 6 );
+        REQUIRE( *(v.rend() - 3) == 10 );
+
+        REQUIRE( v.end() - v.begin() == 5 );
+        REQUIRE( v.begin() - v.end() == -5 );
+        REQUIRE( v.rend() - v.rbegin() == 5 );
+        REQUIRE( v.begin() - v.end() == -5 );
+        REQUIRE( v.rbegin() + 5  == v.rend() );
+        REQUIRE( v.rbegin() + 4  != v.rend() );
+        REQUIRE( v.rend() - 5  == v.rbegin() );
+        REQUIRE( v.rend() - 3  != v.rbegin() );
     }
 
     SECTION("const iterator behaviour") {
@@ -172,12 +195,14 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         const LIB::vector<int> v1;
 
         REQUIRE( *v.begin() == 1 );
-        REQUIRE( *(v.begin() + 1) == 4 );
-        REQUIRE( *(v.begin() + 2) == -1 );
-        REQUIRE( *(v.begin() + 3) == 2 );
-        REQUIRE( *(v.begin() + 4) == 33 );
-        REQUIRE( (v.begin() + 5) == v.end() );
+        REQUIRE( v.begin()[1] == 4 );
+        REQUIRE( v.begin()[2] == -1 );
+        REQUIRE( v.begin()[3] == 2 );
+        REQUIRE( v.begin()[4] == 33 );
+        REQUIRE( v.begin() + 5 == v.end() );
         REQUIRE( v1.begin() == v1.end() );
+        REQUIRE( v1.rbegin() == v1.rend() );
+        REQUIRE( v.rbegin() + 5 == v.rend() );
 
         LIB::vector<int>::const_iterator it = v2.begin();
         REQUIRE( *it == 1 );
@@ -185,7 +210,7 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         REQUIRE( *(it + 2) == -1 );
         REQUIRE( *(it + 3) == 2 );
         REQUIRE( *(it + 4) == 33 );
-        REQUIRE( (it + 5) == v2.end() );
+        REQUIRE( it + 5 == v2.end() );
     }
 
     SECTION("misc") {
@@ -208,46 +233,6 @@ TEST_CASE("begin returns first element and can be incremented", "[vector][iterat
         REQUIRE_FALSE( it1 <= v.begin() );
     }
 
-}
-
-TEMPLATE_TEST_CASE("end works correctly", "[vector][iterators]", LIB::vector<int>)
-{
-    SECTION("non-const iterator behaviour") {
-        LIB::vector<int> v (5, 10);                  // { 10, 10, 10, 10, 10 }
-        REQUIRE( *(v.end() - 1) == 10 );
-        *(v.end() - 1) = 5;                         // { 10, 10, 10, 10, 5 }
-        *(v.end() - 2) = 6;                         // { 10, 10, 10, 6, 5 }
-        REQUIRE( *(v.end() - 1) == 5 );
-        REQUIRE( *(v.end() - 2) == 6 );
-        *(v.end() - 1) = 2;                         // { 10, 10, 10, 6, 2 }
-        *(v.end() - 4) = 1;                         // { 10, 1, 10, 6, 2 }
-        REQUIRE( *(v.end() - 1) == 2 );
-        REQUIRE( *(v.end() - 2) == 6 );
-        REQUIRE( *(v.begin() + 1) == 1 );
-    }
-
-    SECTION("const iterator behaviour") {
-        int arr[] = {1, 4, -1, 2, 33};
-        LIB::vector<int> v2 (arr, arr + 5);
-        const LIB::vector<int> v (v2);
-        const LIB::vector<int> v1;
-
-        REQUIRE( *(v.end() - 1) == 33 );
-        REQUIRE( *(v.end() - 2) == 2 );
-        REQUIRE( *(v.end() - 3) == -1 );
-        REQUIRE( *(v.end() - 4) == 4 );
-        REQUIRE( *(v.end() - 5) == 1 );
-        REQUIRE( v.begin() == (v.end() - 5) );
-        REQUIRE( v1.begin() == v1.end() );
-
-        LIB::vector<int>::const_iterator it = v2.end();
-        REQUIRE( *(it - 1) == 33 );
-        REQUIRE( *(it - 2) == 2 );
-        REQUIRE( *(it - 3) == -1 );
-        REQUIRE( *(it - 4) == 4 );
-        REQUIRE( *(it - 5) == 1 );
-        REQUIRE( (it - 5) == v2.begin() );
-    }
 }
 
 /* MODIFIERS */
@@ -332,11 +317,11 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
         REQUIRE( *ret == 5 );
         ret = v.insert(v.end(), 10);                // { 5, 10 }
         REQUIRE( *ret == 10 );
-        ret = v.insert(++v.begin(), 7);             // { 5, 7, 10 }
+        ret = v.insert(v.begin() + 1, 7);           // { 5, 7, 10 }
         REQUIRE( *ret == 7 );
-        ret = v.insert(----v.end(), 6);             // { 5, 6, 7, 10 }
+        ret = v.insert(v.end() - 2, 6);             // { 5, 6, 7, 10 }
         REQUIRE( *ret == 6 );
-        ret = v.insert(++++v.begin(), 0);           // { 5, 6, 0, 7, 10 }
+        ret = v.insert(v.begin() + 2, 0);           // { 5, 6, 0, 7, 10 }
         REQUIRE( *ret == 0 );
 
         REQUIRE( v.size() == 5 );
@@ -349,9 +334,10 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
     SECTION("fill insert works correctly") {
         v.insert(v.begin(), 5, 10);                 // { 10, 10, 10, 10, 10 }
         v.insert(v.end(), 1, 100);                  // { 10, 10, 10, 10, 10, 100 }
-        v.insert(++v.begin(), 2, 0);                // { 10, 0, 0, 10, 10, 10, 10, 100 }
-        v.insert(++++v.begin(), 1, 42);             // { 10, 0, 42, 0, 10, 10, 10, 10, 100 }
-        v.insert(--v.end(), 3, 21);                 // { 10, 0, 42, 0, 10, 10, 10, 10, 21, 21, 21, 100 }
+        v.insert(v.begin() + 1, 2, 0);              // { 10, 0, 0, 10, 10, 10, 10, 100 }
+        v.insert(v.begin() + 2, 1, 42);             // { 10, 0, 42, 0, 10, 10, 10, 10, 100 }
+        v.insert(v.end() - 1, 3, 21);               // { 10, 0, 42, 0, 10, 10, 10, 10, 21, 21, 21, 100 }
+        v.insert(v.end(), 0, -1);
 
         REQUIRE( v.size() == 12 );
         REQUIRE( v[0] == 10 );
@@ -372,6 +358,7 @@ TEST_CASE("vector insert work correctly", "[vector][modifiers]")
         v.insert(v.end(), arr + 1, arr + 5);        // { 0, 1, 4, 5, 6 }
         v.insert(++v.begin(), arr + 3, arr + 5);    // { 0, 5, 6, 1, 4, 5, 6 }
         v.insert(----v.end(), arr1 + 1, arr1 + 2);  // { 0, 5, 6, 1, 4, -32, 5, 6 }
+        v.insert(v.end(), arr, arr);
 
         REQUIRE( v.size() == 8 );
         REQUIRE( v[0] == 0 );
@@ -462,6 +449,14 @@ TEST_CASE("swap swaps vector sizes, capacities and content", "[vector][modifiers
         REQUIRE(( v1.begin() == v1.end() ));
         for (auto it = v2.begin(); it != v2.end(); ++it)
             REQUIRE( *it == 100 );
+
+        LIB::swap(v1, v2);
+        REQUIRE( v1.size() == 10 );
+        REQUIRE( v2.size() == 0 );
+        REQUIRE( v1.capacity() == v1_cap );
+        REQUIRE( v2.capacity() == v2_cap );
+        for (auto it = v1.begin(); it != v1.end(); ++it)
+            REQUIRE( *it == 100 );
     }
     SECTION("works for empty vectors") {
         LIB::vector<int> v1;
@@ -531,9 +526,13 @@ TEST_CASE("front and back return vectors first element", "[vector][element acces
 {
     int arr[] = { 1, 32, 0, -23 };
     LIB::vector<int> v (arr, arr + 4);
-    LIB::vector<int> cv (arr, arr + 4);
-    LIB::vector<int>::const_reference front_ref = v.front();
-    LIB::vector<int>::const_reference back_ref = v.back();
+    const LIB::vector<int> cv (arr, arr + 3);
+    LIB::vector<int>::reference front_ref = v.front();
+    LIB::vector<int>::reference back_ref = v.back();
+
+    // const
+    REQUIRE( cv.front() == 1 );
+    REQUIRE( cv.back() == 0 );
 
     // front
     REQUIRE( v.front() == 1 );

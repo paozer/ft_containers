@@ -25,7 +25,6 @@ TEMPLATE_PRODUCT_TEST_CASE("container adaptors work as expected", "[container_ad
         REQUIRE( cnt.empty() );
         REQUIRE( cnt.size() == 0 );
     }
-
     SECTION("push updates containers size") {
         for (int i = 0; i < 100; ++i) {
             cnt.push(VALUE_TYPE());
@@ -66,7 +65,6 @@ TEMPLATE_PRODUCT_TEST_CASE("relational operators work as expected", "[container_
         REQUIRE_FALSE(( cnt1 < cnt2 ));
         REQUIRE_FALSE(( cnt1 > cnt2 ));
     }
-
     SECTION("on empty & non-empty containers") {
         cnt2.push(1);
         cnt2.push(2);
@@ -77,7 +75,6 @@ TEMPLATE_PRODUCT_TEST_CASE("relational operators work as expected", "[container_
         REQUIRE_FALSE(( cnt1 >= cnt2 ));
         REQUIRE_FALSE(( cnt1 > cnt2 ));
     }
-
     SECTION("on two non-empty containers") {
         cnt1.push(1);
         cnt2.push(1);
@@ -137,7 +134,6 @@ TEST_CASE("deque specific methods work as expected", "[container_adaptors][queue
         stl_cnt.pop();
         REQUIRE( my_cnt.back() == stl_cnt.back() );
     }
-
     SECTION("front method works as expected") {
         for (int i = 0; i < 9; ++i) {
             my_cnt.push(i);

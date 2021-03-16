@@ -13,16 +13,14 @@
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
-TEST_CASE("list construction works correctly", "[list][basics]")
+TEST_CASE("list constructors return the requested list", "[list][basics]")
 {
-    SECTION("declaration creates empty list") {
+    SECTION("declaration creates an empty list") {
         LIB::list<int> c;
-
         REQUIRE( c.empty() );
         REQUIRE( c.size() == 0 );
     }
-
-    SECTION("fill constructor creates list of specified size & filled with elements") {
+    SECTION("fill constructor creates a list of specified size & filled correct with elements") {
         size_t i = GENERATE(0, 1, 100);
         int j = GENERATE(-100, 914);
         LIB::list<int> c (i, j);
@@ -31,8 +29,7 @@ TEST_CASE("list construction works correctly", "[list][basics]")
         for (auto it = c.begin(); it != c.end(); ++it)
             REQUIRE( *it == j );
     }
-
-    SECTION("range constructor creates list with correct elements from range") {
+    SECTION("range constructor creates list filled with the elements of the passed range") {
         unsigned int first = GENERATE(0, 1, 3);
         unsigned int last = GENERATE(0, 3, 6);
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
@@ -40,16 +37,11 @@ TEST_CASE("list construction works correctly", "[list][basics]")
 
         if (last >= first) {
             LIB::list<int> l (arr + first, arr + last);
-
             REQUIRE( l.size() == last - first );
             for (auto it = l.begin(); it != l.end(); ++it, ++i)
                 REQUIRE( *it == arr[first + i] );
         }
-
-        LIB::list<int> l2 (arr, arr);
-        REQUIRE( l2.empty() );
     }
-
     SECTION("copy constructor constructs an exact copy of a given list") {
         int i = 0;
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
@@ -72,11 +64,11 @@ TEST_CASE("list construction works correctly", "[list][basics]")
 }
 
 /* ASSIGNATION OPERATOR */
-TEST_CASE("assignation operator works correctly", "[list][basics]")
+TEST_CASE("lists can be assigned using the = operator", "[list][operators]")
 {
     int arr[] = {2, 4, 12, 5, 60, 99, -12};
 
-    SECTION("different size of ranges are handled correctly") {
+    SECTION("different sizes of ranges can be assigned to lists") {
         size_t i = 0;
         unsigned int first = GENERATE(0, 1, 3);
         unsigned int last = GENERATE(0, 3, 6);
@@ -90,8 +82,7 @@ TEST_CASE("assignation operator works correctly", "[list][basics]")
                 REQUIRE( *it == arr[first + i] );
         }
     }
-
-    SECTION("assignation from empty list works") {
+    SECTION("assigning from & between empty lists works as expected") {
         LIB::list<int> mylist3;
         LIB::list<int> mylist4 = mylist3;
         LIB::list<int> mylist5 (arr, arr + 3);
@@ -106,7 +97,7 @@ TEST_CASE("assignation operator works correctly", "[list][basics]")
 }
 
 /* RELATIONAL OPERATORS */
-TEST_CASE("relational operators work correctly", "[list][basics]")
+TEST_CASE("lists can be compared using relational operators", "[list][basics]")
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
@@ -168,18 +159,24 @@ TEST_CASE("relational operators work correctly", "[list][basics]")
 }
 
 /* ITERATORS */
-TEST_CASE( "list begin/rbegin work correctly", "[list][basics]")
+TEST_CASE("list begin/rbegin work correctly", "[list][basics]")
 {
     SECTION("non-const iterator behaviour") {
         LIB::list<int> mylist (1, 10);       // { 10 }
         REQUIRE( *mylist.begin() == 10 );
         REQUIRE( *mylist.rbegin() == 10 );
+        REQUIRE( ++mylist.begin() == mylist.end() );
+        REQUIRE( ++mylist.rbegin() == mylist.rend() );
+        REQUIRE( mylist.begin() != mylist.end() );
+        REQUIRE( mylist.rbegin() != mylist.rend() );
 
         mylist.push_front(5);               // { 5, 10 }
-        REQUIRE( *mylist.begin() == 5 );
-        REQUIRE( *++mylist.begin() == 10 );
-        REQUIRE( *mylist.rbegin() == 10 );
-        REQUIRE( *++mylist.rbegin() == 5 );
+        LIB::list<int>::iterator it = mylist.begin();
+        LIB::list<int>::reverse_iterator rit = mylist.rbegin();
+        REQUIRE( *(it++) == 5 );
+        REQUIRE( *it == 10 );
+        REQUIRE( *(rit++) == 10 );
+        REQUIRE( *rit == 5 );
 
         mylist.push_back(20);               // { 5, 10, 20 }
         REQUIRE( *mylist.begin() == 5 );
@@ -190,10 +187,12 @@ TEST_CASE( "list begin/rbegin work correctly", "[list][basics]")
         REQUIRE( *++++mylist.rbegin() == 5 );
 
         mylist.pop_front();                 // { 10, 20 }
-        REQUIRE( *mylist.begin() == 10 );
-        REQUIRE( *++mylist.begin() == 20 );
-        REQUIRE( *mylist.rbegin() == 20 );
-        REQUIRE( *++mylist.rbegin() == 10 );
+        it = mylist.begin();
+        rit = mylist.rbegin();
+        REQUIRE( *it == 10 );
+        REQUIRE( *++it == 20 );
+        REQUIRE( *rit == 20 );
+        REQUIRE( *++rit == 10 );
 
         *mylist.begin() = 21;                // { 21, 42 }
         *mylist.rbegin() = 42;               // { 21, 42 }
@@ -202,7 +201,6 @@ TEST_CASE( "list begin/rbegin work correctly", "[list][basics]")
         REQUIRE( *mylist.rbegin() == 42 );
         REQUIRE( *++mylist.rbegin() == 21 );
     }
-
     SECTION("const iterator behaviour") {
         int arr[] = {1, 2, 3, 4, 5, 6};
         const LIB::list<int> mylist (1, 10);
@@ -286,7 +284,7 @@ TEST_CASE("list end works correctly", "[list][basics]")
 }
 
 /* MODIFIERS */
-TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", LIB::list, TYPE_LIST )
+TEMPLATE_PRODUCT_TEST_CASE("lists can be assigned values", "[list][modifiers]", LIB::list, TYPE_LIST)
 {
     SECTION("range assign works correctly") {
         TestType c;
@@ -298,7 +296,6 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", LIB::l
         for (auto it = c.begin(); it != c.end(); ++it)
             REQUIRE( *it == VALUE_TYPE() );
     }
-
     SECTION("fill assign works correctly") {
         TestType c;
         size_t n = GENERATE(0, 100);
@@ -311,12 +308,12 @@ TEMPLATE_PRODUCT_TEST_CASE( "assign work correctly", "[list][modifiers]", LIB::l
     }
 }
 
-TEST_CASE("push_front works correctly", "[list][modifiers]")
+TEST_CASE("lists can push elements", "[list][modifiers]")
 {
-    SECTION( "the element is added at the front & size is incremented" ) {
-        int value;
-        LIB::list<int> l1;
+    int value;
+    LIB::list<int> l1;
 
+    SECTION("elements can be pushed to the front of the list") {
         for (int i = 0; i < 50; ++i) {
             value = rand();
             l1.push_front(value);
@@ -324,112 +321,105 @@ TEST_CASE("push_front works correctly", "[list][modifiers]")
         }
         REQUIRE( l1.size() == (unsigned int)50 );
     }
-}
-
-TEST_CASE("push_back works correctly", "[list][modifiers]")
-{
-    SECTION( "containers size is incremented & the element is added at the back" ) {
-        int value;
-        LIB::list<int> l1;
-
+    SECTION("elements can be pushed to the back of the list") {
         for (int i = 0; i < 50; ++i) {
             value = rand();
             l1.push_back(value);
-            REQUIRE( *(--l1.end()) == value );
+            REQUIRE( l1.back() == value );
         }
         REQUIRE( l1.size() == (unsigned int)50 );
     }
 }
 
-TEST_CASE("pop_front works correctly", "[list][modifiers]")
+TEST_CASE("lists can pop elements", "[list][modifiers]")
 {
     unsigned int size = GENERATE(0, 1, 2, 15);
     LIB::list<int> l1 (size, 100);
 
-    while (!l1.empty()) {
-        REQUIRE( l1.size() == size);
-        REQUIRE( *l1.begin() == 100);
-        REQUIRE( *--l1.end() == 100);
-        l1.pop_front();
-        --size;
+    SECTION("elements can be popped from the front of the list") {
+        while (!l1.empty()) {
+            REQUIRE( l1.size() == size);
+            REQUIRE( l1.front() == 100);
+            REQUIRE( l1.back() == 100);
+            l1.pop_front();
+            --size;
+        }
+        REQUIRE( size == 0 );
     }
-    REQUIRE( size == 0 );
+    SECTION("elements can be popped from the front of the list") {
+        while (!l1.empty()) {
+            REQUIRE( l1.size() == size);
+            REQUIRE( l1.front() == 100);
+            REQUIRE( l1.back() == 100);
+            l1.pop_back();
+            --size;
+        }
+        REQUIRE( size == 0 );
+    }
 }
 
-TEST_CASE("pop_back works correctly", "[list][modifiers]")
+TEST_CASE("inserting elements works correctly", "[list][modifiers]")
 {
-    unsigned int size = GENERATE(0, 1, 2, 15);
-    LIB::list<int> l1 (size, 100);
+    LIB::list<int> l;
+    LIB::list<int>::iterator it = l.begin();
+    LIB::list<int>::iterator ret;
 
-    while (!l1.empty()) {
-        REQUIRE( l1.size() == size);
-        REQUIRE( *l1.begin() == 100);
-        REQUIRE( *--l1.end() == 100);
-        l1.pop_back();
-        --size;
+    SECTION("single element insert works correctly") {
+        ret = l.insert(it, 5);            // { 5 }
+        REQUIRE( l.size() == 1 );
+        REQUIRE( l.front() == 5 );
+        REQUIRE( l.back() == 5 );
+        REQUIRE( *ret == 5 );
+
+        ret = l.insert(it, 10);           // { 5, 10}
+        REQUIRE( l.size() == 2 );
+        REQUIRE( l.front() == 5 );
+        REQUIRE( l.back() == 10 );
+        REQUIRE( *ret == 10 );
     }
-    REQUIRE( size == 0 );
-}
+    SECTION("fill insert works correctly") {
+        l.insert(l.begin(), 5, 10);
+        REQUIRE( l.size() == 5 );
 
-TEST_CASE("insert work correctly", "[list][modifiers]")
-{
-    LIB::list<int> c;
-    LIB::list<int>::iterator it = c.begin();
-
-    SECTION( "single element insert works correctly" ) {
-        c.insert(it, 5);            // { 5 }
-        REQUIRE( c.size() == 1 );
-        REQUIRE( *c.begin() == 5 );
-
-        c.insert(it, 10);           // { 5, 10}
-        REQUIRE( c.size() == 2 );
-        REQUIRE( *--c.end() == 10 );
-    }
-
-    SECTION( "fill insert works correctly" ) {
-        c.insert(c.begin(), 5, 10);
-        REQUIRE( c.size() == 5 );
-
-        for (auto it = c.begin(); it != c.end(); ++it)
+        for (it = l.begin(); it != l.end(); ++it)
             REQUIRE( *it == 10 );
 
-        c.insert(it, 1, 100);
-        REQUIRE( c.size() == 6 );
-        REQUIRE( *--c.end() == 100 );
+        l.insert(it, 1, 100);
+        REQUIRE( l.size() == 6 );
+        REQUIRE( l.back() == 100 );
     }
-
-    SECTION( "range insert works correctly" ) {
+    SECTION("range insert works correctly") {
         int arr[] = {12, 1, 4, 5, 6, 7};
 
-        c.push_front(0);
-        c.push_back(-32);
-        c.insert(--c.end(), arr + 1, arr + 5);
-        REQUIRE( c.size() == 6 );
+        l.push_front(0);
+        l.insert(l.end(), arr + 1, arr + 5);
+        l.push_back(-32);
+        REQUIRE( l.size() == 6 );
 
-        auto it = c.begin();
-        REQUIRE( *it == 0 );
-        REQUIRE( *++it == 1 );
-        REQUIRE( *++it == 4 );
-        REQUIRE( *++it == 5 );
+        auto it = l.begin();
+        REQUIRE( *it++ == 0 );
+        REQUIRE( *it++ == 1 );
+        REQUIRE( *it++ == 4 );
+        REQUIRE( *it == 5 );
         REQUIRE( *++it == 6 );
         REQUIRE( *++it == -32 );
     }
 }
 
-TEST_CASE("erase return value & remaining values are consistent", "[list][modifiers]")
+TEST_CASE("elements can be erase from the list", "[list][modifiers]")
 {
     int arr[] = {1, 2, 3, 4, 5, 6};
-    LIB::list<int> mylist (arr, arr + 6);    // { 1, 2, 3, 4, 5, 6 }
+    LIB::list<int> mylist (arr, arr + 6);                   // { 1, 2, 3, 4, 5, 6 }
     LIB::list<int>::iterator ret;
 
-    ret = mylist.erase(mylist.begin());     // { 2, 3, 4, 5, 6 }
+    ret = mylist.erase(mylist.begin());                     // { 2, 3, 4, 5, 6 }
     REQUIRE( mylist.size() == 5 );
     REQUIRE( *ret == 2 );
 
-    ret = mylist.erase(--mylist.end());     // { 2, 3, 4, 5 }
+    ret = mylist.erase(--mylist.end());                     // { 2, 3, 4, 5 }
     REQUIRE( mylist.size() == 4 );
     REQUIRE(( ret == mylist.end() ));
-    REQUIRE( *(--mylist.end()) == 5 );
+    REQUIRE( mylist.back() == 5 );
 
     ret = mylist.erase(++mylist.begin(), --mylist.end());   // { 2, 3 }
     REQUIRE( mylist.size() == 2 );
@@ -440,7 +430,7 @@ TEST_CASE("erase return value & remaining values are consistent", "[list][modifi
     REQUIRE(( ret == mylist.end() ));
 }
 
-TEST_CASE( "swap works correctly", "[list][modifiers]")
+TEST_CASE("lists can be swapped", "[list][modifiers]")
 {
     int arr1[] = {1, 2, 3, 4, 5, 6};
     int arr2[] = {-3, 69, 1};
@@ -457,24 +447,20 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
 
         for (it = mylist1.begin(); it != mylist1.end(); ++it, ++i)
             REQUIRE( *it == arr2[i] );
-
         i = 0;
         for (it = mylist2.begin(); it != mylist2.end(); ++it, ++i)
             REQUIRE( *it == arr1[i] );
     }
-
-    SECTION("empty lists can be swapped w/ filled lists") {
+    SECTION("empty lists can be swapped with filled lists") {
         LIB::list<int> mylist1 (arr1, arr1 + 6);
         LIB::list<int> mylist2;
 
         mylist1.swap(mylist2);
-        REQUIRE( mylist1.size() == 0 );
+        REQUIRE( mylist1.empty() );
         REQUIRE( mylist2.size() == 6 );
-
         for (it = mylist2.begin(); it != mylist2.end(); ++it, ++i)
             REQUIRE( *it == arr1[i] );
     }
-
     SECTION("empty lists can be swapped") {
         LIB::list<int> mylist1;
         LIB::list<int> mylist2;
@@ -485,94 +471,77 @@ TEST_CASE( "swap works correctly", "[list][modifiers]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE( "resize works correctly", "[list][modifiers]", LIB::list, TYPE_LIST )
-{
-    TestType c;
 
-    SECTION( "size is reduced when n is smaller than current size" ) {
-        c.resize(0);
-        REQUIRE( c.size() == 0 );
-
-        c.assign(4, VALUE_TYPE());
-        c.resize(2);
-        REQUIRE( c.size() == 2 );
-
-        c.resize(1);
-        REQUIRE( c.size() == 1 );
-
-        c.resize(0);
-        REQUIRE( c.size() == 0 );
-    }
-
-    SECTION( "size is expanded at it's end when n is greater than current size" ) {
-        SECTION( "empty list" ) {
-            c.resize(5);
-            REQUIRE( c.size() == 5 );
-        }
-
-        SECTION( "non-empty list" ) {
-            c.push_front(VALUE_TYPE());
-            c.resize(5);
-            REQUIRE( c.size() == 5 );
-            c.push_front(VALUE_TYPE());
-            c.resize(20);
-            REQUIRE( c.size() == 20 );
-        }
-    }
-}
-
-TEST_CASE("resize added elements are consistent")
+TEST_CASE("lists can be resized", "[list][modifiers]")
 {
     int arr[] = {1, 2, 3, 4, 5};
-    LIB::list<int> mylist (arr, arr + 5);
+    LIB::list<int> l0 (arr, arr + 5);
 
-    mylist.resize(4);
-    REQUIRE( mylist.size() == 4 );
-    REQUIRE( *(--mylist.end()) == 4 );
+    SECTION("the lists size can be reduced with resize") {
+        l0.resize(4);
+        REQUIRE( l0.size() == 4 );
+        REQUIRE( l0.front() == 1 );
+        REQUIRE( l0.back() == 4 );
+        l0.resize(2);
+        REQUIRE( l0.size() == 2 );
+        REQUIRE( l0.front() == 1 );
+        REQUIRE( l0.back() == 2 );
+        l0.resize(0);
+        REQUIRE( l0.empty() );
+    }
+    SECTION("resize adds elements to the lists end") {
+        l0.resize(5);
+        REQUIRE( l0.size() == 5 );
+        l0.resize(7);
+        REQUIRE( l0.size() == 7 );
+        REQUIRE( l0.front() == 1 );
+        REQUIRE( l0.back() == int() );
+        l0.resize(10);
+        REQUIRE( l0.size() == 10 );
+        REQUIRE( l0.front() == 1 );
+        REQUIRE( l0.back() == int() );
+    }
 
-    mylist.resize(5);
-    REQUIRE( mylist.size() == 5 );
-    REQUIRE( *(--mylist.end()) == int() );
-
-    mylist.resize(0);
-    REQUIRE( mylist.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("clear works correctly", "[list][modifiers]", LIB::list, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("lists can be cleared from their content", "[list][modifiers]", LIB::list, TYPE_LIST)
 {
     TestType c;
 
     c.clear();
     REQUIRE( c.empty() );
-
     c.assign(10, VALUE_TYPE());
     REQUIRE( c.size() == 10 );
-
     c.clear();
     REQUIRE( c.empty() );
-
-    c.assign(10, VALUE_TYPE());
-    REQUIRE( c.size() == 10 );
+    c.assign(3, VALUE_TYPE());
+    REQUIRE( c.size() == 3 );
+    c.clear();
+    REQUIRE( c.empty() );
 }
 
 /* ELEMENT ACCESS */
-TEST_CASE("element access works correctly", "[list][element access]")
+TEST_CASE("front/back return references to the list first/last element", "[list][element access]")
 {
     int arr[] = {1, 2, 3, 4, 5};
     LIB::list<int> mylist (arr, arr + 5);
+    const LIB::list<int> cmylist (arr + 1, arr + 5);
 
     mylist.front() -= 21;
     REQUIRE( mylist.front() == -20 );
-
     mylist.back() -= 42;
     REQUIRE( mylist.back() == -37 );
+
+    REQUIRE( cmylist.front() == 2 );
+    REQUIRE( cmylist.back() == 5 );
 }
 
 /* CAPACITY */
 
-TEMPLATE_PRODUCT_TEST_CASE("empty reflects list state", "[list][basics]", LIB::list, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("empty reflects if the list is empty", "[list][basics]", LIB::list, TYPE_LIST)
 {
     TestType c;
+
     REQUIRE( c.empty() );
     c.push_back(VALUE_TYPE());
     REQUIRE_FALSE( c.empty() );
@@ -580,9 +549,10 @@ TEMPLATE_PRODUCT_TEST_CASE("empty reflects list state", "[list][basics]", LIB::l
     REQUIRE( c.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("size works correctly", "[list][capacity]", LIB::list, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("size returns the lists size", "[list][capacity]", LIB::list, TYPE_LIST)
 {
     TestType c;
+
     REQUIRE( c.size() == 0 );
     c.assign(5, VALUE_TYPE());
     REQUIRE( c.size() == 5 );
@@ -591,15 +561,14 @@ TEMPLATE_PRODUCT_TEST_CASE("size works correctly", "[list][capacity]", LIB::list
 }
 
 /* LIST OPERATIONS */
-
-TEST_CASE("splice work correctly", "[list][operations]")
+TEST_CASE("lists can be spliced", "[list][operations]")
 {
     int v[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
     LIB::list<int> c1 (v, v + 8);
     LIB::list<int> c2;
     LIB::list<int>::iterator it;
 
-    SECTION( "entire list splice works correctly" ) {
+    SECTION("splicing entire lists works") {
         c2.splice(c2.begin(), c1);
         REQUIRE( c1.size() == 0 );
         REQUIRE( c2.size() == 8 );
@@ -608,16 +577,14 @@ TEST_CASE("splice work correctly", "[list][operations]")
         for (it = c2.begin(); it != c2.end(); ++it, ++i)
             REQUIRE( *it == v[i] );
     }
-
-    SECTION( "single element splice works correctly" ) {
+    SECTION("splicing single elements works") {
         c2.splice(c2.begin(), c1, ++c1.begin());
         REQUIRE( c1.size() == 7 );
         REQUIRE( c2.size() == 1 );
         REQUIRE( *c1.begin() == 0 );
         REQUIRE( *c2.begin() == 1 );
     }
-
-    SECTION( "element range splice works correctly" ) {
+    SECTION("splicing a range works") {
         c2.splice(c2.begin(), c1, c1.begin(), c1.begin());
         REQUIRE( c1.size() == 8 );
         REQUIRE( c2.size() == 0 );
@@ -677,7 +644,7 @@ TEST_CASE("remove(_if) works correctly", "[list][operations]")
     }
 }
 
-TEST_CASE("unique works correctly", "[list][operations]")
+TEST_CASE("unique removes duplicates from a list", "[list][operations]")
 {
     int i = 0;
     int arr[] = { 1, 1, -66, -22, -22, -1, -22, 2, 2, 2, 9, 9, 109, 109, 109 };
@@ -689,7 +656,7 @@ TEST_CASE("unique works correctly", "[list][operations]")
     LIB::list<int> l (arr, arr + sizeof(arr) / sizeof(int));
     LIB::list<std::string> l1 (arr2, arr2 + sizeof(arr2) / sizeof(*arr2));
 
-    SECTION("not specifying how to compare") {
+    SECTION("calling unique without a specified comparing function") {
         // INT ARRAY
         l.unique();
         REQUIRE( l.size() == (sizeof(arr_unique1) / sizeof(int)) );
@@ -703,16 +670,14 @@ TEST_CASE("unique works correctly", "[list][operations]")
         for (auto it = l1.begin(); it != l1.end(); ++it, ++i)
             REQUIRE( *it == arr2_unique[i] );
     }
-
-    SECTION("specifying how to compare") {
+    SECTION("calling unique with a specified comparing function") {
         l.unique( [](int i, int j) { return i + j == 2 || i + j == 4; } );
 
         REQUIRE( l.size() == (sizeof(arr_unique2) / sizeof(int)) );
         for (auto it = l.begin(); it != l.end(); ++it, ++i)
             REQUIRE( *it == arr_unique2[i] );
     }
-
-    SECTION("special cases") {
+    SECTION("calling unique with a weird comparing function") {
         LIB::list<int> l2;
         LIB::list<int> l3 (arr, arr + sizeof(arr) / sizeof(*arr));
 
@@ -726,9 +691,9 @@ TEST_CASE("unique works correctly", "[list][operations]")
     }
 }
 
-TEST_CASE( "merge work correctly", "[list][operations]")
+TEST_CASE("lists can be merged", "[list][operations]")
 {
-    SECTION( "merging without specifying how to compare" ) {
+    SECTION("merging without a specified comparing function") {
         int i = 0;
         int a[] = { -66, -22, -1, 9, 109 };
         int b[] = { -12, 2, 2, 4, 5, 12, 99 };
@@ -742,8 +707,7 @@ TEST_CASE( "merge work correctly", "[list][operations]")
         for (auto it = c1.begin(); it != c1.end(); ++it, ++i)
             REQUIRE( *it == c[i] );
     }
-
-    SECTION( "merging with specified comparing function" ) {
+    SECTION("merging with a specified comparing function") {
         int i = 0;
         int a[] = { 109, 9, -1, -22, -66 };
         int b[] = { 99, 12, 5, 4, 2, 2, -12 };
@@ -757,8 +721,7 @@ TEST_CASE( "merge work correctly", "[list][operations]")
         for (auto it = c1.begin(); it != c1.end(); ++it, ++i)
             REQUIRE( *it == c[i] );
     }
-
-    SECTION( "mergin with empty list" ) {
+    SECTION("merging with or between empty lists works") {
         LIB::list<int> l1 (5, 10);
         LIB::list<int> l2;
         LIB::list<int> l3;
@@ -772,7 +735,7 @@ TEST_CASE( "merge work correctly", "[list][operations]")
     }
 }
 
-TEST_CASE("sort work correctly", "[list][operations]")
+TEST_CASE("list can be sorted", "[list][operations]")
 {
     int i = 0;
     // ARRAY 1
@@ -791,7 +754,7 @@ TEST_CASE("sort work correctly", "[list][operations]")
     size_t arr3_size = sizeof(arr3) / sizeof(std::string);
     LIB::list<std::string> l5 (arr3, arr3 + arr3_size);
 
-    SECTION( "sorting without specifying how to compare" ) {
+    SECTION("sorting without a specified comparing function") {
         // ARRAY 1
         i = 0;
         l1.sort();
@@ -808,8 +771,7 @@ TEST_CASE("sort work correctly", "[list][operations]")
         for (auto it = l5.begin(); it != l5.end(); ++it, ++i)
             REQUIRE( *it == arr3_sorted[i] );
     }
-
-    SECTION( "sorting with specified comparing function" ) {
+    SECTION("sorting with a specified comparing function") {
         // ARRAY 1
         i = arr1_size - 1;
         l1.sort(std::greater<int>());
@@ -826,35 +788,47 @@ TEST_CASE("sort work correctly", "[list][operations]")
         for (auto it = l2.begin(); it != l2.end(); ++it, ++i)
             REQUIRE( *it == arr2_sorted[i] );
     }
-
-    SECTION ( "sorting unsortable lists" ) {
+    SECTION ("sorting already sorted or empty lists does not modify them") {
         LIB::list<int> l3;
         LIB::list<int> l4 (1, 0);
+        LIB::list<int> l5 (arr1_sorted, arr1_sorted + arr1_size);
 
         l3.sort();
         REQUIRE( l3.empty() );
+
         l4.sort();
         REQUIRE( l4.size() == 1 );
+
+        l5.sort();
+        for (auto it = l5.begin(); it != l5.end(); ++it, ++i)
+            REQUIRE( *it == arr1_sorted[i] );
     }
 }
 
-TEST_CASE("reverse works correctly", "[list][operations]")
+TEST_CASE("lists can be reversed", "[list][operations]")
 {
     int i = 8;
-    int v[] = {2, 4, 2, 5, 2, 99, -12, 1, 312};
-    LIB::list<int> l1 (v, v + 9);
-    LIB::list<int> l2 (v, v + 1);
+    int arr[] = {2, 4, 2, 5, 2, 99, -12, 1, 312};
+    LIB::list<int> l0;
+    LIB::list<int> l1 (arr, arr + 9);
+    LIB::list<int> l2 (arr, arr + 1);
 
-    l1.reverse();
-    REQUIRE( l1.size() == 9 );
-    for (auto it = l1.begin(); it != l1.end(); ++it, --i)
-        REQUIRE( *it == v[i] );
+    // empty list
+    l0.reverse();
+    REQUIRE( l0.empty() );
 
+    // list of size 1
     l2.reverse();
     REQUIRE( l2.size() == 1 );
     REQUIRE( *l2.begin() == 2 );
 
-    l2.assign(v + 1, v + 3);
+    // "normal" lists
+    l1.reverse();
+    REQUIRE( l1.size() == 9 );
+    for (auto it = l1.begin(); it != l1.end(); ++it, --i)
+        REQUIRE( *it == arr[i] );
+
+    l2.assign(arr + 1, arr + 3);
     l2.reverse();
     REQUIRE( l2.size() == 2 );
     REQUIRE( *l2.begin() == 2 );

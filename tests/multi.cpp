@@ -59,6 +59,8 @@ TEST_CASE("multimap works correctly", "[multimap]")
     auto ret = mmap.erase(rand_char);
     REQUIRE( ret == (unsigned)eq_range_size );
     REQUIRE( mmap.size() == old_size - eq_range_size );
+
+    REQUIRE( mmap.find(127) == mmap.end() );
 }
 
 TEST_CASE("multiset works correctly", "[multiset]")
@@ -105,4 +107,6 @@ TEST_CASE("multiset works correctly", "[multiset]")
     auto ret = mset.erase(rand_char);
     REQUIRE( ret == (unsigned)eq_range_size );
     REQUIRE( mset.size() == old_size - eq_range_size );
+
+    REQUIRE( mset.find(127) == mset.end() );
 }
