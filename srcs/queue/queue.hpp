@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../list/list.hpp"
+#include "../deque/deque.hpp"
 #include <cstddef> // size_t
 
 namespace ft {
 
-template < class T, class Container = ft::list<T> >
+template < class T, class Container = ft::deque<T> >
 class queue
 {
     public:
