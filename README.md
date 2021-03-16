@@ -25,7 +25,8 @@ Proving your containers work as expected is part of the project.
 
 The unit tests provided in this repository should only test defined behaviour.
 To use my tests on your own project compile `tests/main.cpp` and the container test file or take a look at the Makefile.
-Using the Makefile you can also generate an html coverage report to detect bugs, unused code aswell as checking the unit tests coverage.
+Using the `coverage` recipe you can also generate an html coverage report to detect bugs, unused code aswell as check the unit tests coverage.
+Last but not least the `verify-tests` recipe compiles the unit tests with the STL containers to prove their correctness.
 
 Unfortunately branch coverage is broken if you don't compile with `-fno-exceptions` and comment out lines which use exception functionality.
 If you did not finish the tested container you will need to comment out sections which test methods you did not yet implement.
@@ -37,3 +38,5 @@ If you did not finish the tested container you will need to comment out sections
 * [const_iterators](https://web.archive.org/web/20130820212103/https://www.drdobbs.com/the-standard-librarian-defining-iterato/184401331)
 * [data structures](https://www.youtube.com/playlist?list=PLpPXw4zFa0uKKhaSz87IowJnOTzh9tiBk)
 * [deque](https://stackoverflow.com/questions/6292332/what-really-is-a-deque-in-stl)
+
+as well as countless tutorials, so posts and git repositories!
