@@ -9,11 +9,12 @@ TEST_SRC =	tests/map.cpp\
 			tests/deque.cpp\
 			tests/vector.cpp\
 			tests/set.cpp\
+			tests/multi.cpp\
 			tests/stack_queue.cpp
 
 CC		=	clang++
 
-NO_UNIT_FLAGS =	-fsanitize=address -g3 -Wall -Wextra -std=c++98 -DNO_UNIT_TESTS
+NO_UNIT_FLAGS =	-fsanitize=address -g3 -Wall -Wextra -std=c++2a -DNO_UNIT_TESTS
 
 UNIT_FLAGS	=	-fsanitize=address -g3 -Wall -Wextra -std=c++2a
 
