@@ -126,7 +126,7 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                     return iterator(Base::_added_node_ptr);
                 }
             }
-            return iterator(insert(val).first);
+            return insert(val).first;
         }
 
         template <class InputIterator>
@@ -139,8 +139,6 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
 
         void erase (iterator position)
         {
-            if (position == Base::end())
-                return ;
             --Base::_size;
             Base::unset_bounds();
             node_pointer node = position.get_node();
@@ -151,6 +149,7 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 tmp = Base::aux_erase_one_child_node(node);
             else
                 tmp = Base::aux_erase_two_child_node(node);
+            Base::recompute_heights(tmp);
             Base::rebalance(tmp);
             Base::set_bounds();
         }
@@ -158,7 +157,9 @@ class map : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
         size_type erase (const key_type& k)
         {
             size_type old_size = Base::_size;
-            erase(find(k));
+            iterator it = find(k);
+            if (it != Base::end())
+                erase(find(k));
             return old_size - Base::_size;
         }
 

@@ -155,8 +155,6 @@ class avl_tree
 
         void erase (iterator position)
         {
-            if (position == end())
-                return ;
             --_size;
             unset_bounds();
             node_pointer node = position.get_node();
@@ -175,7 +173,9 @@ class avl_tree
         size_type erase (const value_type& k)
         {
             size_type old_size = _size;
-            erase(find(k));
+            iterator it = find(k);
+            if (it != end())
+                erase(it);
             return old_size - _size;
         }
 

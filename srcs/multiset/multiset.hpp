@@ -126,6 +126,7 @@ class multiset : public avl_tree<T, Compare, Alloc>
                 tmp = Base::aux_erase_one_child_node(node);
             else
                 tmp = Base::aux_erase_two_child_node(node);
+            Base::recompute_heights(tmp);
             Base::rebalance(tmp);
             Base::set_bounds();
         }
@@ -250,7 +251,6 @@ class multiset : public avl_tree<T, Compare, Alloc>
             if (!node) {
                 node = Base::new_node(val);
                 node->parent = parent;
-                Base::_added_node = true;
                 Base::_added_node_ptr = node;
                 ++Base::_size;
             } else if (_comp(val, node->content)) {
@@ -258,7 +258,7 @@ class multiset : public avl_tree<T, Compare, Alloc>
             } else if (_comp(node->content, val)) {
                 node->right = aux_insert(node, node->right, val);
             } else {
-                node->left = aux_insert(node, node->left, val);
+                node->right = aux_insert(node, node->right, val);
             }
             return node;
         }

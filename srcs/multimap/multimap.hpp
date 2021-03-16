@@ -148,6 +148,7 @@ class multimap : public avl_tree<std::pair<const Key, T>, Compare, Alloc>
                 tmp = Base::aux_erase_one_child_node(node);
             else
                 tmp = Base::aux_erase_two_child_node(node);
+            Base::recompute_heights(tmp);
             Base::rebalance(tmp);
             Base::set_bounds();
         }
