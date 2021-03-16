@@ -1,4 +1,7 @@
-**/**.swp
+**/*.swp
+**/*.gcno
+**/*.gcda
+**/*.html
 test
 test.dSYM
 tags
