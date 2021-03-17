@@ -25,10 +25,11 @@ Proving your containers work as expected is part of the project.
 
 The unit tests provided in this repository should only test defined behaviour.
 To use my tests on your own project compile `tests/main.cpp` and the container test file or take a look at the Makefile.
-Using the `coverage` recipe you can also generate an html coverage report to detect bugs, unused code aswell as check the unit tests coverage.
+If a test fails you can use the main function in `tests/main.cpp` compiled using the `no_unit_tests` recipe or with the `-DNO_UNIT_TESTS` flag to fix the issue while avoiding long compilation times.
+Using the `coverage` recipe you can also generate an html coverage report to detect bugs, unused code aswell as check the unit tests coverage. Be sure to run the executable to generate coverage information.
 Last but not least the `verify-tests` recipe compiles the unit tests with the STL containers to prove their correctness.
 
-Unfortunately branch coverage is broken if you don't compile with `-fno-exceptions` and comment out lines which use exception functionality.
+Unfortunately branch coverage is broken but you may get better results if you compile with `-fno-exceptions` and comment out code using exceptions.
 If you did not finish the tested container you will need to comment out sections which test methods you did not yet implement.
 
 ### Resources
@@ -38,5 +39,6 @@ If you did not finish the tested container you will need to comment out sections
 * [const_iterators](https://web.archive.org/web/20130820212103/https://www.drdobbs.com/the-standard-librarian-defining-iterato/184401331)
 * [data structures](https://www.youtube.com/playlist?list=PLpPXw4zFa0uKKhaSz87IowJnOTzh9tiBk)
 * [deque](https://stackoverflow.com/questions/6292332/what-really-is-a-deque-in-stl)
+* [catch2](https://github.com/catchorg/Catch2)
 
 as well as countless tutorials, so posts and git repositories!
