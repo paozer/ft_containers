@@ -782,7 +782,7 @@ TEST_CASE("list can be sorted", "[list][operations]")
 
         // ARRAY 2
         i = 0;
-        l2.sort([]<class T>(const T& a, const T& b) { return a == 2 || b > 42; } );
+        l2.sort([](const int& a, const int& b) { return a == 2 || b > 42; } );
 
         REQUIRE( l2.size() == arr2_size );
         for (auto it = l2.begin(); it != l2.end(); ++it, ++i)
