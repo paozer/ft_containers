@@ -13,14 +13,14 @@
 #define VALUE_TYPE typename TestType::value_type
 
 /* CONSTRUCTION */
-TEST_CASE("deque construction works correctly", "[deque][basics]")
+TEST_CASE("construction deque", "[deque][basics]")
 {
-    SECTION("deque declaration creates empty deque") {
+    SECTION("declaration returns an empty deque") {
         LIB::deque<int> dq;
         REQUIRE( dq.empty() );
         REQUIRE( dq.size() == 0 );
     }
-    SECTION("fill constructor returns correct deque") {
+    SECTION("fill construction returns a deque filled with the supplied value") {
         unsigned int size = GENERATE(0, 1, 5);
         int fill = GENERATE(0, -41);
         LIB::deque<int> dq (size, fill);
@@ -29,20 +29,19 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
         for (unsigned int i = 0; i < size; ++i)
             REQUIRE( dq[i] == fill );
     }
-    SECTION("range constructor returns correct deque") {
+    SECTION("range construction returns a deque filled with the ranges values") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
         unsigned int first = GENERATE(0, 1, 3);
         unsigned int last = GENERATE(0, 3, 6);
 
         if (last >= first) {
             LIB::deque<int> dq (arr + first, arr + last);
-
             REQUIRE( dq.size() == last - first );
             for (size_t i = 0; i < last - first; ++i)
                 REQUIRE( dq[i] == arr[i + first] );
         }
     }
-    SECTION ("copy constructor returns correct deque") {
+    SECTION ("copy construction returns an copy of the supplied deque") {
         int arr[] = {2, 4, 12, 5, 60, 99, -12};
         LIB::deque<int> dq1;
         LIB::deque<int> dq2 (dq1);
@@ -58,7 +57,7 @@ TEST_CASE("deque construction works correctly", "[deque][basics]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("deque correctly copies value upon construction", "[deque][basics]", LIB::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("allocation/destruction/copying of values deque", "[deque][basics]", LIB::deque, TYPE_LIST)
 {
     // this test may produces double free there is a problem with
     // your allocation/copying with non builtin types
@@ -69,7 +68,7 @@ TEMPLATE_PRODUCT_TEST_CASE("deque correctly copies value upon construction", "[d
 }
 
 /* ASSIGNATION OPERATOR */
-TEST_CASE("deque assignation works correctly", "[deque][assignation operators]")
+TEST_CASE("assignation operator deque", "[deque][operators]")
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
@@ -86,12 +85,11 @@ TEST_CASE("deque assignation works correctly", "[deque][assignation operators]")
     for (; lit != dq1.end(); ++lit, ++rit)
         REQUIRE( *lit == *rit );
     dq2 = dq3;
-    REQUIRE( dq2.size() == dq3.size() );
-    REQUIRE( dq2.begin() == dq2.end() );
+    REQUIRE( dq2.empty() );
 }
 
 /* RELATIONAL OPERATORS */
-TEST_CASE("deque relational operators work correctly", "[deque][relational operators]")
+TEST_CASE("relational operators deque", "[deque][operators]")
 {
     int a[] = {1, 4, -1, 2, 33};
     int b[] = {1, 4};
@@ -153,36 +151,34 @@ TEST_CASE("deque relational operators work correctly", "[deque][relational opera
 }
 
 /* ITERATORS */
-TEST_CASE("deque begin returns first element and can be incremented", "[deque][iterators]")
+TEST_CASE("iterators deque", "[deque][iterators]")
 {
-    SECTION("non-const iterator behaviour") {
-        LIB::deque<int> dq (5, 10);              // { 10, 10, 10, 10, 10 }
+    LIB::deque<int> dq (5, 10);                     // { 10, 10, 10, 10, 10 }
+
+    SECTION("begin returns an iterator to the first element") {
         REQUIRE( *dq.begin() == 10 );
-        *dq.begin() = 5;                         // { 5, 10, 10, 10, 10 }
-        *++dq.begin() = 6;                       // { 5, 6, 10, 10, 10 }
+        *dq.begin() = 5;                            // { 5, 10, 10, 10, 10 }
+        *++dq.begin() = 6;                          // { 5, 6, 10, 10, 10 }
         REQUIRE( dq.begin()[0] == 5 );
         REQUIRE( dq.begin()[1] == 6 );
         REQUIRE( dq.begin()[2] == 10 );
-        dq.begin()[0] = 2;                         // { 2, 6, 10, 10, 10 }
+        dq.begin()[0] = 2;                          // { 2, 6, 10, 10, 10 }
         REQUIRE( *dq.begin() == 2 );
         REQUIRE( *(dq.begin() + 1) == 6 );
         REQUIRE( *(dq.begin() + 2) == 10 );
         REQUIRE(( dq.begin() - dq.end() == -5 ));
-    }
-    SECTION("const iterator behaviour") {
+
         int arr[] = {1, 4, -1, 2, 33};
         LIB::deque<int> dq2 (arr, arr + 5);
-        const LIB::deque<int> dq (dq2);
+        const LIB::deque<int> dq3 (dq2);
         const LIB::deque<int> dq1;
-
-        REQUIRE( *dq.begin() == 1 );
-        REQUIRE( dq.begin()[1] == 4 );
-        REQUIRE( dq.begin()[2] == -1 );
-        REQUIRE( dq.begin()[3] == 2 );
-        REQUIRE( dq.begin()[4] == 33 );
-        REQUIRE( (dq.begin() + 5) == dq.end() );
+        REQUIRE( *dq3.begin() == 1 );
+        REQUIRE( dq3.begin()[1] == 4 );
+        REQUIRE( dq3.begin()[2] == -1 );
+        REQUIRE( dq3.begin()[3] == 2 );
+        REQUIRE( dq3.begin()[4] == 33 );
+        REQUIRE( (dq3.begin() + 5) == dq3.end() );
         REQUIRE( dq1.begin() == dq1.end() );
-
         LIB::deque<int>::const_iterator it = dq2.begin();
         REQUIRE( *it == 1 );
         REQUIRE( *(it + 1) == 4 );
@@ -191,12 +187,7 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
         REQUIRE( *(it + 4) == 33 );
         REQUIRE( (it + 5) == dq2.end() );
     }
-}
-
-TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", LIB::deque<int>)
-{
-    SECTION("non-const iterator behaviour") {
-        LIB::deque<int> dq (5, 10);                 // { 10, 10, 10, 10, 10 }
+    SECTION("end returns an iterator to one past the last element") {
         REQUIRE( dq.end()[-1] == 10 );
         *(dq.end() - 1) = 5;                        // { 10, 10, 10, 10, 5 }
         dq.end()[-2] = 6;                           // { 10, 10, 10, 6, 5 }
@@ -207,19 +198,18 @@ TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", LIB::deque
         REQUIRE( *(dq.end() - 1) == 2 );
         REQUIRE( *(dq.end() - 2) == 6 );
         REQUIRE( dq.begin()[1] == 1 );
-    }
-    SECTION("const iterator behaviour") {
+
         int arr[] = {1, 4, -1, 2, 33};
         LIB::deque<int> dq2 (arr, arr + 5);
-        const LIB::deque<int> dq (dq2);
+        const LIB::deque<int> dq3 (dq2);
         const LIB::deque<int> dq1;
 
-        REQUIRE( *(dq.end() - 1) == 33 );
-        REQUIRE( *(dq.end() - 2) == 2 );
-        REQUIRE( *(dq.end() - 3) == -1 );
-        REQUIRE( dq.end()[-4] == 4 );
-        REQUIRE( dq.end()[-5] == 1 );
-        REQUIRE( dq.begin() == (dq.end() - 5) );
+        REQUIRE( *(dq3.end() - 1) == 33 );
+        REQUIRE( *(dq3.end() - 2) == 2 );
+        REQUIRE( *(dq3.end() - 3) == -1 );
+        REQUIRE( dq3.end()[-4] == 4 );
+        REQUIRE( dq3.end()[-5] == 1 );
+        REQUIRE( dq3.begin() == (dq3.end() - 5) );
         REQUIRE( dq1.begin() == dq1.end() );
 
         LIB::deque<int>::const_iterator it = dq2.end();
@@ -230,117 +220,99 @@ TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", LIB::deque
         REQUIRE( *(it - 5) == 1 );
         REQUIRE( (it - 5) == dq2.begin() );
     }
-}
+    SECTION("reverse iterators are functional", "[deque][iterator]")
+    {
+        int arr[] = {1, 4, -1, 2, 33};
+        LIB::deque<int> dq0 (arr, arr + 5);
+        const LIB::deque<int> dq1 (dq0);
 
-TEST_CASE("reverse iterators can be used to iterate over deques", "[deque][iterator]")
-{
-    int arr[] = {1, 4, -1, 2, 33};
-    LIB::deque<int> dq0 (arr, arr + 5);
-    const LIB::deque<int> dq1 (dq0);
-
-    REQUIRE( (dq0.rbegin() + 2)[0] == dq0.rbegin()[2] );
-    REQUIRE( dq0.rbegin()[3] == dq0.rend()[-2] );
-    REQUIRE( dq0.rbegin() + 5 == dq0.rend() );
-    REQUIRE( dq0.rbegin() == dq0.rend() - 5 );
-    REQUIRE( dq0.rbegin() + 1 == dq0.rend() - 4 );
+        REQUIRE( (dq0.rbegin() + 2)[0] == dq0.rbegin()[2] );
+        REQUIRE( dq0.rbegin()[3] == dq0.rend()[-2] );
+        REQUIRE( dq0.rbegin() + 5 == dq0.rend() );
+        REQUIRE( dq0.rbegin() == dq0.rend() - 5 );
+        REQUIRE( dq0.rbegin() + 1 == dq0.rend() - 4 );
+    }
 }
 
 /* MODIFIERS */
-TEST_CASE("deque assign methods work correctly", "[deque][modifiers]")
+TEST_CASE("assign deque", "[deque][modifiers]")
 {
     int arr[] = {1, 4, -1, 2, 33};
     LIB::deque<int> dq;
     LIB::deque<int> dq1 (10, 1);
 
-    SECTION("range assign creates deque with correct values") {
+    SECTION("ranges can be assigned to deques") {
         unsigned int i = GENERATE(0, 1, 3);
         unsigned int j = GENERATE(0, 4, 5);
-
         if (j >= i) {
             dq.assign(arr + i, arr + j);
-
             REQUIRE( dq.size() == j - i );
             for (size_t y = 0; y < dq.size(); ++y)
                 REQUIRE( dq[y] == arr[y + i] );
-
-            SECTION("range assign clears values before assigning") {
-                dq1.assign(arr + i, arr + j);
-
-                REQUIRE( dq1.size() == j - i );
-                for (size_t y = 0; y < dq1.size(); ++y)
-                    REQUIRE( dq1[y] == arr[y + i] );
-            }
+            dq1.assign(arr + i, arr + j);
+            REQUIRE( dq1.size() == j - i );
+            for (size_t y = 0; y < dq1.size(); ++y)
+                REQUIRE( dq1[y] == arr[y + i] );
         }
     }
-    SECTION("fill assign fills deque with correct values") {
+    SECTION("fills can be assigned to deques") {
         unsigned int i = GENERATE(0, 1, 25);
         int j = GENERATE(0, 42, -12);
         dq.assign(i, j);
-
         REQUIRE( dq.size() == i );
         for (size_t y = 0; y < dq.size(); ++y)
             REQUIRE( dq[y] == j );
+        dq1.assign(i, j);
+        REQUIRE( dq1.size() == i );
+        for (size_t y = 0; y < dq1.size(); ++y)
+            REQUIRE( dq1[y] == j );
+    }
+}
 
-        SECTION("fill assign clears values before assigning") {
-            dq1.assign(i, j);
 
-            REQUIRE( dq1.size() == i );
-            for (size_t y = 0; y < dq1.size(); ++y)
-                REQUIRE( dq1[y] == j );
+TEST_CASE("push/pop deque", "[deque][modifiers]")
+{
+    LIB::deque<int> dq;
+    std::vector<int> stl;
+    stl.reserve(100);
+
+    SECTION("values can be pushed/popped to the front") {
+        for (unsigned int i = 0; i < 100; ++i) {
+            int rand = std::rand() % 200000 - 100000;
+            dq.push_back(rand);
+            stl.push_back(rand);
+            REQUIRE( dq.back() == stl.back() );
         }
+        REQUIRE( dq.size() == stl.size() );
+        while (dq.size() != 0 ) {
+            REQUIRE( dq.back() == stl.back() );
+            dq.pop_back();
+            stl.pop_back();
+        }
+        REQUIRE( dq.size() == stl.size() );
+    }
+    SECTION("values can be pushed/popped to the back") {
+        for (unsigned int i = 0; i < 100; ++i) {
+            int rand = std::rand() % 200000 - 100000;
+            dq.push_front(rand);
+            stl.insert(stl.begin(), rand);
+            REQUIRE( dq.front() == stl.front() );
+        }
+        REQUIRE( dq.size() == stl.size() );
+        while (dq.size() != 0 ) {
+            REQUIRE( dq[0] == stl[0] );
+            dq.pop_front();
+            stl.erase(stl.begin());
+        }
+        REQUIRE( dq.size() == stl.size() );
     }
 }
 
-
-TEST_CASE("push/pop_back add/remove elements at back of the deque", "[deque][modifiers]")
-{
-    LIB::deque<int> dq;
-    std::vector<int> stl;
-    stl.reserve(100);
-
-    for (unsigned int i = 0; i < 100; ++i) {
-        int rand = std::rand() % 200000 - 100000;
-        dq.push_back(rand);
-        stl.push_back(rand);
-        REQUIRE( dq.back() == stl.back() );
-    }
-    REQUIRE( dq.size() == stl.size() );
-
-    while (dq.size() != 0 ) {
-        REQUIRE( dq.back() == stl.back() );
-        dq.pop_back();
-        stl.pop_back();
-    }
-    REQUIRE( dq.size() == stl.size() );
-}
-
-TEST_CASE("push/pop_front add/remove elements at the front of the deque", "[deque][modifiers]")
-{
-    LIB::deque<int> dq;
-    std::vector<int> stl;
-    stl.reserve(100);
-
-    for (unsigned int i = 0; i < 100; ++i) {
-        int rand = std::rand() % 200000 - 100000;
-        dq.push_front(rand);
-        stl.insert(stl.begin(), rand);
-        REQUIRE( dq.front() == stl.front() );
-    }
-    REQUIRE( dq.size() == stl.size() );
-
-    while (dq.size() != 0 ) {
-        REQUIRE( dq[0] == stl[0] );
-        dq.pop_front();
-        stl.erase(stl.begin());
-    }
-    REQUIRE( dq.size() == stl.size() );
-}
-
-TEST_CASE("deque insert work correctly", "[deque][modifiers]")
+TEST_CASE("insert deque", "[deque][modifiers]")
 {
     LIB::deque<int> dq;
 
-    SECTION("single element insert works correctly") {
+    SECTION("single elements can be inserted") {
         LIB::deque<int>::iterator ret;
         ret = dq.insert(dq.begin(), 5);               // { 5 }
         REQUIRE( *ret == 5 );
@@ -360,7 +332,7 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
         REQUIRE( dq[3] == 7 );
         REQUIRE( dq[4] == 10 );
     }
-    SECTION("fill insert works correctly") {
+    SECTION("fills can be inserted") {
         dq.insert(dq.begin(), 5, 10);                 // { 10, 10, 10, 10, 10 }
         dq.insert(dq.end(), 1, 100);                  // { 10, 10, 10, 10, 10, 100 }
         dq.insert(++dq.begin(), 2, 0);                // { 10, 0, 0, 10, 10, 10, 10, 100 }
@@ -379,7 +351,7 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
         REQUIRE( dq[10] == 21 );
         REQUIRE( dq[11] == 100 );
     }
-    SECTION("range insert works correctly") {
+    SECTION("ranges can be inserted") {
         int arr[] = {12, 1, 4, 5, 6, 7};
         int arr1[] = { 0 , -32 };
         dq.insert(dq.begin(), arr1, arr1 + 1);        // { 0 }
@@ -399,13 +371,13 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
     }
 }
 
-TEST_CASE("deque erase work correctly", "[deque][modifiers]")
+TEST_CASE("erase deque", "[deque][modifiers]")
 {
     int arr[] = {23, 1, 233, 4, 55, 3};
     LIB::deque<int> dq (arr, arr + 6);             // { 23, 1, 233, 4, 55, 3 }
     LIB::deque<int>::iterator ret;
 
-    SECTION("single element erase works correctly") {
+    SECTION("single elements can be erased") {
         ret = dq.erase(dq.begin() + 1);                // { 23, 233, 4, 55, 3 }
         REQUIRE( dq.size() == 5 );
         REQUIRE( ret[-1] == 23 );
@@ -423,7 +395,7 @@ TEST_CASE("deque erase work correctly", "[deque][modifiers]")
         REQUIRE( ret[-1] == 233 );
         REQUIRE( ret[0] == 55 );
     }
-    SECTION("multiple element erase works correctly") {
+    SECTION("ranges can be erased") {
         ret = dq.erase(dq.end() - 1, dq.end());              // { 23, 1, 233, 4, 55 }
         REQUIRE( dq.size() == 5 );
         REQUIRE( ret == dq.end() );
@@ -445,9 +417,9 @@ TEST_CASE("deque erase work correctly", "[deque][modifiers]")
     }
 }
 
-TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
+TEST_CASE("swap deque", "[deque][modifiers]")
 {
-    SECTION("works for non empty deques") {
+    SECTION("non empty deques can be swapped") {
         LIB::deque<int> dq1 (10, 100);
         LIB::deque<int> dq2 (2, -12);
 
@@ -466,7 +438,7 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
         for (auto it = dq2.begin(); it != dq2.end(); ++it)
             REQUIRE( *it == -12 );
     }
-    SECTION("works for swapping non-empty and empty deques") {
+    SECTION("non empty and empty deques can be swapped") {
         LIB::deque<int> dq1 (10, 100);
         LIB::deque<int> dq2;
 
@@ -477,7 +449,7 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
         for (auto it = dq2.begin(); it != dq2.end(); ++it)
             REQUIRE( *it == 100 );
     }
-    SECTION("works for empty deques") {
+    SECTION("empty deques can be swapped") {
         LIB::deque<int> dq1;
         LIB::deque<int> dq2;
 
@@ -495,7 +467,7 @@ TEST_CASE("swap swaps deque sizes and content", "[deque][modifiers]")
     }
 }
 
-TEST_CASE("deque resizing works correctly", "[deque][modifiers]")
+TEST_CASE("resize deque", "[deque][modifiers]")
 {
     int arr[] = { 1, 32, 0, -23 };
     LIB::deque<int> dq (arr, arr + 4);
@@ -531,7 +503,7 @@ TEST_CASE("deque resizing works correctly", "[deque][modifiers]")
     }
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "[deque][modifiers]", LIB::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("clear deque", "[deque][modifiers]", LIB::deque, TYPE_LIST)
 {
     TestType dq;
     dq.clear();
@@ -543,7 +515,7 @@ TEMPLATE_PRODUCT_TEST_CASE("clear removes all elements and sets size to zero", "
 }
 
 /* ELEMENT ACCESS */
-TEST_CASE("front and back return deques first element", "[deque][element access]")
+TEST_CASE("front/back deque", "[deque][element access]")
 {
     int arr[] = { 1, 32, 0, -23 };
     LIB::deque<int> dq (arr, arr + 4);
@@ -568,7 +540,7 @@ TEST_CASE("front and back return deques first element", "[deque][element access]
     REQUIRE( dq.back() == 0 );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[deque][element access]", LIB::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("at deque", "[deque][element access]", LIB::deque, TYPE_LIST)
 {
         unsigned int i = GENERATE(1, 25, 100);
         TestType dq1;
@@ -585,7 +557,7 @@ TEMPLATE_PRODUCT_TEST_CASE("at throws only when index is out of range", "[deque]
 }
 
 /* CAPACITY */
-TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", LIB::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("empty deque", "[deque][capacity]", LIB::deque, TYPE_LIST)
 {
     TestType dq;
     REQUIRE( dq.empty() );
@@ -595,7 +567,7 @@ TEMPLATE_PRODUCT_TEST_CASE("empty reflects deque state", "[deque][capacity]", LI
     REQUIRE( dq.empty() );
 }
 
-TEMPLATE_PRODUCT_TEST_CASE("size returns updated deque size", "[deque][capacity]", LIB::deque, TYPE_LIST)
+TEMPLATE_PRODUCT_TEST_CASE("size deque", "[deque][capacity]", LIB::deque, TYPE_LIST)
 {
     TestType dq;
     REQUIRE( dq.size() == 0 );
