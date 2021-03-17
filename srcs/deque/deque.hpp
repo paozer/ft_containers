@@ -27,8 +27,8 @@ class deque
         typedef typename allocator_type::const_pointer const_pointer;
         typedef deque_iterator<value_type, chunk_size, false> iterator;
         typedef deque_iterator<value_type, chunk_size, true> const_iterator;
-        //typedef reverse_deque_iterator<value_type, chunk_size, false> reverse_iterator;
-        //typedef reverse_deque_iterator<value_type, chunk_size, true> const_reverse_iterator;
+        typedef reverse_deque_iterator<value_type, chunk_size, false> reverse_iterator;
+        typedef reverse_deque_iterator<value_type, chunk_size, true> const_reverse_iterator;
         typedef std::ptrdiff_t difference_type;
         typedef size_t size_type;
 
@@ -117,6 +117,11 @@ class deque
 
         /* ITERATORS */
         iterator begin() { return _first + 1; }
+        iterator end() { return _last; }
+        const_iterator end() const { return _last; }
+        reverse_iterator rend() { return reverse_iterator(_first.get_curr(), _first.get_map()); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(_first.get_curr(), _first.get_map()); }
+        reverse_iterator rbegin() { return reverse_iterator((_last - 1).get_curr(), (_last - 1).get_map()); }
 
         const_iterator begin() const
         {
@@ -124,13 +129,12 @@ class deque
             return ++it;
         }
 
-        iterator end() { return _last; }
-        const_iterator end() const { return _last; }
-
-        //reverse_iterator rend() { return reverse_iterator(_first.get_curr(), _first.get_map()); }
-        //const_reverse_iterator rend() const { return const_reverse_iterator(_first.get_curr(), _first.get_map()); }
-        //reverse_iterator rbegin() { return reverse_iterator((_last - 1).get_curr(), (_last - 1).get_map()); }
-        //const_reverse_iterator rbegin() const { return const_reverse_iterator((_last - 1).get_curr(), (_last - 1).get_map()); }
+        const_reverse_iterator rbegin() const
+        {
+            const_iterator it = _last;
+            --it;
+            return const_reverse_iterator(it.get_curr(), it.get_map());
+        }
 
         /* CAPACITY */
         size_type size() const { return _size; }

@@ -306,12 +306,12 @@ class reverse_deque_iterator
             difference_type distance_to_start = distance_2_start();
             difference_type distance_to_end = distance_2_end();
 
-            if (n > 0 && n > distance_to_end) {
-                _map -= (distance_to_end - n) / chunk_size;
-                _curr = *_map + chunk_size - 1 - (distance_to_end - n) % chunk_size;
-            } else if (n < 0 && n < -distance_to_start) {
-                _map += (n + distance_to_start) / chunk_size;
-                _curr = *_map + (n - distance_to_end - 1) % chunk_size;
+            if (n > 0 && n > distance_to_start) {
+                _map -= (n + distance_to_end) / chunk_size;
+                _curr = *_map + chunk_size - (n - distance_to_start) % chunk_size;
+            } else if (n < 0 && n < -distance_to_end) {
+                _map += (distance_to_start - n) / chunk_size;
+                _curr = *_map + (1 - n - distance_to_end) % chunk_size;
             } else {
                 _curr -= n;
             }
