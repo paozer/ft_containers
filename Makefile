@@ -53,10 +53,17 @@ coverage:		Makefile $(MAIN_SRC) $(TEST_SRC) srcs/**/*.hpp
 				@echo "report can be found in ./COVERAGE_REPORT/coverage.html"
 				@make clean
 
+# build and run valgrind docker container
+valgrind:
+				@echo "building container..."
+				@docker build --rm --tag valgrind . >/dev/null
+				@docker run --name valgrind -v $(PWD):/root/build -w /root/build -i -t valgrind bash
+
 clean:
 				@rm -rf $(NAME).o
 				@rm -rf $(NAME).dSYM
 				@rm -f *.gcno
+				@docker rm --force valgrind 2&>/dev/null
 				@echo "make clean done..."
 
 fclean:			clean
