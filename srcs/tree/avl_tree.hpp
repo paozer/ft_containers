@@ -553,7 +553,6 @@ class avl_tree
             delete_node(node);
         }
 
-        // TODO: check potential bugs with NULL arg
         node_pointer get_min (node_pointer node)
         {
             while (node->left)

@@ -34,11 +34,8 @@ TEST_CASE("set contructors work as expected", "[set][basics]")
         stl.unique();
         auto stl_it = stl.begin();
         auto my_it = my_set.begin();
-        while (stl_it != stl.end()) {
+        for (; stl_it != stl.end(); ++my_it, ++stl_it)
             REQUIRE( *my_it == *stl_it );
-            ++my_it;
-            ++stl_it;
-        }
     }
     SECTION("copy constructor constructs a copy with a copy of each element") {
         LIB::set<int> my_set1;
@@ -51,17 +48,8 @@ TEST_CASE("set contructors work as expected", "[set][basics]")
 
         auto it1 = my_set1.begin();
         auto it2 = my_set2.begin();
-        while (it1 != my_set1.end()) {
+        for (; it1 != my_set1.end(); ++it1, ++it2)
             REQUIRE( *it1 == *it2 );
-            ++it1;
-            ++it2;
-        }
-
-        // TODO: set operator returns non const reference
-        //*my_set1.begin() = *my_set2.begin() - 10;
-        //*--my_set1.end() = *--my_set2.end() - 10;
-        //REQUIRE( *my_set1.begin() != *my_set2.begin() );
-        //REQUIRE( *--my_set1.end() != *--my_set2.end() );
     }
 }
 
@@ -78,17 +66,8 @@ TEST_CASE("set assignment operator copies elements", "[set][operators]")
 
     auto it1 = my_set1.begin();
     auto it2 = my_set2.begin();
-    while (it1 != my_set1.end()) {
+    for (; it1 != my_set1.end(); ++it1, ++it2)
         REQUIRE( *it1 == *it2 );
-        ++it1;
-        ++it2;
-    }
-
-    // TODO: set operator returns non const reference
-    //*my_set1.begin() -= 10;
-    //*--my_set1.end() += 10;
-    //REQUIRE( *my_set1.begin() != *my_set2.begin() );
-    //REQUIRE( *--my_set1.end() != *--my_set2.end() );
 }
 
 TEST_CASE("there are no duplicates in a set", "[set][basics]")
@@ -266,11 +245,8 @@ TEST_CASE("set insert works as expected", "[set][modifiers]")
         std::array<int, 11> arr = { -12, -5, 0, 2, 3, 4, 5, 6, 8, 42, 123 };
         auto setit = my_set.begin();
         auto arrit = arr.begin();
-        while (setit != my_set.end()) {
+        for (; setit != my_set.end(); ++setit, ++arrit)
             REQUIRE( *setit == *arrit );
-            ++setit;
-            ++arrit;
-        }
     }
     SECTION("range insert inserts a copy of the ranges elements") {
         std::vector<char> v;
@@ -281,10 +257,9 @@ TEST_CASE("set insert works as expected", "[set][modifiers]")
         auto last = v.begin() + 15;
         my_set.insert(first, last);
         REQUIRE( (my_set.size() == (unsigned long)std::distance(first, last)) );
-        for (auto it = my_set.begin(); it != my_set.end(); ++it) {
+        for (auto it = my_set.begin(); it != my_set.end(); ++it, ++first) {
             REQUIRE( *it == *first );
             REQUIRE( *it == *first );
-            ++first;
         }
     }
 }

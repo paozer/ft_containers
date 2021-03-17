@@ -63,22 +63,17 @@ class deque_iterator
         friend difference_type operator- (const self_type& lhs, const self_type& rhs)
         {
             difference_type n = 0;
-
             if (lhs._map < rhs._map) {
-
                 n += lhs.distance_2_end();                      // lhs distance to end
-                n += (rhs._map - lhs._map - 1) * chunk_size;  // map distance difference
+                n += (rhs._map - lhs._map - 1) * chunk_size;    // map distance difference
                 n += rhs.distance_2_start();                    // rhs distance to start
                 n += 1;
                 n *= -1;
-
             } else if (lhs._map > rhs._map) {
-
                 n += rhs.distance_2_end();
                 n += (lhs._map - rhs._map - 1) * chunk_size;
                 n += lhs.distance_2_start();
                 n += 1;
-
             } else {
                 n = lhs._curr - rhs._curr;
             }
@@ -241,22 +236,17 @@ class reverse_deque_iterator
         friend difference_type operator- (const self_type& lhs, const self_type& rhs)
         {
             difference_type n = 0;
-
             if (lhs._map < rhs._map) {
-
                 n += lhs.distance_2_end();                      // lhs distance to end
-                n += (rhs._map - lhs._map - 1) * chunk_size;  // map distance difference
+                n += (rhs._map - lhs._map - 1) * chunk_size;    // map distance difference
                 n += rhs.distance_2_start();                    // rhs distance to start
                 n += 1;
-
             } else if (lhs._map > rhs._map) {
-
                 n += rhs.distance_2_end();
                 n += (lhs._map - rhs._map - 1) * chunk_size;
                 n += lhs.distance_2_start();
                 n += 1;
                 n *= -1;
-
             } else {
                 n = rhs._curr - lhs._curr;
             }

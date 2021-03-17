@@ -83,11 +83,8 @@ TEST_CASE("deque assignation works correctly", "[deque][assignation operators]")
     REQUIRE( dq1.size() == dq2.size() );
     lit = dq1.begin();
     rit = dq2.begin();
-    while (lit != dq1.end()) {
+    for (; lit != dq1.end(); ++lit, ++rit)
         REQUIRE( *lit == *rit );
-        ++lit;
-        ++rit;
-    }
     dq2 = dq3;
     REQUIRE( dq2.size() == dq3.size() );
     REQUIRE( dq2.begin() == dq2.end() );
@@ -163,14 +160,13 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
         REQUIRE( *dq.begin() == 10 );
         *dq.begin() = 5;                         // { 5, 10, 10, 10, 10 }
         *++dq.begin() = 6;                       // { 5, 6, 10, 10, 10 }
-        REQUIRE( *dq.begin() == 5 );
-        REQUIRE( *(dq.begin() + 1) == 6 );
-        REQUIRE( *(dq.begin() + 2) == 10 );
-        *dq.begin() = 2;                         // { 2, 6, 10, 10, 10 }
+        REQUIRE( dq.begin()[0] == 5 );
+        REQUIRE( dq.begin()[1] == 6 );
+        REQUIRE( dq.begin()[2] == 10 );
+        dq.begin()[0] = 2;                         // { 2, 6, 10, 10, 10 }
         REQUIRE( *dq.begin() == 2 );
         REQUIRE( *(dq.begin() + 1) == 6 );
         REQUIRE( *(dq.begin() + 2) == 10 );
-
         REQUIRE(( dq.begin() - dq.end() == -5 ));
     }
     SECTION("const iterator behaviour") {
@@ -180,10 +176,10 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
         const LIB::deque<int> dq1;
 
         REQUIRE( *dq.begin() == 1 );
-        REQUIRE( *(dq.begin() + 1) == 4 );
-        REQUIRE( *(dq.begin() + 2) == -1 );
-        REQUIRE( *(dq.begin() + 3) == 2 );
-        REQUIRE( *(dq.begin() + 4) == 33 );
+        REQUIRE( dq.begin()[1] == 4 );
+        REQUIRE( dq.begin()[2] == -1 );
+        REQUIRE( dq.begin()[3] == 2 );
+        REQUIRE( dq.begin()[4] == 33 );
         REQUIRE( (dq.begin() + 5) == dq.end() );
         REQUIRE( dq1.begin() == dq1.end() );
 
@@ -200,17 +196,17 @@ TEST_CASE("deque begin returns first element and can be incremented", "[deque][i
 TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", LIB::deque<int>)
 {
     SECTION("non-const iterator behaviour") {
-        LIB::deque<int> dq (5, 10);                  // { 10, 10, 10, 10, 10 }
-        REQUIRE( *(dq.end() - 1) == 10 );
-        *(dq.end() - 1) = 5;                         // { 10, 10, 10, 10, 5 }
-        *(dq.end() - 2) = 6;                         // { 10, 10, 10, 6, 5 }
-        REQUIRE( *(dq.end() - 1) == 5 );
+        LIB::deque<int> dq (5, 10);                 // { 10, 10, 10, 10, 10 }
+        REQUIRE( dq.end()[-1] == 10 );
+        *(dq.end() - 1) = 5;                        // { 10, 10, 10, 10, 5 }
+        dq.end()[-2] = 6;                           // { 10, 10, 10, 6, 5 }
+        REQUIRE( dq.end()[-1] == 5 );
         REQUIRE( *(dq.end() - 2) == 6 );
-        *(dq.end() - 1) = 2;                         // { 10, 10, 10, 6, 2 }
-        *(dq.end() - 4) = 1;                         // { 10, 1, 10, 6, 2 }
+        *(dq.end() - 1) = 2;                        // { 10, 10, 10, 6, 2 }
+        dq.end()[-4] = 1;                           // { 10, 1, 10, 6, 2 }
         REQUIRE( *(dq.end() - 1) == 2 );
         REQUIRE( *(dq.end() - 2) == 6 );
-        REQUIRE( *(dq.begin() + 1) == 1 );
+        REQUIRE( dq.begin()[1] == 1 );
     }
     SECTION("const iterator behaviour") {
         int arr[] = {1, 4, -1, 2, 33};
@@ -221,19 +217,32 @@ TEMPLATE_TEST_CASE("deque end works correctly", "[deque][iterators]", LIB::deque
         REQUIRE( *(dq.end() - 1) == 33 );
         REQUIRE( *(dq.end() - 2) == 2 );
         REQUIRE( *(dq.end() - 3) == -1 );
-        REQUIRE( *(dq.end() - 4) == 4 );
-        REQUIRE( *(dq.end() - 5) == 1 );
+        REQUIRE( dq.end()[-4] == 4 );
+        REQUIRE( dq.end()[-5] == 1 );
         REQUIRE( dq.begin() == (dq.end() - 5) );
         REQUIRE( dq1.begin() == dq1.end() );
 
         LIB::deque<int>::const_iterator it = dq2.end();
-        REQUIRE( *(it - 1) == 33 );
-        REQUIRE( *(it - 2) == 2 );
-        REQUIRE( *(it - 3) == -1 );
+        REQUIRE( it[-1] == 33 );
+        REQUIRE( it[-2] == 2 );
+        REQUIRE( it[-3] == -1 );
         REQUIRE( *(it - 4) == 4 );
         REQUIRE( *(it - 5) == 1 );
         REQUIRE( (it - 5) == dq2.begin() );
     }
+}
+
+TEST_CASE("reverse iterators can be used to iterate over deques", "[deque][iterator]")
+{
+    int arr[] = {1, 4, -1, 2, 33};
+    LIB::deque<int> dq0 (arr, arr + 5);
+    const LIB::deque<int> dq1 (dq0);
+
+    REQUIRE( (dq0.rbegin() + 2)[0] == dq0.rbegin()[2] );
+    REQUIRE( dq0.rbegin()[3] == dq0.rend()[-2] );
+    REQUIRE( dq0.rbegin() + 5 == dq0.rend() );
+    REQUIRE( dq0.rbegin() == dq0.rend() - 5 );
+    REQUIRE( dq0.rbegin() + 1 == dq0.rend() - 4 );
 }
 
 /* MODIFIERS */
@@ -337,11 +346,11 @@ TEST_CASE("deque insert work correctly", "[deque][modifiers]")
         REQUIRE( *ret == 5 );
         ret = dq.insert(dq.end(), 10);                // { 5, 10 }
         REQUIRE( *ret == 10 );
-        ret = dq.insert(++dq.begin(), 7);             // { 5, 7, 10 }
+        ret = dq.insert(dq.begin() + 1, 7);             // { 5, 7, 10 }
         REQUIRE( *ret == 7 );
-        ret = dq.insert(----dq.end(), 6);             // { 5, 6, 7, 10 }
+        ret = dq.insert(dq.end() - 2, 6);             // { 5, 6, 7, 10 }
         REQUIRE( *ret == 6 );
-        ret = dq.insert(++++dq.begin(), 0);           // { 5, 6, 0, 7, 10 }
+        ret = dq.insert(dq.begin() + 2, 0);           // { 5, 6, 0, 7, 10 }
         REQUIRE( *ret == 0 );
 
         REQUIRE( dq.size() == 5 );

@@ -332,11 +332,11 @@ class deque
         allocator_type _alloc;
         ptr_allocator_type _ptr_alloc;
 
+        // TODO: add arg to set new map size
         void realloc_map (bool at_front)
         {
             map_pointer tmp = _ptr_alloc.allocate(_map_size + 1);
             if (at_front) { // add an empty chunk at the beginning of the map
-
                 // + 1 to account for added array
                 difference_type offset = _last.get_map() - _map + 1;
                 tmp[0] = _alloc.allocate(chunk_size);
@@ -345,9 +345,7 @@ class deque
                 _first.set_map(tmp);
                 _first.set_curr(*tmp + chunk_size - 1);
                 _last.set_map(tmp + offset);
-
             } else { // add an empty chunk at the end of the map
-
                 difference_type offset = _first.get_map() - _map;
                 tmp[_map_size] = _alloc.allocate(chunk_size);
                 for (size_t i = 0; i < _map_size; ++i)
@@ -355,7 +353,6 @@ class deque
                 _first.set_map(tmp + offset);
                 _last.set_map(tmp + _map_size);
                 _last.set_curr(tmp[_map_size]);
-
             }
             _ptr_alloc.deallocate(_map, _map_size);
             _map = tmp;

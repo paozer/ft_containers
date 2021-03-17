@@ -19,24 +19,9 @@
 #include <set>
 #include <chrono>
 
-template <class T, class Alloc = std::allocator<T> >
-class testClass
-{
-    public:
-        typedef typename Alloc::reference reference;
-
-        testClass()
-        {
-        }
-};
-
 int main(void)
 {
-    //compile under linux fails
-    //testClass<const int> tc;
-    std::vector<int> v (10, 23);
-
-    std::cout << *(3 - v.end()) << std::endl;
+    std::cout << "no_unit_tests" << std::endl;
     return 0;
 }
 

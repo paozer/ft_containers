@@ -30,11 +30,8 @@ TEST_CASE("map constructors return the requested map", "[map][basics]")
 
         auto stl_it = stl_map.begin();
         auto my_it = my_map.begin();
-        while (stl_it != stl_map.end()) {
+        for (; stl_it != stl_map.end(); ++my_it, ++stl_it)
             REQUIRE( *my_it == *stl_it );
-            ++my_it;
-            ++stl_it;
-        }
     }
     SECTION("copy constructor constructs an exact copy of a given map") {
         LIB::map<char, int> my_map1;
@@ -47,11 +44,8 @@ TEST_CASE("map constructors return the requested map", "[map][basics]")
 
         auto it1 = my_map1.begin();
         auto it2 = my_map2.begin();
-        while (it1 != my_map1.end()) {
+        for (; it1 != my_map1.end(); ++it1, ++it2)
             REQUIRE( *it1 == *it2 );
-            ++it1;
-            ++it2;
-        }
         my_map1.begin()->second = my_map2.begin()->second - 10;
         (--my_map1.end())->second = (--my_map2.end())->second - 1029;
         REQUIRE(( my_map1.begin()->second != my_map2.begin()->second ));
@@ -197,12 +191,10 @@ TEST_CASE("maps can be iterated over", "[map][iterators]")
 
         it = --map.end();
         lit = --list.end();
-        while (true) {
+        for (; true; it--, lit--) {
             REQUIRE( it->first == *lit );
             if (it == map.begin())
                 break;
-            it--;
-            lit--;
         }
         REQUIRE( it == map.begin());
         REQUIRE( lit == list.begin());
