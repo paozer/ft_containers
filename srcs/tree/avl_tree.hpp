@@ -385,10 +385,8 @@ class avl_tree
             node_pointer min = get_min(child->right);
             swap_nodes(child, min);
             if (!child->left && !child->right)
-                aux_erase_no_child_node(child);
-            else if ((!child->left && child->right) || (child->left && !child->right))
-                aux_erase_one_child_node(child);
-            return min;
+                return aux_erase_no_child_node(child);
+            return aux_erase_one_child_node(child);
         }
 
         /* REBALANCING */
@@ -481,43 +479,45 @@ class avl_tree
         }
 
         /* UTILITIES */
+        // only works in the context of swapping a node with it's
+        // inorder successor during the erasal of a node with
+        // two children
         void swap_nodes (node_pointer n1, node_pointer n2)
         {
-            node_pointer parent_n1 = n1->parent;
-            node_pointer left_n1 = n1->left;
-            node_pointer right_n1 = n1->right;
-            node_pointer parent_n2 = n2->parent;
-            node_pointer left_n2 = n2->left;
-            node_pointer right_n2 = n2->right;
-
             ft::swap(n1->height, n2->height);
 
-            if (parent_n1) {
-                if (parent_n1->left == n1)
-                    parent_n1->left = n2;
-                else
-                    parent_n1->right = n2;
-                n2->parent = parent_n1;
-            } else {
-                _root = n2;
-                n2->parent = NULL;
-            }
+            // swap left children
+            n2->left = n1->left;
+            n2->left->parent = n2;
+            n1->left = NULL;
 
-            n2->left = left_n1;
-            left_n1->parent = n2;
-            n1->left = left_n2;
-            n1->right = right_n2;
-
-            if (right_n2)
-                right_n2->parent = n1;
-            if (parent_n2 != n1) {
-                n2->right = right_n1;
-                right_n1->parent = n2;
-                parent_n2->left = n1;
-                n1->parent = parent_n2;
+            // swap right children
+            node_pointer tmp = n2->right;
+            if (n1->right != n2) {
+                n2->right = n1->right;
+                n2->right->parent = n2;
             } else {
+                // n1->parent will be fixed later
                 n2->right = n1;
+            }
+            n1->right = tmp;
+            n1->right ? n1->right->parent = n1 : 0;
+
+            // swap parents
+            if (n1->parent == NULL)
+                _root = n2;
+            else if (n1->parent->left == n1)
+                n1->parent->left = n2;
+            else
+                n1->parent->right = n2;
+
+            tmp = n2->parent;
+            n2->parent = n1->parent;
+            if (tmp == n1)
                 n1->parent = n2;
+            else {
+                n1->parent = tmp;
+                n1->parent->left = n1;
             }
         }
 
